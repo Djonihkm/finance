@@ -1,6 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import Image from "next/image";
 import {
   Building2,
   Wallet,
@@ -11,127 +14,114 @@ import {
   ChevronRight,
   LogOut,
 } from "lucide-react";
-import Image from "next/image";
 
 interface MenuItem {
-  id: string;
   label: string;
   icon: React.ReactNode;
+  href: string;
   badge?: string | number;
-  active?: boolean;
 }
 
 const Sidebar: React.FC = () => {
-  const [activeItem, setActiveItem] = useState("etablissements");
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const pathname = usePathname(); // Récupère l'URL actuelle (logique collègue)
+  const [isCollapsed, setIsCollapsed] = useState(false); // Ta logique de réduction
 
-  // Données du menu basées sur l'image
+  // Données du menu avec 'href' (logique collègue) mais tes icônes
   const mainMenuItems: MenuItem[] = [
     {
-      id: "etablissements",
       label: "Établissements",
       icon: <Building2 className="w-5 h-5" />,
-      //   badge: '237',
-      active: activeItem === "etablissements",
+      href: "/etablissements",
     },
   ];
 
   const financeMenuItems: MenuItem[] = [
     {
-      id: "budget",
       label: "Budget",
       icon: <Wallet className="w-5 h-5" />,
-      active: activeItem === "budget",
+      href: "/budget",
     },
     {
-      id: "depenses",
       label: "Dépenses",
       icon: <Receipt className="w-5 h-5" />,
-      active: activeItem === "depenses",
+      href: "/depenses",
     },
     {
-      id: "bilan",
       label: "Bilan",
       icon: <FileText className="w-5 h-5" />,
-      active: activeItem === "bilan",
+      href: "/bilan",
     },
     {
-      id: "utilisateurs",
       label: "Utilisateurs",
       icon: <Users className="w-5 h-5" />,
-      active: activeItem === "utilisateurs",
+      href: "/utilisateurs",
     },
     {
-      id: "parametres",
       label: "Paramètres",
       icon: <Settings className="w-5 h-5" />,
-      active: activeItem === "parametres",
+      href: "/parametres",
     },
   ];
 
-  const renderMenuItem = (item: MenuItem) => (
-    <button
-      key={item.id}
-      onClick={() => setActiveItem(item.id)}
-      className={`
-        w-full flex items-center justify-between px-4 py-3 mb-1 rounded-lg transition-all duration-200 group relative
-        ${
-          item.active
-            ? "bg-white/10 text-white border-l-4 border-yellow-400"
-            : "text-blue-200 hover:text-white hover:bg-white/5 border-l-4 border-transparent"
-        }
-        ${isCollapsed ? "justify-center px-2" : ""}
-      `}
-      title={isCollapsed ? item.label : undefined}
-    >
-      <div
-        className={`flex items-center gap-3 ${isCollapsed ? "justify-center" : ""}`}
+  // On garde ton rendu visuel, mais on enveloppe dans un Link
+  const renderMenuItem = (item: MenuItem) => {
+    const isActive = pathname === item.href; // Détection de la page active
+
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        className={`
+          w-full flex items-center justify-between px-4 py-3 mb-1 rounded-lg transition-all duration-200 group relative
+          ${
+            isActive
+              ? "bg-white/10 text-white border-l-4 border-yellow-400"
+              : "text-blue-200 hover:text-white hover:bg-white/5 border-l-4 border-transparent"
+          }
+          ${isCollapsed ? "justify-center px-2" : ""}
+        `}
+        title={isCollapsed ? item.label : undefined}
       >
-        <span
-          className={`${item.active ? "text-yellow-400" : "text-blue-300 group-hover:text-white"} transition-colors`}
+        <div
+          className={`flex items-center gap-3 ${isCollapsed ? "justify-center" : ""}`}
         >
-          {item.icon}
-        </span>
+          <span
+            className={`${isActive ? "text-yellow-400" : "text-blue-300 group-hover:text-white"} transition-colors`}
+          >
+            {item.icon}
+          </span>
 
-        {!isCollapsed && (
-          <span className="font-medium text-sm">{item.label}</span>
+          {!isCollapsed && (
+            <span className="font-medium text-sm">{item.label}</span>
+          )}
+        </div>
+
+        {/* Badge (optionnel, conservé de ta version) */}
+        {!isCollapsed && item.badge && (
+          <span
+            className="
+            bg-yellow-400 text-[#1e3a5f] 
+            text-xs font-bold 
+            px-2 py-0.5 rounded-full 
+            min-w-[24px] text-center
+          "
+          >
+            {item.badge}
+          </span>
         )}
-      </div>
 
-      {/* Badge */}
-      {!isCollapsed && item.badge && (
-        <span
-          className="
-          bg-yellow-400 text-[#1e3a5f] 
-          text-xs font-bold 
-          px-2 py-0.5 rounded-full 
-          min-w-[24px] text-center
-        "
-        >
-          {item.badge}
-        </span>
-      )}
-
-      {/* Tooltip quand collapsed */}
-      {isCollapsed && item.badge && (
-        <span className="absolute -top-1 -right-1 bg-yellow-400 text-[#1e3a5f] text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-          {item.badge}
-        </span>
-      )}
-    </button>
-  );
+        {isCollapsed && item.badge && (
+          <span className="absolute -top-1 -right-1 bg-yellow-400 text-[#1e3a5f] text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+            {item.badge}
+          </span>
+        )}
+      </Link>
+    );
+  };
 
   return (
     <>
-      {/* Mobile Overlay */}
-      {isCollapsed && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setIsCollapsed(false)}
-        />
-      )}
-
-      {/* Sidebar Container */}
+      {/* Sidebar Container - Ta structure visuelle */}
       <aside
         className={`
         fixed top-0 left-0 h-screen 
@@ -140,22 +130,10 @@ const Sidebar: React.FC = () => {
         transition-all duration-300 ease-in-out
         ${isCollapsed ? "w-20" : "w-64"}
         lg:relative lg:translate-x-0
-        ${!isCollapsed && "translate-x-0"}
       `}
       >
-        {/* Header - Logo */}
+        {/* Header - Logo (Ta version améliorée) */}
         <div className="p-4 border-b border-white/10 relative">
-          {/* Ligne mobile: bouton à droite, pas de chevauchement */}
-          {/*   <div className="flex justify-end lg:hidden mb-2">
-    <button
-      onClick={() => setIsCollapsed(!isCollapsed)}
-      className="p-1 rounded hover:bg-white/10"
-      aria-label={isCollapsed ? 'Ouvrir le menu' : 'Fermer le menu'}
-    >
-      {isCollapsed ? <X size={20} /> : <Menu size={20} />}
-    </button>
-  </div> */}
-
           {/* Logo centré */}
           <div className="flex items-center justify-center">
             <div
@@ -174,7 +152,7 @@ const Sidebar: React.FC = () => {
             </div>
           </div>
 
-          {/* Toggle (desktop + mobile) */}
+          {/* Toggle (Ta version unifiée desktop/mobile) */}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="flex absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-[#234876] rounded-full items-center justify-center border border-white/20 shadow-md hover:bg-[#2d5a8c] transition-colors z-50"
@@ -211,7 +189,7 @@ const Sidebar: React.FC = () => {
           </div>
         </nav>
 
-        {/* Footer - Profil Admin */}
+        {/* Footer - Profil Admin (Ta version) */}
         <div className="p-4 border-t border-white/10 bg-black/20">
           <div
             className={`
