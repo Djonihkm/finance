@@ -8,8 +8,6 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fr">
-      <body>
         <div className="flex min-h-screen w-full bg-[#f8f9fa]">
           {/* 1. Sidebar à gauche (fixe) */}
           <Sidebar />
@@ -25,7 +23,5 @@ export default function DashboardLayout({
             </main>
           </div>
         </div>
-      </body>
-    </html>
   );
 }
