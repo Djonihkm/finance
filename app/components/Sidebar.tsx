@@ -113,7 +113,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, onCloseMobile }) => {
         `}
       >
         <span
-          className={`flex-shrink-0 transition-colors ${isActive ? "text-yellow-400" : "text-blue-300 group-hover:text-white"}`}
+          className={`flex-shrink-0  transition-colors ${isActive ? "text-yellow-400" : "text-blue-300 group-hover:text-white"}`}
         >
           {item.icon}
         </span>
