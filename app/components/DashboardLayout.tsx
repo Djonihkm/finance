@@ -1,27 +1,26 @@
-// app/layout.tsx ou components/DashboardLayout.tsx
+"use client";
+
+import { useState } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  const toggleMobile = () => setIsMobileOpen(prev => !prev);
+  const closeMobile = () => setIsMobileOpen(false);
+
   return (
-    // h-screen : force la hauteur à la taille de l'écran
-    // overflow-hidden : empêche toute la page de scroller
-    <div className="flex h-screen overflow-hidden w-full bg-[#f8f9fa] text-black">
-      {/* 1. Sidebar à gauche (fixe) */}
-      <Sidebar />
+<div className="flex h-screen overflow-hidden w-full bg-[#f8f9fa] text-black">
+  <Sidebar isMobileOpen={isMobileOpen} onCloseMobile={closeMobile} />
 
-      {/* 2. Conteneur de droite (Header + Contenu) */}
-      <div className="flex flex-col flex-1 min-w-0 h-full">
-        {/* Header en haut */}
-        <Header />
-
-        {/* Zone de contenu principal (scrollable si besoin) */}
-        <main className="flex-1 p-8 overflow-y-auto">{children}</main>
-      </div>
-    </div>
+  {/* PAS de classe ml-* ici — flex-1 suffit */}
+  <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+    <Header onMenuClick={toggleMobile} />
+    <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto">
+      {children}
+    </main>
+  </div>
+</div>
   );
 }
