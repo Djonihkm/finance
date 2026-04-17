@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Profiler } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -11,6 +11,8 @@ import {
   FileText,
   Users,
   Settings,
+  CircleUserRound,
+  School,
   X,
   LogOut,
 } from "lucide-react";
@@ -66,9 +68,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, onCloseMobile }) => {
 
   const financeMenuItems: MenuItem[] = [
     {
+      label: "Mon Etablissement",
+      icon: <School className="w-5 h-5" />,
+      href: "/mon-etablissement",
+    },
+    {
       label: "Dépenses",
       icon: <Receipt className="w-5 h-5" />,
       href: "/depensesEtablissement",
+    },
+    {
+      label: "Profil",
+      icon: <CircleUserRound className="w-5 h-5" />,
+      href: "/profil",
     },
     {
       label: "Paramètres",
