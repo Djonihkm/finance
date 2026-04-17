@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"e:/app/finance/app/depenses/[reference]\")",
+      "Bash(mkdir -p \"e:/app/finance/app/depenses/bons/[reference]\")"
+    ]
+  }
+}
