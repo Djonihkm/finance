@@ -201,7 +201,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, onCloseMobile }) => {
           <div
             className={`flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors ${!showLabels ? "justify-center" : ""}`}
           >
-            <div className="relative flex-shrink-0">
+            <div className="relative shrink-0">
               <div className="w-9 h-9 rounded-full bg-slate-600 flex items-center justify-center text-sm font-bold border-2 border-blue-400">
                 AD
               </div>
