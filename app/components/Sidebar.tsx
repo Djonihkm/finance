@@ -44,7 +44,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isMobileOpen, onCloseMobile }) => {
 
   const financeMenuItems: MenuItem[] = [
     { label: "Budget",       icon: <Wallet   className="w-5 h-5" />, href: "/budget" },
-    { label: "Dépenses",     icon: <Receipt  className="w-5 h-5" />, href: "/depenses" },
+    { label: "Dépenses-admin",     icon: <Receipt  className="w-5 h-5" />, href: "/depenses" },
     { label: "Bilan",        icon: <FileText className="w-5 h-5" />, href: "/bilan" },
     { label: "Utilisateurs", icon: <Users    className="w-5 h-5" />, href: "/utilisateurs" },
     { label: "Paramètres",   icon: <Settings className="w-5 h-5" />, href: "/parametres" },
