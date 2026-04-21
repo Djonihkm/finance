@@ -39,7 +39,7 @@ const DepensesPage = () => {
         {/* Sélecteur */}
         <div className="flex w-full gap-4">
           <button onClick={() => setActiveMode('depenses')} className={getButtonClass('depenses')}>
-            Dépenses
+            Menus dépenses
           </button>
           <button onClick={() => setActiveMode('bons')} className={getButtonClass('bons')}>
             Bons de commandes

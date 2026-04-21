@@ -68,14 +68,14 @@ export default function LoginPage() {
             )}
 
             {/* Mot de passe oublié */}
-            <div className="flex justify-end">
+            {/* <div className="flex justify-end">
               <button
                 type="button"
                 className="text-xs text-gray-500 hover:text-[#1a365d] transition"
               >
                 Mot de passe oublié ?
               </button>
-            </div>
+            </div> */}
 
             {/* Bouton connexion */}
             <button
@@ -88,7 +88,7 @@ export default function LoginPage() {
           </form>
 
           {/* Inscription */}
-          <p className="mt-6 text-center text-sm text-gray-500">
+          {/* <p className="mt-6 text-center text-sm text-gray-500">
             Vous n&apos;avez pas de compte ?{" "}
             <Link
               href="#"
@@ -96,7 +96,7 @@ export default function LoginPage() {
             >
               S&apos;inscrire
             </Link>
-          </p>
+          </p> */}
         </div>
       </div>
 

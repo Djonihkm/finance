@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import {
@@ -29,6 +28,7 @@ interface SidebarProps {
   role: UserRole;
   isMobileOpen: boolean;
   onCloseMobile: () => void;
+  onNavigate: (href: string) => void;
 }
 
 type ScreenSize = "mobile" | "tablet" | "desktop";
@@ -48,7 +48,7 @@ const etablissementMenuItems: MenuItem[] = [
   { label: "Paramètres", icon: <Settings className="w-5 h-5" />, href: "/parametres" },
 ];
 
-const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile }) => {
+const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, onNavigate }) => {
   const pathname = usePathname();
   const [screenSize, setScreenSize] = useState<ScreenSize>("desktop");
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -65,6 +65,11 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile }) 
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  const handleNav = (href: string) => {
+    if (href === pathname) return;
+    onNavigate(href);
+  };
+
   const menuItems = role === "admin" ? adminMenuItems : etablissementMenuItems;
   const sectionLabel = role === "admin" ? "ADMIN" : "ETABLISSEMENT";
   const userLabel = role === "admin" ? "Admin Ministère" : "Établissement";
@@ -77,14 +82,13 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile }) 
   const renderMenuItem = (item: MenuItem) => {
     const isActive = pathname === item.href;
     return (
-      <Link
+      <button
         key={item.href}
-        href={item.href}
-        onClick={screenSize === "mobile" ? onCloseMobile : undefined}
+        onClick={() => handleNav(item.href)}
         title={!showLabels ? item.label : undefined}
         className={`
-          flex items-center gap-3 px-4 py-3 mb-1 rounded-lg transition-all duration-200 group
-          border-l-4
+          w-full flex items-center gap-3 px-4 py-3 mb-1 rounded-lg transition-all duration-200 group
+          border-l-4 cursor-pointer
           ${isActive
             ? "bg-white/10 text-white border-yellow-400"
             : "text-blue-200 hover:text-white hover:bg-white/5 border-transparent"
@@ -97,8 +101,10 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile }) 
         >
           {item.icon}
         </span>
-        {showLabels && <span className="font-medium text-sm">{item.label}</span>}
-      </Link>
+        {showLabels && (
+          <span className="flex-1 text-left font-medium text-sm">{item.label}</span>
+        )}
+      </button>
     );
   };
 
