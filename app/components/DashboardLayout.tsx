@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRole } from "@/lib/role-context";
-import Sidebar from "./Sidebar";
+import Sidebar from "./SideBar";
 import Header from "./Header";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
