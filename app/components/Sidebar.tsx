@@ -16,8 +16,8 @@ import {
   X,
   LogOut,
 } from "lucide-react";
-import { logout } from "@/lib/auth";
 import type { UserRole } from "@/lib/mock-users";
+import LogoutModal from "./LogoutModal";
 
 interface MenuItem {
   label: string;
@@ -51,6 +51,7 @@ const etablissementMenuItems: MenuItem[] = [
 const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile }) => {
   const pathname = usePathname();
   const [screenSize, setScreenSize] = useState<ScreenSize>("desktop");
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     const check = () => {
@@ -169,21 +170,24 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile }) 
                   <p className="text-sm font-semibold text-white truncate">{userLabel}</p>
                   <p className="text-xs text-blue-300 truncate">{userSub}</p>
                 </div>
-                <form action={logout}>
-                  <button
-                    type="submit"
-                    className="text-blue-400 opacity-60 hover:opacity-100 transition-opacity"
-                    aria-label="Se déconnecter"
-                    title="Se déconnecter"
-                  >
-                    <LogOut size={16} />
-                  </button>
-                </form>
+                <button
+                  type="button"
+                  onClick={() => setShowLogoutModal(true)}
+                  className="text-blue-400 opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
+                  aria-label="Se déconnecter"
+                  title="Se déconnecter"
+                >
+                  <LogOut size={16} />
+                </button>
               </>
             )}
           </div>
         </div>
       </aside>
+
+      {showLogoutModal && (
+        <LogoutModal onCancel={() => setShowLogoutModal(false)} />
+      )}
 
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
