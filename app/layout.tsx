@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getRole } from "@/lib/get-role";
 import { RoleProvider } from "@/lib/role-context";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,7 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <RoleProvider role={role}>{children}</RoleProvider>
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

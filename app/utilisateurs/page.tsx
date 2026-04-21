@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, ChevronDown, Users, ShieldCheck, Lock } from 'lucide-react';
 import DashboardLayout from '../components/DashboardLayout';
-import { utilisateurs, type Role, type Statut } from '../data/utilisateurs';
+import { type Role, type Statut } from '../data/utilisateurs';
+import { useStore } from '@/lib/store';
 
 const ROLES: Role[] = ['SUPER ADMIN', 'DF', 'COMPTABLE', 'AUDITEUR', 'LECTEUR'];
 const STATUTS: Statut[] = ['ACTIF', 'INACTIF', 'SUSPENDU'];
@@ -25,6 +26,7 @@ const statutConfig: Record<Statut, { dot: string; text: string; label: string }>
 
 const UtilisateursPage = () => {
   const router = useRouter();
+  const { utilisateurs } = useStore();
   const [search, setSearch]             = useState('');
   const [roleFilter, setRoleFilter]     = useState<Role | ''>('');
   const [statutFilter, setStatutFilter] = useState<Statut | ''>('');
@@ -37,11 +39,11 @@ const UtilisateursPage = () => {
       const matchStatut = !statutFilter || u.statut === statutFilter;
       return matchSearch && matchRole && matchStatut;
     }),
-  [search, roleFilter, statutFilter]);
+  [utilisateurs, search, roleFilter, statutFilter]);
 
-  const total     = 48;
-  const actifs    = 39;
-  const suspendus = 9;
+  const total     = utilisateurs.length;
+  const actifs    = utilisateurs.filter((u) => u.statut === 'ACTIF').length;
+  const suspendus = utilisateurs.filter((u) => u.statut === 'SUSPENDU').length;
 
   return (
     <DashboardLayout>

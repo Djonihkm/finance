@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, FileText, Landmark, Wallet, UploadCloud, CheckCircle2 } from 'lucide-react';
+import { toast } from 'sonner';
 import DashboardLayout from '../../components/DashboardLayout';
+import { useStore } from '@/lib/store';
 
 const NouvelleDepensePage = () => {
   const router = useRouter();
+  const addDepense = useStore((s) => s.addDepense);
   const [showSuccess, setShowSuccess] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -29,7 +32,17 @@ const NouvelleDepensePage = () => {
   };
 
   const handleSubmit = () => {
-    console.log('Soumission:', formData);
+    if (!formData.intitule.trim()) { toast.error('L\'intitulé est requis.'); return; }
+    if (!formData.montant) { toast.error('Le montant est requis.'); return; }
+    addDepense({
+      date: formData.date || new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }),
+      intitule: formData.intitule,
+      montant: Number(formData.montant).toLocaleString('fr-FR', { minimumFractionDigits: 2 }),
+      paiement: formData.modePaiement,
+      reference: formData.reference || `CS-${Date.now()}`,
+      categorie: formData.categorie || 'Autres',
+      fournisseur: formData.beneficiaire,
+    });
     setShowSuccess(true);
   };
 

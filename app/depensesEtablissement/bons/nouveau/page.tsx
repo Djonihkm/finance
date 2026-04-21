@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -9,7 +9,9 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
 import DashboardLayout from "../../../components/DashboardLayout";
+import { useStore } from "@/lib/store";
 import Image from "next/image";
 
 interface LigneCommande {
@@ -20,6 +22,7 @@ interface LigneCommande {
 
 const NouveauBonPage = () => {
   const router = useRouter();
+  const addBon = useStore((s) => s.addBon);
   const [showSuccess, setShowSuccess] = useState(false);
 
   const [bonData, setBonData] = useState({
@@ -77,7 +80,16 @@ const NouveauBonPage = () => {
   const totalTTC = sousTotal + tvaMontant - bonData.promo;
 
   const handleSubmit = () => {
-    console.log("Bon soumis:", { bonData, lignes });
+    if (!bonData.fournisseurNom.trim()) { toast.error('Le nom du fournisseur est requis.'); return; }
+    addBon({
+      date: bonData.dateEmission || new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }),
+      intitule: `Commande ${bonData.fournisseurNom}`,
+      montant: totalTTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 }),
+      paiement: 'Virement',
+      reference: bonData.numero,
+      categorie: 'Commande',
+      fournisseur: bonData.fournisseurNom,
+    });
     setShowSuccess(true);
   };
 

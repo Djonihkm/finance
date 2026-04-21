@@ -3,8 +3,9 @@
 import { use } from 'react';
 import { notFound, useRouter } from 'next/navigation';
 import { ArrowLeft, Ban, ChevronRight, FileText, LogIn, AlertTriangle } from 'lucide-react';
+import { toast } from 'sonner';
 import DashboardLayout from '../../components/DashboardLayout';
-import { utilisateurs } from '../../data/utilisateurs';
+import { useStore } from '@/lib/store';
 
 const roleBadge: Record<string, string> = {
   'SUPER ADMIN': 'bg-[#11355b] text-white',
@@ -21,12 +22,28 @@ export default function UtilisateurDetailPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
+  const { utilisateurs, updateStatutUtilisateur } = useStore();
   const user = utilisateurs.find((u) => u.id === Number(id));
 
   if (!user) notFound();
 
   const isActif    = user.statut === 'ACTIF';
   const isSuspendu = user.statut === 'SUSPENDU';
+
+  const handleToggleStatut = () => {
+    if (isSuspendu) {
+      updateStatutUtilisateur(user.id, 'ACTIF');
+      toast.success(`${user.nom} a été réactivé.`);
+    } else {
+      if (!confirm(`Suspendre le compte de ${user.nom} ?`)) return;
+      updateStatutUtilisateur(user.id, 'SUSPENDU');
+      toast.success(`${user.nom} a été suspendu.`);
+    }
+  };
+
+  const handleRevoquer = () => {
+    toast.info('Révocation d\'accès non disponible sans backend.');
+  };
 
   return (
     <DashboardLayout>
@@ -35,6 +52,7 @@ export default function UtilisateurDetailPage({
         {/* Retour */}
         <div className="mb-6">
           <button
+            type="button"
             onClick={() => router.back()}
             className="flex items-center gap-2 text-gray-500 hover:text-[#11355b] transition-colors font-medium text-sm cursor-pointer"
           >
@@ -56,7 +74,6 @@ export default function UtilisateurDetailPage({
               {user.poste} &bull; ID: {user.idBadge}
             </p>
             <div className="flex flex-wrap gap-2">
-              {/* Statut */}
               <span className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
                 isActif    ? 'bg-emerald-100 text-emerald-700' :
                 isSuspendu ? 'bg-red-100 text-red-600' :
@@ -64,28 +81,27 @@ export default function UtilisateurDetailPage({
               }`}>
                 {user.statut}
               </span>
-              {/* Niveau */}
               <span className="px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-gray-100 text-gray-600">
                 {user.niveau}
               </span>
-              {/* Rôle */}
               <span className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${roleBadge[user.role]}`}>
                 {user.role}
               </span>
             </div>
           </div>
 
-          {/* Action principale */}
-          {!isSuspendu ? (
-            <button className="shrink-0 flex items-center gap-2 px-5 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold text-sm transition-colors cursor-pointer shadow-sm">
-              <Ban size={16} />
-              Suspendre l&apos;utilisateur
-            </button>
-          ) : (
-            <button className="shrink-0 flex items-center gap-2 px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-semibold text-sm transition-colors cursor-pointer shadow-sm">
-              Réactiver l&apos;utilisateur
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={handleToggleStatut}
+            className={`shrink-0 flex items-center gap-2 px-5 py-3 rounded-lg font-semibold text-sm transition-colors cursor-pointer shadow-sm text-white ${
+              isSuspendu
+                ? 'bg-emerald-500 hover:bg-emerald-600'
+                : 'bg-red-500 hover:bg-red-600'
+            }`}
+          >
+            {!isSuspendu && <Ban size={16} />}
+            {isSuspendu ? 'Réactiver l\'utilisateur' : 'Suspendre l\'utilisateur'}
+          </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-[1fr_260px] gap-5">
@@ -147,7 +163,6 @@ export default function UtilisateurDetailPage({
               <p className="text-4xl font-bold mb-1">{user.performance}%</p>
               <p className="text-sm text-white/70 mb-4">Conformité aux protocoles</p>
 
-              {/* Barre de progression */}
               <div className="w-full bg-white/20 rounded-full h-2 mb-2">
                 <div
                   className={`h-2 rounded-full transition-all ${
@@ -174,7 +189,11 @@ export default function UtilisateurDetailPage({
                 Les modifications de statut nécessitent une validation de double authentification
                 et seront inscrites au registre permanent des audits.
               </p>
-              <button className="w-full text-sm font-bold text-red-500 hover:text-red-600 border border-red-200 hover:bg-red-50 py-2.5 rounded-lg transition-colors cursor-pointer">
+              <button
+                type="button"
+                onClick={handleRevoquer}
+                className="w-full text-sm font-bold text-red-500 hover:text-red-600 border border-red-200 hover:bg-red-50 py-2.5 rounded-lg transition-colors cursor-pointer"
+              >
                 Révoquer l&apos;accès aux archives
               </button>
             </div>
