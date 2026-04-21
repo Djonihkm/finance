@@ -33,7 +33,7 @@ const MonEtablissementPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-300 mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* En-tête */}
         <div>
           <h1 className="text-3xl font-bold text-[#11355b]">Mon établissement</h1>
@@ -42,9 +42,9 @@ const MonEtablissementPage = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Carte à gauche */}
-          <div className="lg:col-span-1">
+          <div className="md:col-span-1">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 text-center h-full relative overflow-hidden">
               {/* Image */}
               <div className="relative w-full max-w-[260px] aspect-square mx-auto mb-6 rounded-xl overflow-hidden shadow-sm bg-gray-100">
@@ -67,11 +67,11 @@ const MonEtablissementPage = () => {
               </h2>
 
               <div className="flex justify-center gap-2 mt-4 flex-wrap">
-                <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold uppercase tracking-wide">
+                <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-[11px] font-bold uppercase tracking-wide">
                   {etablissement.statutBadge1}
                 </span>
 
-                <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold uppercase tracking-wide flex items-center gap-2">
+                <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold uppercase tracking-wide flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   {etablissement.statutBadge2}
                 </span>
@@ -96,7 +96,7 @@ const MonEtablissementPage = () => {
           </div>
 
           {/* Détails à droite */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="md:col-span-2 space-y-6">
             {/* Informations générales */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8">
               <div className="mb-6 pb-4 border-b border-gray-50">
@@ -108,7 +108,7 @@ const MonEtablissementPage = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Nom de l’institution
                   </label>
                   <input
@@ -120,7 +120,7 @@ const MonEtablissementPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Type d’institution
                   </label>
                   <input
@@ -132,7 +132,7 @@ const MonEtablissementPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Identifiant de l’institution
                   </label>
                   <div className="relative">
@@ -154,7 +154,7 @@ const MonEtablissementPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Date de création
                   </label>
                   <input
@@ -178,7 +178,7 @@ const MonEtablissementPage = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Nom du représentant
                   </label>
                   <input
@@ -190,7 +190,7 @@ const MonEtablissementPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Fonction / Rôle
                   </label>
                   <input
@@ -199,13 +199,13 @@ const MonEtablissementPage = () => {
                     readOnly
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-[#11355b] font-medium cursor-default"
                   />
-                  <p className="text-[10px] text-gray-400 mt-2 italic">
+                  <p className="text-[11px] text-gray-400 mt-2 italic">
                     Point de contact principal pour l’audit financier.
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Email officiel
                   </label>
                   <div className="relative">
@@ -220,7 +220,7 @@ const MonEtablissementPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                  <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Numéro de téléphone
                   </label>
                   <div className="relative">

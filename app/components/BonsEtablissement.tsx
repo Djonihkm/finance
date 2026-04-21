@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Printer, FileText, Info } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 import type { Transaction } from '../data/depenses';
+import Image from "next/image";
 
 interface BonCommandeDetailProps {
   data: Transaction;
@@ -15,7 +16,7 @@ const BonCommandeDetail: React.FC<BonCommandeDetailProps> = ({ data }) => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-300 mx-auto">
+      <div className="max-w-7xl mx-auto">
 
         {/* Bouton Retour */}
         <div className="mb-4">
@@ -29,26 +30,39 @@ const BonCommandeDetail: React.FC<BonCommandeDetailProps> = ({ data }) => {
         </div>
 
         {/* Layout en 2 colonnes */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-6">
 
           {/* === COLONNE PRINCIPALE (Document) === */}
           <div className="bg-white rounded-xl p-8 shadow-sm">
 
-            {/* Header du document */}
-            <div className="grid grid-cols-3 items-start gap-6 mb-8">
-              <div className="w-24 h-24 bg-gray-100 rounded flex items-center justify-center">
-                <span className="text-xs text-gray-400">LOGO</span>
+            {/* En-tête du document */}
+            <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-10 pb-6 border-b border-gray-100">
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-20 relative shrink-0">
+                  <Image
+                    src="/fav.png"
+                    alt="Logo"
+                    fill
+                    className="object-contain"
+                    priority
+                  />
+                </div>
               </div>
-              <div className="text-center">
-                <h1 className="text-2xl font-bold text-[#11355b] tracking-wide">BON DE COMMANDE</h1>
-                <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-1">
+
+              <div className="text-center flex-1">
+                <h1 className="text-1xl md:text-1xl font-bold text-[#11355b] ">
+                  BON DE COMMANDE
+                </h1>
+                <p className="text-[8px] text-gray-400 uppercase tracking-widest mt-1">
                   Document de procurement autorisé
                 </p>
               </div>
+
               <div className="text-right text-xs text-gray-600 leading-relaxed">
                 <p>Cité Ministérielle</p>
                 <p>Quartier Cadjèhoun – Ahouanlêko</p>
-                <p>12e arrondissement, Commune de Cotonou</p>
+                <p>12e arrondissement, </p>
+                <p>Commune de Cotonou</p>
                 <p>République du Bénin</p>
               </div>
             </div>
@@ -57,19 +71,19 @@ const BonCommandeDetail: React.FC<BonCommandeDetailProps> = ({ data }) => {
             <div className="grid grid-cols-2 gap-8 mb-8">
               <div className="space-y-5">
                 <div className="border-l-4 border-[#11355b] pl-4">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">N° de commande</p>
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">N° de commande</p>
                   <p className="text-lg font-bold text-[#11355b]">{data.reference}</p>
                 </div>
                 <div className="border-l-4 border-[#11355b] pl-4">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Date d&apos;émission</p>
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Date d&apos;émission</p>
                   <p className="text-base font-semibold text-gray-800">{data.date}</p>
                 </div>
                 <div className="border-l-4 border-[#11355b] pl-4">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Mode de paiement</p>
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Mode de paiement</p>
                   <p className="text-base font-semibold text-gray-800">{data.paiement}</p>
                 </div>
                 <div className="border-l-4 border-[#11355b] pl-4">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Catégorie</p>
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Catégorie</p>
                   <span className="inline-block bg-blue-50 text-[#11355b] px-2 py-1 rounded text-sm font-bold uppercase">
                     {data.categorie}
                   </span>
@@ -77,7 +91,7 @@ const BonCommandeDetail: React.FC<BonCommandeDetailProps> = ({ data }) => {
               </div>
 
               <div className="bg-gray-50 p-5 rounded-lg">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
                   Coordonnées du fournisseur
                 </p>
                 <p className="font-bold text-[#11355b] mb-2">Fournisseur principal</p>
@@ -138,7 +152,7 @@ const BonCommandeDetail: React.FC<BonCommandeDetailProps> = ({ data }) => {
               </div>
 
               <div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
                   Signature du comptable
                 </p>
                 <div className="border border-gray-200 rounded h-32 flex items-center justify-center text-gray-300 italic text-sm">
@@ -146,11 +160,11 @@ const BonCommandeDetail: React.FC<BonCommandeDetailProps> = ({ data }) => {
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Fait à</p>
+                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Fait à</p>
                     <div className="border-b border-gray-300 h-6"></div>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">La date</p>
+                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">La date</p>
                     <p className="border-b border-gray-300 h-6 text-sm pt-1">..../... / 2026</p>
                   </div>
                 </div>

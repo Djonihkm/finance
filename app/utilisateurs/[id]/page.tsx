@@ -30,7 +30,7 @@ export default function UtilisateurDetailPage({
 
   return (
     <DashboardLayout>
-      <div className="max-w-300 mx-auto">
+      <div className="max-w-7xl mx-auto">
 
         {/* Retour */}
         <div className="mb-6">
@@ -88,7 +88,7 @@ export default function UtilisateurDetailPage({
           )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_260px] gap-5">
 
           {/* ===== COLONNE PRINCIPALE ===== */}
           <div className="space-y-5">
@@ -141,7 +141,7 @@ export default function UtilisateurDetailPage({
 
             {/* Indicateurs de performance */}
             <div className="bg-[#11355b] rounded-xl p-5 text-white">
-              <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest mb-3">
+              <p className="text-[11px] font-bold text-white/50 uppercase tracking-widest mb-3">
                 Indicateurs de performance
               </p>
               <p className="text-4xl font-bold mb-1">{user.performance}%</p>
@@ -158,7 +158,7 @@ export default function UtilisateurDetailPage({
                   style={{ width: `${user.performance}%` }}
                 />
               </div>
-              <div className="flex justify-between text-[10px] text-white/40 font-bold uppercase tracking-wider">
+              <div className="flex justify-between text-[11px] text-white/40 font-bold uppercase tracking-wider">
                 <span>Standard</span>
                 <span>Exceptionnel</span>
               </div>
@@ -188,7 +188,7 @@ export default function UtilisateurDetailPage({
 function ProfileField({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">{label}</p>
       <p className="text-sm font-semibold text-gray-800">{value}</p>
     </div>
   );

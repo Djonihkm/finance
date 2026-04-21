@@ -31,73 +31,74 @@ const EtablissementsPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-300 mx-auto space-y-6">
+      <div className="w-full max-w-7xl mx-auto space-y-4 md:space-y-6">
 
-        {/* En-tête */}
-        <div className="flex items-start justify-between">
+        {/* En-tête — colonne sur mobile, ligne sur md+ */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-[#11355b]">Etablissements</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-[#11355b]">Etablissements</h1>
             <p className="text-gray-500 text-sm mt-1">
               Consultez et gérez la liste des établissements enregistrés
             </p>
           </div>
+          {/* Bouton pleine largeur sur mobile, auto sur sm+ */}
           <button
             onClick={() => router.push('/etablissements/nouveau')}
-            className="bg-[#11355b] hover:bg-[#1a4a7a] text-white px-5 py-3 rounded-lg flex items-center gap-2 font-semibold text-sm transition-colors shadow-md cursor-pointer"
+            className="w-full sm:w-auto bg-[#11355b] hover:bg-[#1a4a7a] text-white px-5 py-3 rounded-lg flex items-center justify-center gap-2 font-semibold text-sm transition-colors shadow-md cursor-pointer shrink-0"
           >
             <Plus size={18} />
             NOUVEL ETABLISSEMENT
           </button>
         </div>
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm flex items-center gap-5">
-            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
-              <Building2 size={24} className="text-[#11355b]" />
+        {/* KPI Cards — 1 col mobile, 3 col md+ */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-5">
+          <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm flex items-center gap-4">
+            <div className="w-11 h-11 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
+              <Building2 size={22} className="text-[#11355b]" />
             </div>
             <div>
               <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Total</p>
-              <p className="text-3xl font-bold text-[#11355b]">237</p>
+              <p className="text-2xl md:text-3xl font-bold text-[#11355b]">237</p>
             </div>
           </div>
 
-          <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm flex items-center gap-5">
-            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center shrink-0">
-              <Landmark size={24} className="text-emerald-600" />
+          <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm flex items-center gap-4">
+            <div className="w-11 h-11 bg-green-50 rounded-xl flex items-center justify-center shrink-0">
+              <Landmark size={22} className="text-emerald-600" />
             </div>
             <div>
               <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Publics</p>
-              <p className="text-3xl font-bold text-emerald-600">142</p>
+              <p className="text-2xl md:text-3xl font-bold text-emerald-600">142</p>
             </div>
           </div>
 
-          <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm flex items-center gap-5">
-            <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center shrink-0">
-              <Store size={24} className="text-orange-500" />
+          <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm flex items-center gap-4">
+            <div className="w-11 h-11 bg-orange-50 rounded-xl flex items-center justify-center shrink-0">
+              <Store size={22} className="text-orange-500" />
             </div>
             <div>
               <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Privés</p>
-              <p className="text-3xl font-bold text-orange-500">95</p>
+              <p className="text-2xl md:text-3xl font-bold text-orange-500">95</p>
             </div>
           </div>
         </div>
 
         {/* Table */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-6">
+          <div className="p-4 md:p-6">
             <h2 className="text-lg font-bold text-[#11355b]">Liste des Enregistrements</h2>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[500px]">
               <thead>
                 <tr className="text-[11px] font-bold text-gray-400 uppercase tracking-wider border-y border-gray-100 bg-gray-50/50">
-                  <th className="px-6 py-4">Nom</th>
-                  <th className="px-6 py-4">Type</th>
-                  <th className="px-6 py-4">Département</th>
-                  <th className="px-6 py-4">Date</th>
-                  <th className="px-6 py-4">Statut</th>
+                  <th className="px-4 md:px-6 py-4">Nom</th>
+                  <th className="px-4 md:px-6 py-4">Type</th>
+                  <th className="px-4 md:px-6 py-4 hidden sm:table-cell">Département</th>
+                  <th className="px-4 md:px-6 py-4 hidden md:table-cell">Date</th>
+                  <th className="px-4 md:px-6 py-4">Statut</th>
                 </tr>
               </thead>
               <tbody className="text-sm">
@@ -107,12 +108,12 @@ const EtablissementsPage = () => {
                     onClick={() => router.push(`/etablissements/${encodeURIComponent(etab.id)}`)}
                     className="border-b border-gray-50 hover:bg-blue-50/40 transition-colors cursor-pointer"
                   >
-                    <td className="px-6 py-4">
-                      <p className="font-semibold text-[#11355b]">{etab.nom}</p>
+                    <td className="px-4 md:px-6 py-4">
+                      <p className="font-semibold text-[#11355b] text-sm">{etab.nom}</p>
                       <p className="text-xs text-gray-400 mt-0.5">ID: #{etab.id}</p>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${
+                    <td className="px-4 md:px-6 py-4">
+                      <span className={`px-2 py-1 rounded text-[11px] font-bold uppercase tracking-wider ${
                         etab.type === 'PUBLIC'
                           ? 'bg-emerald-100 text-emerald-700'
                           : 'bg-gray-100 text-gray-600'
@@ -120,13 +121,19 @@ const EtablissementsPage = () => {
                         {etab.type}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">{etab.departement}</td>
-                    <td className="px-6 py-4 text-gray-500">{etab.date}</td>
-                    <td className="px-6 py-4">
+                    {/* Département masqué sur mobile */}
+                    <td className="px-4 md:px-6 py-4 text-gray-600 hidden sm:table-cell">
+                      {etab.departement}
+                    </td>
+                    {/* Date masquée sur mobile et tablet */}
+                    <td className="px-4 md:px-6 py-4 text-gray-500 hidden md:table-cell">
+                      {etab.date}
+                    </td>
+                    <td className="px-4 md:px-6 py-4">
                       <span className={`flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider ${
                         etab.statut === 'ACTIF' ? 'text-emerald-600' : 'text-red-500'
                       }`}>
-                        <span className={`w-2 h-2 rounded-full ${
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${
                           etab.statut === 'ACTIF' ? 'bg-emerald-500' : 'bg-red-500'
                         }`} />
                         {etab.statut}
@@ -139,11 +146,11 @@ const EtablissementsPage = () => {
           </div>
 
           {/* Pagination */}
-          <div className="bg-gray-50/50 px-6 py-4 flex justify-between items-center border-t border-gray-100">
-            <p className="text-xs text-gray-500">
-              Affichage de {(currentPage - 1) * ITEMS_PER_PAGE + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, TOTAL)} sur {TOTAL} établissements
+          <div className="bg-gray-50/50 px-4 md:px-6 py-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center border-t border-gray-100">
+            <p className="text-xs text-gray-500 text-center sm:text-left">
+              {(currentPage - 1) * ITEMS_PER_PAGE + 1}–{Math.min(currentPage * ITEMS_PER_PAGE, TOTAL)} sur {TOTAL} établissements
             </p>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center justify-center gap-1">
               <button
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
@@ -180,6 +187,7 @@ const EtablissementsPage = () => {
             </div>
           </div>
         </div>
+
       </div>
     </DashboardLayout>
   );
