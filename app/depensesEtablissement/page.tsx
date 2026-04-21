@@ -4,16 +4,17 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import DashboardLayout from '../components/DashboardLayout';
-import { depenses, bonsCommandes } from '../data/depenses';
+import { useStore } from '@/lib/store';
 
 type Mode = 'depenses' | 'bons';
 
 const DepensesPage = () => {
   const router = useRouter();
+  const { depenses, bonsCommandes } = useStore();
   const [activeMode, setActiveMode] = useState<Mode>('depenses');
 
   const currentData = activeMode === 'depenses' ? depenses : bonsCommandes;
-  const totalCount = activeMode === 'depenses' ? 156 : 42;
+  const totalCount = currentData.length;
 
   const getButtonClass = (mode: Mode) => {
     return `flex-1 py-3 rounded-lg font-semibold transition-all duration-200 cursor-pointer ${

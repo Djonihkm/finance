@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ArrowLeft, Info, MapPin, Phone, Users,
   FileText, Upload, CheckCircle2, ChevronRight,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import DashboardLayout from '../../components/DashboardLayout';
+import { useStore } from '@/lib/store';
 
 const DEPARTEMENTS = ['Alibori', 'Atacora', 'Atlantique', 'Borgou', 'Collines', 'Couffo', 'Donga', 'Littoral', 'Mono', 'Ouémé', 'Plateau', 'Zou'];
 const NIVEAUX = ['Maternelle', 'Primaire', 'Secondaire Général', 'Secondaire Technique', 'Supérieur', 'Formation Professionnelle'];
@@ -34,9 +36,35 @@ const labelClass = "text-[11px] font-bold text-gray-400 uppercase tracking-wider
 
 const NouvelEtablissementPage = () => {
   const router = useRouter();
+  const addEtablissement = useStore((s) => s.addEtablissement);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
+
+  const handleSubmit = () => {
+    if (!form.nom.trim()) { toast.error('Le nom de l\'établissement est requis.'); return; }
+    if (!form.commune.trim()) { toast.error('La commune est requise.'); return; }
+    const newId = `BJ-${Math.floor(10000 + Math.random() * 90000)}`;
+    addEtablissement({
+      id: newId,
+      nom: form.nom,
+      type: form.type === 'Public' ? 'PUBLIC' : 'PRIVÉ',
+      departement: form.departement,
+      commune: form.commune,
+      niveau: form.niveau,
+      date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }),
+      statut: form.statut as 'ACTIF' | 'INACTIF',
+      directeur: form.directeur,
+      telephone: form.telephone,
+      email: form.email,
+      effectif: Number(form.effectif) || 0,
+      enseignants: Number(form.enseignants) || 0,
+      budgetAnnuel: form.budgetAnnuel,
+      adresse: form.adresse,
+    });
+    toast.success(`${form.nom} créé avec succès !`);
+    router.push('/etablissements');
+  };
 
   const [form, setForm] = useState<FormData>({
     nom: '',
@@ -229,7 +257,11 @@ const NouvelEtablissementPage = () => {
                 </p>
               </div>
 
-              <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm">
+              <button
+                type="button"
+                onClick={handleSubmit}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm"
+              >
                 Créer l&apos;établissement
                 <ChevronRight size={16} />
               </button>

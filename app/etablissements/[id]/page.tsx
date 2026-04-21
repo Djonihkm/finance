@@ -1,14 +1,17 @@
 "use client";
 
-import { use } from 'react';
+import { use, useState } from 'react';
 import { notFound, useRouter } from 'next/navigation';
 import {
   ArrowLeft, Building2, MapPin, Users, GraduationCap,
   Phone, Mail, CheckCircle, XCircle, Pencil, Printer,
-  FileText, Calendar, Wallet,
+  FileText, Calendar, Wallet, Save, X,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import DashboardLayout from '../../components/DashboardLayout';
-import { etablissements } from '../../data/etablissements';
+import { useStore } from '@/lib/store';
+
+const inputClass = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#11355b]/20 focus:border-[#11355b] transition-colors";
 
 export default function EtablissementDetailPage({
   params,
@@ -17,12 +20,39 @@ export default function EtablissementDetailPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
+  const { etablissements, updateEtablissement } = useStore();
   const etab = etablissements.find((e) => e.id === decodeURIComponent(id));
 
-  if (!etab) notFound();
+  const [isEditing, setIsEditing] = useState(false);
+  const [draft, setDraft] = useState(etab ?? null);
+
+  if (!etab || !draft) notFound();
 
   const isActif = etab.statut === 'ACTIF';
   const isPublic = etab.type === 'PUBLIC';
+
+  const setField = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    setDraft((prev) => prev ? { ...prev, [field]: e.target.value } : prev);
+
+  const handleSave = () => {
+    if (!draft.nom.trim()) { toast.error('Le nom est requis.'); return; }
+    updateEtablissement(etab.id, draft);
+    toast.success('Modifications enregistrées.');
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setDraft(etab);
+    setIsEditing(false);
+  };
+
+  const handleToggleStatut = () => {
+    const next = etab.statut === 'ACTIF' ? 'INACTIF' : 'ACTIF';
+    updateEtablissement(etab.id, { statut: next });
+    toast.success(`Établissement ${next === 'ACTIF' ? 'activé' : 'désactivé'}.`);
+  };
+
+  const handlePrint = () => window.print();
 
   return (
     <DashboardLayout>
@@ -62,14 +92,45 @@ export default function EtablissementDetailPage({
             <p className="text-sm text-gray-400">ID: #{etab.id} · {etab.niveau}</p>
           </div>
           <div className="flex gap-2 shrink-0">
-            <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer">
-              <Pencil size={15} />
-              Modifier
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-[#11355b] hover:bg-[#1a4a7a] rounded-lg text-sm font-medium text-white transition-colors cursor-pointer shadow-sm">
-              <Printer size={15} />
-              Imprimer
-            </button>
+            {isEditing ? (
+              <>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-sm font-medium text-white transition-colors cursor-pointer shadow-sm"
+                >
+                  <Save size={15} />
+                  Enregistrer
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  <X size={15} />
+                  Annuler
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  <Pencil size={15} />
+                  Modifier
+                </button>
+                <button
+                  type="button"
+                  onClick={handlePrint}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#11355b] hover:bg-[#1a4a7a] rounded-lg text-sm font-medium text-white transition-colors cursor-pointer shadow-sm"
+                >
+                  <Printer size={15} />
+                  Imprimer
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -81,16 +142,39 @@ export default function EtablissementDetailPage({
             {/* Informations générales */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
               <h2 className="text-sm font-bold text-[#11355b] uppercase tracking-wider mb-5 flex items-center gap-2">
-                <Building2 size={16} className="text-[#11355b]" />
+                <Building2 size={16} />
                 Informations générales
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <InfoField label="Nom officiel" value={etab.nom} />
-                <InfoField label="Type" value={etab.type} />
-                <InfoField label="Niveau d'enseignement" value={etab.niveau} />
-                <InfoField label="Date de création" value={etab.date} icon={<Calendar size={14} className="text-gray-400" />} />
-                <InfoField label="Directeur / Responsable" value={etab.directeur} />
-                <InfoField label="Statut" value={etab.statut} highlight={isActif ? 'green' : 'red'} />
+                {isEditing ? (
+                  <>
+                    <EditField label="Nom officiel"><input value={draft.nom} onChange={setField('nom')} className={inputClass} /></EditField>
+                    <EditField label="Type">
+                      <select value={draft.type} onChange={setField('type')} className={inputClass}>
+                        <option value="PUBLIC">Public</option>
+                        <option value="PRIVÉ">Privé</option>
+                      </select>
+                    </EditField>
+                    <EditField label="Niveau d'enseignement"><input value={draft.niveau} onChange={setField('niveau')} className={inputClass} /></EditField>
+                    <EditField label="Date de création"><input value={draft.date} onChange={setField('date')} className={inputClass} /></EditField>
+                    <EditField label="Directeur / Responsable"><input value={draft.directeur} onChange={setField('directeur')} className={inputClass} /></EditField>
+                    <EditField label="Statut">
+                      <select value={draft.statut} onChange={setField('statut')} className={inputClass}>
+                        <option value="ACTIF">Actif</option>
+                        <option value="INACTIF">Inactif</option>
+                      </select>
+                    </EditField>
+                  </>
+                ) : (
+                  <>
+                    <InfoField label="Nom officiel" value={etab.nom} />
+                    <InfoField label="Type" value={etab.type} />
+                    <InfoField label="Niveau d'enseignement" value={etab.niveau} />
+                    <InfoField label="Date de création" value={etab.date} icon={<Calendar size={14} className="text-gray-400" />} />
+                    <InfoField label="Directeur / Responsable" value={etab.directeur} />
+                    <InfoField label="Statut" value={etab.statut} highlight={isActif ? 'green' : 'red'} />
+                  </>
+                )}
               </div>
             </div>
 
@@ -101,11 +185,23 @@ export default function EtablissementDetailPage({
                 Localisation
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <InfoField label="Département" value={etab.departement} />
-                <InfoField label="Commune" value={etab.commune} />
-                <div className="sm:col-span-2">
-                  <InfoField label="Adresse complète" value={etab.adresse} />
-                </div>
+                {isEditing ? (
+                  <>
+                    <EditField label="Département"><input value={draft.departement} onChange={setField('departement')} className={inputClass} /></EditField>
+                    <EditField label="Commune"><input value={draft.commune} onChange={setField('commune')} className={inputClass} /></EditField>
+                    <div className="sm:col-span-2">
+                      <EditField label="Adresse complète"><input value={draft.adresse} onChange={setField('adresse')} className={inputClass} /></EditField>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <InfoField label="Département" value={etab.departement} />
+                    <InfoField label="Commune" value={etab.commune} />
+                    <div className="sm:col-span-2">
+                      <InfoField label="Adresse complète" value={etab.adresse} />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
@@ -116,20 +212,29 @@ export default function EtablissementDetailPage({
                 Contacts
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                  <Phone size={18} className="text-[#11355b] shrink-0" />
-                  <div>
-                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Téléphone</p>
-                    <p className="text-sm font-semibold text-gray-800">{etab.telephone}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                  <Mail size={18} className="text-[#11355b] shrink-0" />
-                  <div>
-                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Email</p>
-                    <p className="text-sm font-semibold text-gray-800">{etab.email}</p>
-                  </div>
-                </div>
+                {isEditing ? (
+                  <>
+                    <EditField label="Téléphone"><input value={draft.telephone} onChange={setField('telephone')} className={inputClass} /></EditField>
+                    <EditField label="Email"><input value={draft.email} onChange={setField('email')} className={inputClass} /></EditField>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                      <Phone size={18} className="text-[#11355b] shrink-0" />
+                      <div>
+                        <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Téléphone</p>
+                        <p className="text-sm font-semibold text-gray-800">{etab.telephone}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                      <Mail size={18} className="text-[#11355b] shrink-0" />
+                      <div>
+                        <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Email</p>
+                        <p className="text-sm font-semibold text-gray-800">{etab.email}</p>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
@@ -139,11 +244,19 @@ export default function EtablissementDetailPage({
                 <Users size={16} className="text-orange-500" />
                 Statistiques
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <StatCard icon={<Users size={20} className="text-[#11355b]" />} label="Effectif élèves" value={etab.effectif.toLocaleString('fr-FR')} color="blue" />
-                <StatCard icon={<GraduationCap size={20} className="text-emerald-600" />} label="Enseignants" value={etab.enseignants.toString()} color="green" />
-                <StatCard icon={<Wallet size={20} className="text-orange-500" />} label="Budget annuel" value={`${etab.budgetAnnuel} FCFA`} color="orange" />
-              </div>
+              {isEditing ? (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                  <EditField label="Effectif élèves"><input type="number" value={draft.effectif} onChange={setField('effectif')} className={inputClass} /></EditField>
+                  <EditField label="Enseignants"><input type="number" value={draft.enseignants} onChange={setField('enseignants')} className={inputClass} /></EditField>
+                  <EditField label="Budget annuel (FCFA)"><input value={draft.budgetAnnuel} onChange={setField('budgetAnnuel')} className={inputClass} /></EditField>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <StatCard icon={<Users size={20} className="text-[#11355b]" />} label="Effectif élèves" value={etab.effectif.toLocaleString('fr-FR')} color="blue" />
+                  <StatCard icon={<GraduationCap size={20} className="text-emerald-600" />} label="Enseignants" value={etab.enseignants.toString()} color="green" />
+                  <StatCard icon={<Wallet size={20} className="text-orange-500" />} label="Budget annuel" value={`${etab.budgetAnnuel} FCFA`} color="orange" />
+                </div>
+              )}
             </div>
           </div>
 
@@ -154,29 +267,40 @@ export default function EtablissementDetailPage({
                 Actions
               </h3>
 
-              {isActif ? (
-                <button className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 mb-3 transition-colors cursor-pointer shadow-sm">
-                  <XCircle size={16} />
-                  Désactiver l&apos;établissement
-                </button>
-              ) : (
-                <button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 mb-3 transition-colors cursor-pointer shadow-sm">
-                  <CheckCircle size={16} />
-                  Activer l&apos;établissement
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleToggleStatut}
+                className={`w-full py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 mb-3 transition-colors cursor-pointer shadow-sm text-white ${
+                  isActif ? 'bg-red-500 hover:bg-red-600' : 'bg-emerald-500 hover:bg-emerald-600'
+                }`}
+              >
+                {isActif ? <XCircle size={16} /> : <CheckCircle size={16} />}
+                {isActif ? "Désactiver l'établissement" : "Activer l'établissement"}
+              </button>
 
-              <button className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer">
+              <button
+                type="button"
+                onClick={() => setIsEditing(true)}
+                className="w-full border border-gray-200 hover:bg-gray-50 text-gray-700 py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              >
                 <Pencil size={16} />
                 Modifier les informations
               </button>
 
               <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
-                <button className="flex items-center gap-3 text-sm text-gray-600 hover:text-[#11355b] cursor-pointer transition-colors w-full">
+                <button
+                  type="button"
+                  onClick={handlePrint}
+                  className="flex items-center gap-3 text-sm text-gray-600 hover:text-[#11355b] cursor-pointer transition-colors w-full"
+                >
                   <Printer size={15} />
                   Imprimer la fiche
                 </button>
-                <button className="flex items-center gap-3 text-sm text-orange-500 hover:text-orange-600 cursor-pointer transition-colors w-full font-medium">
+                <button
+                  type="button"
+                  onClick={() => toast.info('Export PDF non disponible sans backend.')}
+                  className="flex items-center gap-3 text-sm text-orange-500 hover:text-orange-600 cursor-pointer transition-colors w-full font-medium"
+                >
                   <FileText size={15} />
                   Télécharger en PDF
                 </button>
@@ -203,16 +327,17 @@ export default function EtablissementDetailPage({
   );
 }
 
-function InfoField({
-  label,
-  value,
-  icon,
-  highlight,
-}: {
-  label: string;
-  value: string;
-  icon?: React.ReactNode;
-  highlight?: 'green' | 'red';
+function EditField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="block space-y-1.5">
+      <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">{label}</span>
+      {children}
+    </label>
+  );
+}
+
+function InfoField({ label, value, icon, highlight }: {
+  label: string; value: string; icon?: React.ReactNode; highlight?: 'green' | 'red';
 }) {
   return (
     <div>
@@ -221,8 +346,7 @@ function InfoField({
         {icon}
         <p className={`text-sm font-semibold ${
           highlight === 'green' ? 'text-emerald-600' :
-          highlight === 'red' ? 'text-red-500' :
-          'text-gray-800'
+          highlight === 'red' ? 'text-red-500' : 'text-gray-800'
         }`}>
           {value}
         </p>
@@ -231,16 +355,8 @@ function InfoField({
   );
 }
 
-function StatCard({
-  icon,
-  label,
-  value,
-  color,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  color: 'blue' | 'green' | 'orange';
+function StatCard({ icon, label, value, color }: {
+  icon: React.ReactNode; label: string; value: string; color: 'blue' | 'green' | 'orange';
 }) {
   const bg = { blue: 'bg-blue-50', green: 'bg-emerald-50', orange: 'bg-orange-50' }[color];
   return (

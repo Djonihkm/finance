@@ -1,13 +1,16 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { User, Key, Camera, Eye, EyeOff, Save, Lock, Info } from 'lucide-react';
+import { toast } from 'sonner';
 import DashboardLayout from '../components/DashboardLayout';
+import { useStore } from '@/lib/store';
 
 const ParametresPage = () => {
   const router = useRouter();
+  const { profil, updateProfil } = useStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -16,12 +19,12 @@ const ParametresPage = () => {
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
   const [formData, setFormData] = useState({
-    nom: 'Dupont',
-    prenom: 'Jean',
-    email: 'jean.dupont@oakwood.edu',
-    telephone: '+229 97 00 00 00',
-    role: 'Comptable Principal',
-    etablissement: 'Lycée Technique de Cotonou',
+    nom: profil.nom,
+    prenom: profil.prenom,
+    email: profil.email,
+    telephone: profil.telephone,
+    role: profil.role,
+    etablissement: profil.etablissement,
     motDePasseActuel: '',
     nouveauMotDePasse: '',
     confirmationMotDePasse: '',
@@ -44,8 +47,14 @@ const ParametresPage = () => {
   };
 
   const handleSave = () => {
-    console.log('Modifications sauvegardées:', formData);
-    // Logique d'envoi à l'API
+    updateProfil({
+      nom: formData.nom,
+      prenom: formData.prenom,
+      email: formData.email,
+      telephone: formData.telephone,
+      role: formData.role,
+    });
+    toast.success('Profil mis à jour avec succès.');
   };
 
   const handleCancel = () => {
