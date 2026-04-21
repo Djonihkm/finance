@@ -172,7 +172,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile }) 
                 <form action={logout}>
                   <button
                     type="submit"
-                    className="text-blue-400 opacity-60 hover:opacity-100 transition-opacity"
+                    className="text-blue-400 opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
                     aria-label="Se déconnecter"
                     title="Se déconnecter"
                   >
