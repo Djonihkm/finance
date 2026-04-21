@@ -68,7 +68,7 @@ const NouvelEtablissementPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-300 mx-auto">
+      <div className="max-w-7xl mx-auto">
 
         {/* Retour */}
         <div className="mb-6">
@@ -81,7 +81,7 @@ const NouvelEtablissementPage = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-6">
 
           {/* ===== FORMULAIRE ===== */}
           <div className="space-y-5">
@@ -236,7 +236,7 @@ const NouvelEtablissementPage = () => {
             </div>
 
             <div className="px-1">
-              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1.5">
+              <p className="text-[11px] font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
                 Synchronisation en temps réel active
               </p>

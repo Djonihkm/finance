@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, Printer, FileText, Receipt } from 'lucide-react';
 import DashboardLayout from './DashboardLayout';
 import type { Transaction } from '../data/depenses';
+import Image from "next/image";
 
 interface DepenseDetailProps {
   data: Transaction;
@@ -15,7 +16,7 @@ const DepenseDetail: React.FC<DepenseDetailProps> = ({ data }) => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-300 mx-auto">
+      <div className="max-w-7xl mx-auto">
 
         {/* Bouton Retour */}
         <div className="mb-4">
@@ -28,22 +29,30 @@ const DepenseDetail: React.FC<DepenseDetailProps> = ({ data }) => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-6">
 
           {/* === DOCUMENT PRINCIPAL === */}
           <div className="bg-white rounded-xl p-8 shadow-sm">
 
             {/* Header */}
             <div className="grid grid-cols-3 items-start gap-6 mb-8">
-              <div className="w-24 h-24 bg-gray-100 rounded flex items-center justify-center">
-                <span className="text-xs text-gray-400">LOGO</span>
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-20 relative shrink-0">
+                  <Image
+                    src="/fav.png"
+                    alt="Logo"
+                    fill
+                    className="object-contain"
+                    priority
+                  />
+                </div>
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2 mb-1">
                   <Receipt size={20} className="text-[#11355b]" />
                   <h1 className="text-2xl font-bold text-[#11355b] tracking-wide">DÉPENSE</h1>
                 </div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-widest">
+                <p className="text-[11px] text-gray-400 uppercase tracking-widest">
                   Fiche de dépense officielle
                 </p>
               </div>
@@ -59,19 +68,19 @@ const DepenseDetail: React.FC<DepenseDetailProps> = ({ data }) => {
             <div className="grid grid-cols-2 gap-8 mb-8">
               <div className="space-y-5">
                 <div className="border-l-4 border-[#11355b] pl-4">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Référence</p>
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Référence</p>
                   <p className="text-lg font-bold text-[#11355b]">{data.reference}</p>
                 </div>
                 <div className="border-l-4 border-[#11355b] pl-4">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Date</p>
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Date</p>
                   <p className="text-base font-semibold text-gray-800">{data.date}</p>
                 </div>
                 <div className="border-l-4 border-[#11355b] pl-4">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Mode de paiement</p>
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Mode de paiement</p>
                   <p className="text-base font-semibold text-gray-800">{data.paiement}</p>
                 </div>
                 <div className="border-l-4 border-[#11355b] pl-4">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Catégorie</p>
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Catégorie</p>
                   <span className="inline-block bg-blue-50 text-[#11355b] px-2 py-1 rounded text-sm font-bold uppercase">
                     {data.categorie}
                   </span>
@@ -79,7 +88,7 @@ const DepenseDetail: React.FC<DepenseDetailProps> = ({ data }) => {
               </div>
 
               <div className="bg-gray-50 p-5 rounded-lg">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-3">
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3">
                   Intitulé de la dépense
                 </p>
                 <p className="text-base font-semibold text-gray-800 leading-relaxed">{data.intitule}</p>
@@ -124,7 +133,7 @@ const DepenseDetail: React.FC<DepenseDetailProps> = ({ data }) => {
               </div>
 
               <div>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">
                   Visa du responsable financier
                 </p>
                 <div className="border border-gray-200 rounded h-32 flex items-center justify-center text-gray-300 italic text-sm">
@@ -132,11 +141,11 @@ const DepenseDetail: React.FC<DepenseDetailProps> = ({ data }) => {
                 </div>
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Fait à</p>
+                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Fait à</p>
                     <div className="border-b border-gray-300 h-6"></div>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">La date</p>
+                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">La date</p>
                     <p className="border-b border-gray-300 h-6 text-sm pt-1">..../... / 2026</p>
                   </div>
                 </div>

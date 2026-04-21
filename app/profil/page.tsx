@@ -63,7 +63,7 @@ const ParametresPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-300 mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
 
         {/* En-tête */}
         <div>
@@ -74,10 +74,10 @@ const ParametresPage = () => {
         </div>
 
         {/* Section haut : Carte profil + Infos personnelles */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
           {/* Carte profil */}
-          <div className="lg:col-span-1">
+          <div className="md:col-span-1">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center h-full">
 
               {/* Avatar avec upload */}
@@ -129,10 +129,10 @@ const ParametresPage = () => {
 
               {/* Badges */}
               <div className="flex justify-center gap-2 mt-5">
-                <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">
                   Actif
                 </span>
-                <span className="bg-blue-100 text-[#11355b] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                <span className="bg-blue-100 text-[#11355b] px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider">
                   Admin
                 </span>
               </div>
@@ -140,7 +140,7 @@ const ParametresPage = () => {
           </div>
 
           {/* Informations personnelles */}
-          <div className="lg:col-span-2">
+          <div className="md:col-span-2">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 h-full">
 
               <div className="flex items-center gap-3 mb-6">

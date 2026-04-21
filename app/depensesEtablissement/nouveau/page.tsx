@@ -46,7 +46,7 @@ const NouvelleDepensePage = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-300 mx-auto">
+      <div className="max-w-7xl mx-auto">
 
         {/* Bouton retour */}
         <button
@@ -68,10 +68,10 @@ const NouvelleDepensePage = () => {
         </div>
 
         {/* Layout principal */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
           {/* Colonne formulaire */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="md:col-span-2 space-y-6">
 
             {/* Section : Identification */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8">
@@ -280,7 +280,7 @@ const NouvelleDepensePage = () => {
           </div>
 
           {/* Colonne récapitulatif */}
-          <div className="lg:col-span-1">
+          <div className="md:col-span-1">
             <div className="lg:sticky lg:top-6 space-y-4">
 
               <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-6">
@@ -290,28 +290,28 @@ const NouvelleDepensePage = () => {
 
                 <div className="space-y-4">
                   <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Intitulé</p>
+                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Intitulé</p>
                     <p className="text-sm font-semibold text-[#11355b] truncate">
                       {formData.intitule || '—'}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Catégorie</p>
+                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Catégorie</p>
                     <p className="text-sm font-semibold text-[#11355b] capitalize">
                       {formData.categorie || '—'}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Numéro de référence</p>
+                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Numéro de référence</p>
                     <p className="text-sm font-semibold text-[#11355b]">
                       {formData.reference || '—'}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Montant</p>
+                    <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Montant</p>
                     <p className="text-lg font-bold text-[#11355b]">
                       {formData.montant ? `${Number(formData.montant).toLocaleString('fr-FR')} FCFA` : '—'}
                     </p>

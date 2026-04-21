@@ -34,7 +34,7 @@ const DepensesPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-300 mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
 
         {/* Sélecteur */}
         <div className="flex w-full gap-4">
@@ -55,15 +55,15 @@ const DepensesPage = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[500px]">
               <thead>
                 <tr className="text-[11px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100">
-                  <th className="px-6 py-4">Date</th>
-                  <th className="px-6 py-4">Intitulé</th>
-                  <th className="px-6 py-4">Montant</th>
-                  <th className="px-6 py-4">Paiement</th>
-                  <th className="px-6 py-4">Référence</th>
-                  <th className="px-6 py-4">Catégorie</th>
+                  <th className="hidden sm:table-cell px-4 py-4">Date</th>
+                  <th className="px-4 py-4">Intitulé</th>
+                  <th className="px-4 py-4">Montant</th>
+                  <th className="hidden md:table-cell px-4 py-4">Paiement</th>
+                  <th className="hidden md:table-cell px-4 py-4">Référence</th>
+                  <th className="px-4 py-4">Catégorie</th>
                 </tr>
               </thead>
               <tbody className="text-sm text-gray-700">
@@ -73,13 +73,16 @@ const DepensesPage = () => {
                     onClick={() => handleRowClick(item.reference)}
                     className="border-b border-gray-50 hover:bg-blue-50/40 transition-colors cursor-pointer"
                   >
-                    <td className="px-6 py-4 text-gray-500">{item.date}</td>
-                    <td className="px-6 py-4 font-medium text-gray-800">{item.intitule}</td>
-                    <td className="px-6 py-4 font-bold text-[#11355b]">{item.montant}</td>
-                    <td className="px-6 py-4">{item.paiement}</td>
-                    <td className="px-6 py-4 text-gray-500">{item.reference}</td>
-                    <td className="px-6 py-4">
-                      <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-[10px] font-bold uppercase">
+                    <td className="hidden sm:table-cell px-4 py-4 text-gray-500">{item.date}</td>
+                    <td className="px-4 py-4 font-medium text-gray-800">
+                      {item.intitule}
+                      <p className="sm:hidden text-xs text-gray-400 mt-0.5">{item.date}</p>
+                    </td>
+                    <td className="px-4 py-4 font-bold text-[#11355b]">{item.montant}</td>
+                    <td className="hidden md:table-cell px-4 py-4">{item.paiement}</td>
+                    <td className="hidden md:table-cell px-4 py-4 text-gray-500">{item.reference}</td>
+                    <td className="px-4 py-4">
+                      <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-[11px] font-bold uppercase">
                         {item.categorie}
                       </span>
                     </td>
@@ -94,10 +97,10 @@ const DepensesPage = () => {
               Affichage de {currentData.length} sur {totalCount} {activeMode === 'depenses' ? 'dépenses' : 'bons'}
             </p>
             <div className="flex gap-2">
-              <button className="p-1 border border-gray-200 rounded bg-white hover:bg-gray-50 disabled:opacity-50 cursor-pointer">
+              <button type="button" aria-label="Page précédente" className="p-1 border border-gray-200 rounded bg-white hover:bg-gray-50 disabled:opacity-50 cursor-pointer">
                 <ChevronLeft size={16} />
               </button>
-              <button className="p-1 border border-gray-200 rounded bg-white hover:bg-gray-50 disabled:opacity-50 cursor-pointer">
+              <button type="button" aria-label="Page suivante" className="p-1 border border-gray-200 rounded bg-white hover:bg-gray-50 disabled:opacity-50 cursor-pointer">
                 <ChevronRight size={16} />
               </button>
             </div>
@@ -109,19 +112,19 @@ const DepensesPage = () => {
           <div className={`p-6 rounded-xl shadow-sm border relative overflow-hidden transition-all ${
             activeMode === 'depenses' ? 'bg-[#11355b] text-white shadow-lg border-transparent' : 'bg-white border-gray-100'
           }`}>
-            <p className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${activeMode === 'depenses' ? 'opacity-70' : 'text-orange-400'}`}>Total Dépense</p>
+            <p className={`text-[11px] font-bold uppercase tracking-wider mb-1 ${activeMode === 'depenses' ? 'opacity-70' : 'text-orange-400'}`}>Total Dépense</p>
             <p className={`text-2xl font-bold ${activeMode === 'depenses' ? 'text-white' : 'text-[#11355b]'}`}>4,580.45 FCFA</p>
           </div>
 
           <div className={`p-6 rounded-xl shadow-sm border relative overflow-hidden transition-all ${
             activeMode === 'bons' ? 'bg-[#11355b] text-white shadow-lg border-transparent' : 'bg-white border-gray-100'
           }`}>
-            <p className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${activeMode === 'bons' ? 'opacity-70' : 'text-blue-400'}`}>Total Bons</p>
+            <p className={`text-[11px] font-bold uppercase tracking-wider mb-1 ${activeMode === 'bons' ? 'opacity-70' : 'text-blue-400'}`}>Total Bons</p>
             <p className={`text-2xl font-bold ${activeMode === 'bons' ? 'text-white' : 'text-[#11355b]'}`}>12,240.00 FCFA</p>
           </div>
 
           <div className="bg-white border border-gray-100 p-6 rounded-xl shadow-sm">
-            <p className="text-[10px] font-bold text-green-500 uppercase tracking-wider mb-1">Budget Restant</p>
+            <p className="text-[11px] font-bold text-green-500 uppercase tracking-wider mb-1">Budget Restant</p>
             <p className="text-2xl font-bold text-[#11355b]">3,179.55 FCFA</p>
           </div>
         </div>

@@ -62,10 +62,10 @@ const BudgetPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-300 mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
 
         {/* ── KPI CARDS ── */}
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
 
           {/* Total Annuel */}
           <div className="bg-white rounded-xl px-4 py-3 shadow-sm flex items-center gap-3">
@@ -73,11 +73,11 @@ const BudgetPage = () => {
               <Landmark size={16} className="text-[#11355b]" />
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider truncate">Total Annuel</p>
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider truncate">Total Annuel</p>
               <p className="text-base font-bold text-[#11355b] leading-tight">{fmtM(totalAnnuel)}</p>
               <div className="flex items-center gap-1 mt-0.5">
                 <TrendingUp size={11} className="text-emerald-500 shrink-0" />
-                <span className="text-[10px] text-emerald-600 font-medium">+4.2% vs l&apos;an dernier</span>
+                <span className="text-[11px] text-emerald-600 font-medium">+4.2% vs l&apos;an dernier</span>
               </div>
             </div>
           </div>
@@ -88,13 +88,13 @@ const BudgetPage = () => {
               <ShoppingCart size={16} className="text-emerald-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Consommé</p>
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Consommé</p>
               <p className="text-base font-bold text-[#11355b] leading-tight">{fmtM(consomme)}</p>
               <div className="flex items-center gap-2 mt-1">
                 <div className="flex-1 bg-gray-100 rounded-full h-1">
                   <div className="bg-emerald-500 h-1 rounded-full" style={{ width: `${pctConsomme}%` }} />
                 </div>
-                <span className="text-[10px] text-gray-400 shrink-0">{pctConsomme}%</span>
+                <span className="text-[11px] text-gray-400 shrink-0">{pctConsomme}%</span>
               </div>
             </div>
           </div>
@@ -105,9 +105,9 @@ const BudgetPage = () => {
               <PiggyBank size={16} className="text-yellow-600" />
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Disponible</p>
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Disponible</p>
               <p className="text-base font-bold text-[#11355b] leading-tight">{fmtM(disponible)}</p>
-              <p className="text-[10px] text-gray-400 mt-0.5">Prévu fin de trimestre</p>
+              <p className="text-[11px] text-gray-400 mt-0.5">Prévu fin de trimestre</p>
             </div>
           </div>
 
@@ -117,9 +117,9 @@ const BudgetPage = () => {
               <CalendarCheck size={16} className="text-red-500" />
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Engagé</p>
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Engagé</p>
               <p className="text-base font-bold text-[#11355b] leading-tight">{fmtM(engage)}</p>
-              <p className="text-[10px] text-gray-400 mt-0.5">En attente de validation</p>
+              <p className="text-[11px] text-gray-400 mt-0.5">En attente de validation</p>
             </div>
           </div>
         </div>
@@ -143,15 +143,15 @@ const BudgetPage = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[600px]">
               <thead>
                 <tr className="text-[11px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/60 border-b border-gray-100">
-                  <th className="px-6 py-4">Direction / Département</th>
-                  <th className="px-6 py-4">Catégorie</th>
-                  <th className="px-6 py-4">Alloué</th>
-                  <th className="px-6 py-4">Dépensé</th>
-                  <th className="px-6 py-4">Exécution %</th>
-                  <th className="px-6 py-4">Statut</th>
+                  <th className="px-4 py-4">Direction / Département</th>
+                  <th className="hidden sm:table-cell px-4 py-4">Catégorie</th>
+                  <th className="px-4 py-4">Alloué</th>
+                  <th className="hidden sm:table-cell px-4 py-4">Dépensé</th>
+                  <th className="px-4 py-4">Exécution %</th>
+                  <th className="px-4 py-4">Statut</th>
                 </tr>
               </thead>
               <tbody className="text-sm">
@@ -165,34 +165,34 @@ const BudgetPage = () => {
                       className="border-b border-gray-50 hover:bg-blue-50/30 transition-colors cursor-pointer"
                     >
                       {/* Direction */}
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-lg bg-linear-to-br ${d.color} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
+                          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-linear-to-br ${d.color} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
                             {initiales}
                           </div>
                           <div>
-                            <p className="font-semibold text-[#11355b]">{d.nom}</p>
+                            <p className="font-semibold text-[#11355b] text-sm">{d.nom}</p>
                             <p className="text-xs text-gray-400">Code: {d.code}</p>
                           </div>
                         </div>
                       </td>
 
                       {/* Catégorie */}
-                      <td className="px-6 py-4 text-gray-500">{d.categorie}</td>
+                      <td className="hidden sm:table-cell px-4 py-4 text-gray-500">{d.categorie}</td>
 
                       {/* Alloué */}
-                      <td className="px-6 py-4 font-bold text-[#11355b]">
+                      <td className="px-4 py-4 font-bold text-[#11355b] text-sm">
                         {fmt(d.alloue)}
                       </td>
 
                       {/* Dépensé */}
-                      <td className={`px-6 py-4 font-semibold ${pct >= 80 ? 'text-red-500' : 'text-emerald-600'}`}>
+                      <td className={`hidden sm:table-cell px-4 py-4 font-semibold text-sm ${pct >= 80 ? 'text-red-500' : 'text-emerald-600'}`}>
                         {fmt(d.depense)}
                       </td>
 
                       {/* Exécution */}
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3 min-w-[120px]">
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-2 min-w-[80px]">
                           <div className="flex-1 bg-gray-100 rounded-full h-1.5">
                             <div
                               className={`${s.bar} h-1.5 rounded-full transition-all`}
@@ -204,8 +204,8 @@ const BudgetPage = () => {
                       </td>
 
                       {/* Statut */}
-                      <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${s.bg} ${s.text}`}>
+                      <td className="px-4 py-4">
+                        <span className={`px-2 py-1 rounded-full text-[11px] sm:text-[11px] font-bold uppercase tracking-wider ${s.bg} ${s.text}`}>
                           {d.statut}
                         </span>
                       </td>
