@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import type { UserRole } from "./mock-users";
+import type { UserRole } from "./types";
 
 export async function getRole(): Promise<UserRole> {
   const cookieStore = await cookies();

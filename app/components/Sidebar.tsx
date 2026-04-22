@@ -15,7 +15,7 @@ import {
   X,
   LogOut,
 } from "lucide-react";
-import type { UserRole } from "@/lib/mock-users";
+import type { UserRole } from "@/lib/types";
 import LogoutModal from "./LogoutModal";
 
 interface MenuItem {
