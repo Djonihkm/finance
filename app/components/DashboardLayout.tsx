@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useRole } from "@/lib/role-context";
-import Sidebar from "./SideBar";
+import Sidebar from "./Sidebar";
 import Header from "./Header";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
