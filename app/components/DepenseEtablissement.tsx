@@ -49,7 +49,7 @@ const DepenseDetail: React.FC<DepenseDetailProps> = ({ data }) => {
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center gap-2 mb-1">
-                  <Receipt size={20} className="text-[#11355b]" />
+                  
                   <h1 className="text-2xl font-bold text-[#11355b] tracking-wide">DÉPENSE</h1>
                 </div>
                 <p className="text-[11px] text-gray-400 uppercase tracking-widest">
