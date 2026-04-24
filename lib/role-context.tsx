@@ -3,7 +3,7 @@
 import { createContext, useContext } from "react";
 import type { UserRole } from "./types";
 
-const RoleContext = createContext<UserRole>("admin");
+const RoleContext = createContext<UserRole>("ministere");
 
 export function RoleProvider({
   role,
