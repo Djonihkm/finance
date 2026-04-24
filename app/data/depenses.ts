@@ -1,5 +1,5 @@
 export interface Transaction {
-  fournisseur: string;
+  fournisseur?: string;
   date: string;
   intitule: string;
   montant: string;

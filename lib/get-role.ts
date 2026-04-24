@@ -1,7 +1,6 @@
-import { cookies } from "next/headers";
-import type { UserRole } from "./mock-users";
+import type { UserRole } from "./types";
+import { getUiRole } from "./session";
 
 export async function getRole(): Promise<UserRole> {
-  const cookieStore = await cookies();
-  return (cookieStore.get("role")?.value as UserRole) ?? "admin";
+  return getUiRole();
 }

@@ -1,0 +1,269 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────
+
+enum Role {
+  SUPER_ADMIN
+  MINISTERE
+  ADMIN
+  COMPTABLE
+  DIRECTEUR
+}
+
+enum StatutDocument {
+  BROUILLON
+  SOUMIS
+  VALIDE
+  REJETE
+}
+
+enum TypeEtablissement {
+  LYCEE
+  COLLEGE
+  CEG
+  ECOLE_PRIMAIRE
+  AUTRE
+}
+
+enum TypePaiement {
+  ESPECES
+  VIREMENT
+  VIREMENT_30J
+  VIREMENT_60J
+  CHEQUE
+  CARTE_BANCAIRE
+  ACOMPTE
+}
+
+enum CategorieDepense {
+  FOURNITURE
+  MOBILIER
+  PERSONNEL
+  PEDAGOGIE
+  EQUIPEMENT
+  TRAVAUX
+  AUTRE
+}
+
+enum ActionHistorique {
+  CREE
+  MODIFIE
+  SOUMIS
+  SIGNE
+  VALIDE
+  REJETE
+}
+
+// ─────────────────────────────────────────────
+// USER
+// ─────────────────────────────────────────────
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  nom       String
+  prenom    String
+  role      Role
+  telephone String?
+  poste     String?
+  avatarUrl String?
+  isActive  Boolean   @default(true)
+  deletedAt DateTime?
+
+  // Null pour SUPER_ADMIN et MINISTERE
+  etablissementId String?
+  etablissement   Etablissement? @relation("EtablissementUsers", fields: [etablissementId], references: [id])
+
+  // Etablissements créés par ce MINISTERE
+  etablissementsCreates Etablissement[] @relation("EtablissementCreateur")
+
+  // Documents
+  depensesCreees   Depense[]     @relation("DepenseCreateur")
+  depensesSignees  Depense[]     @relation("DepenseSignataire")
+  depensesValidees Depense[]     @relation("DepenseValideur")
+
+  bonsCreees   BonCommande[] @relation("BonCreateur")
+  bonsSignes   BonCommande[] @relation("BonSignataire")
+  bonsValides  BonCommande[] @relation("BonValideur")
+
+  historiques Historique[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// ETABLISSEMENT
+// ─────────────────────────────────────────────
+
+model Etablissement {
+  id        String            @id @default(uuid())
+  nom       String
+  code      String            @unique
+  type      TypeEtablissement
+  adresse   String?
+  ville     String?
+  region    String?
+  telephone String?
+  email     String?
+  logoUrl   String?
+  isActive  Boolean           @default(true)
+  deletedAt DateTime?
+
+  createdById String
+  createdBy   User   @relation("EtablissementCreateur", fields: [createdById], references: [id])
+
+  users    User[]        @relation("EtablissementUsers")
+  budgets  Budget[]
+  depenses Depense[]
+  bons     BonCommande[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// BUDGET
+// ─────────────────────────────────────────────
+
+model Budget {
+  id              String  @id @default(uuid())
+  annee           Int
+  montantTotal    Decimal @db.Decimal(15, 2)
+  // Incrémenté automatiquement lors de la validation d'une Dépense ou d'un Bon
+  montantConsomme Decimal @default(0) @db.Decimal(15, 2)
+
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([etablissementId, annee])
+}
+
+// ─────────────────────────────────────────────
+// DEPENSE
+// ─────────────────────────────────────────────
+
+model Depense {
+  id          String           @id @default(uuid())
+  reference   String           @unique
+  intitule    String
+  montant     Decimal          @db.Decimal(15, 2)
+  categorie   CategorieDepense
+  paiement    TypePaiement
+  fournisseur String?
+  description String?
+  date        DateTime
+  statut      StatutDocument   @default(BROUILLON)
+
+  signeParId String?
+  signePar   User?     @relation("DepenseSignataire", fields: [signeParId], references: [id])
+  signeAt    DateTime?
+
+  valideParId String?
+  validePar   User?     @relation("DepenseValideur", fields: [valideParId], references: [id])
+  valideAt    DateTime?
+  commentaire String?
+
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id])
+
+  createdById String
+  createdBy   User   @relation("DepenseCreateur", fields: [createdById], references: [id])
+
+  historiques Historique[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+// ─────────────────────────────────────────────
+// BON DE COMMANDE
+// ─────────────────────────────────────────────
+
+model BonCommande {
+  id           String         @id @default(uuid())
+  reference    String         @unique
+  intitule     String
+  fournisseur  String?
+  description  String?
+  date         DateTime
+  statut       StatutDocument @default(BROUILLON)
+  montantTotal Decimal        @db.Decimal(15, 2)
+
+  lignes LigneBonCommande[]
+
+  signeParId String?
+  signePar   User?     @relation("BonSignataire", fields: [signeParId], references: [id])
+  signeAt    DateTime?
+
+  valideParId String?
+  validePar   User?     @relation("BonValideur", fields: [valideParId], references: [id])
+  valideAt    DateTime?
+  commentaire String?
+
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id])
+
+  createdById String
+  createdBy   User   @relation("BonCreateur", fields: [createdById], references: [id])
+
+  historiques Historique[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+// ─────────────────────────────────────────────
+// LIGNE BON DE COMMANDE
+// ─────────────────────────────────────────────
+
+model LigneBonCommande {
+  id           String  @id @default(uuid())
+  designation  String
+  quantite     Int
+  prixUnitaire Decimal @db.Decimal(15, 2)
+  montant      Decimal @db.Decimal(15, 2)
+
+  bonCommandeId String
+  bonCommande   BonCommande @relation(fields: [bonCommandeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// HISTORIQUE (audit trail)
+// ─────────────────────────────────────────────
+
+model Historique {
+  id          String           @id @default(uuid())
+  action      ActionHistorique
+  commentaire String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  depenseId String?
+  depense   Depense? @relation(fields: [depenseId], references: [id])
+
+  bonCommandeId String?
+  bonCommande   BonCommande? @relation(fields: [bonCommandeId], references: [id])
+
+  createdAt DateTime @default(now())
+}

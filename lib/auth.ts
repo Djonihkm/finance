@@ -1,26 +1,49 @@
 "use server";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { MOCK_USERS } from "./mock-users";
+import bcrypt from "bcryptjs";
+import { prisma } from "./prisma";
+import { setSession, clearSession } from "./session";
+import type { PrismaRole, UserRole } from "./types";
 
 export type LoginState = { error: string } | null;
+
+function toUiRole(role: PrismaRole): UserRole {
+  if (role === "SUPER_ADMIN") return "superadmin";
+  if (role === "MINISTERE") return "ministere";
+  return "etablissement";
+}
+
+function dashboardFor(uiRole: UserRole): string {
+  if (uiRole === "superadmin") return "/etablissements";
+  if (uiRole === "ministere") return "/etablissements";
+  return "/mon-etablissement";
+}
 
 export async function login(_prevState: LoginState, formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  const user = MOCK_USERS.find(u => u.email === email && u.password === password);
+  const user = await prisma.user.findUnique({ where: { email, isActive: true, deletedAt: null } });
   if (!user) return { error: "Email ou mot de passe incorrect" };
 
-  const cookieStore = await cookies();
-  cookieStore.set("role", user.role, { path: "/", sameSite: "lax" });
+  const valid = await bcrypt.compare(password, user.password);
+  if (!valid) return { error: "Email ou mot de passe incorrect" };
 
-  redirect(user.role === "admin" ? "/etablissements" : "/mon-etablissement");
+  const uiRole = toUiRole(user.role as PrismaRole);
+  await setSession({
+    userId: user.id,
+    role: user.role as PrismaRole,
+    uiRole,
+    etablissementId: user.etablissementId,
+    nom: user.nom,
+    prenom: user.prenom,
+    email: user.email,
+  });
+
+  redirect(dashboardFor(uiRole));
 }
 
 export async function logout() {
-  const cookieStore = await cookies();
-  cookieStore.delete("role");
+  await clearSession();
   redirect("/login");
 }
-
