@@ -72,7 +72,7 @@ export type BudgetRow = Prisma.BudgetGetPayload<{
 
 /** Liste tous les établissements actifs (admin / ministère). */
 export async function getEtablissements(): Promise<EtablissementRow[]> {
-  return prisma.etablissement.findMany({
+  const data = await prisma.etablissement.findMany({
     where: { isActive: true, deletedAt: null },
     include: {
       budgets: { orderBy: { annee: "desc" }, take: 1 },
@@ -80,6 +80,15 @@ export async function getEtablissements(): Promise<EtablissementRow[]> {
     },
     orderBy: { createdAt: "desc" },
   });
+
+  // Sérialisation ici
+  return data.map(item => ({
+    ...item,
+    montantTotal: item.montantTotal.toNumber(),
+    // Convertir aussi les dates si nécessaire (souvent géré automatiquement)
+    createdAt: item.createdAt.toISOString(),
+    updatedAt: item.updatedAt.toISOString(),
+  }));
 }
 
 /** Détail complet d'un établissement avec ses utilisateurs, budgets et docs. */
