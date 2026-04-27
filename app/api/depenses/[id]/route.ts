@@ -39,7 +39,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
     const depense = await prisma.$transaction(async (tx) => {
       const d = await tx.depense.update({
         where: { id },
-        data: { statut: "SOUMIS", signeParId: session.userId, signeAt: new Date() },
+        data: { statut: "REVIEW", signeParId: session.userId, signeAt: new Date() },
       });
       await tx.historique.create({
         data: { action: "SIGNE", userId: session.userId, depenseId: id },
@@ -92,7 +92,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
   // Simple update (BROUILLON only)
   const depense = await prisma.depense.update({
-    where: { id, statut: "BROUILLON" },
+    where: { id, statut: "REVIEW" },
     data: {
       intitule: body.intitule,
       montant: body.montant,
@@ -112,7 +112,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
 
   const { id } = await params;
   await prisma.depense.update({
-    where: { id, statut: "BROUILLON", createdById: session.userId },
+    where: { id, statut: "REVIEW", createdById: session.userId },
     data: { deletedAt: new Date() },
   });
 

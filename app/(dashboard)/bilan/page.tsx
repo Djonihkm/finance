@@ -7,6 +7,7 @@ import { formatMontant, formatDate, formatCategorie, formatPaiement, STATUT_COLO
 export default async function BilanPage() {
   const session = await getSession();
   if (!session) redirect("/login");
+  if (session.uiRole === "etablissement") redirect("/mon-etablissement");
 
   const isAdmin = session.role === "SUPER_ADMIN" || session.role === "MINISTERE";
 

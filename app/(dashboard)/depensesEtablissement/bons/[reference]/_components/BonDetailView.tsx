@@ -166,7 +166,7 @@ export default function BonDetailView({ data, backPath }: Props) {
               Actions
             </h3>
 
-            {data.statut === "SOUMIS" && (
+            {data.statut === "REVIEW" && (
               <>
                 <button
                   onClick={() => handleAction("valider")}
@@ -187,7 +187,7 @@ export default function BonDetailView({ data, backPath }: Props) {
               </>
             )}
 
-            <div className={`space-y-3 border-t border-gray-100 pt-3 ${data.statut === "SOUMIS" ? "mt-4" : ""}`}>
+            <div className={`space-y-3 border-t border-gray-100 pt-3 ${data.statut === "REVIEW" ? "mt-4" : ""}`}>
               {/* <button
                 onClick={() => window.print()}
                 className="flex items-center gap-3 text-sm text-gray-700 hover:text-[#11355b] py-2 w-full cursor-pointer transition-colors"

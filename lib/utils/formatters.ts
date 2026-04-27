@@ -39,15 +39,13 @@ export function formatRole(role: string): string {
 // ── Documents ─────────────────────────────────────────────────────────────────
 
 export const STATUT_LABELS: Record<string, string> = {
-  BROUILLON: "Brouillon",
-  SOUMIS: "Soumis",
+  REVIEW: "En révision",
   VALIDE: "Validé",
   REJETE: "Rejeté",
 };
 
 export const STATUT_COLORS: Record<string, string> = {
-  BROUILLON: "bg-gray-100 text-gray-600",
-  SOUMIS: "bg-blue-100 text-blue-700",
+  REVIEW: "bg-orange-100 text-orange-700",
   VALIDE: "bg-emerald-100 text-emerald-700",
   REJETE: "bg-red-100 text-red-600",
 };

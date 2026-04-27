@@ -7,11 +7,15 @@
  * Flux : Neon ← Prisma ← getAllDepenses() + getAllBons() ← ici ← DepensesView
  */
 
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/session";
 import { getAllDepenses, getAllBons } from "@/lib/queries";
 import { serialize } from "@/lib/utils/serialize";
 import DepensesView from "../depensesEtablissement/_components/DepensesView";
 
 export default async function DepensesAdminPage() {
+  const session = await getSession();
+  if (!session || session.uiRole === "etablissement") redirect("/depensesEtablissement");
   const [depenses, bons] = await Promise.all([
     getAllDepenses(),
     getAllBons(),

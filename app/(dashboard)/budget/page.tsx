@@ -15,6 +15,8 @@ import {
   ChevronRight,
   TrendingUp,
 } from "lucide-react";
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/session";
 import { getBudgets } from "@/lib/queries";
 import { formatMontant } from "@/lib/utils/formatters";
 
@@ -25,6 +27,9 @@ function fmtM(n: number): string {
 }
 
 export default async function BudgetPage() {
+  const session = await getSession();
+  if (!session || session.uiRole === "etablissement") redirect("/mon-etablissement");
+
   const budgets = await getBudgets();
 
   // Agrégats globaux calculés depuis les vraies données

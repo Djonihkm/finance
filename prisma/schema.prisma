@@ -21,8 +21,7 @@ enum Role {
 }
 
 enum StatutDocument {
-  BROUILLON
-  SOUMIS
+  REVIEW
   VALIDE
   REJETE
 }
@@ -167,7 +166,7 @@ model Depense {
   fournisseur String?
   description String?
   date        DateTime
-  statut      StatutDocument   @default(BROUILLON)
+  statut      StatutDocument   @default(REVIEW)
 
   signeParId String?
   signePar   User?     @relation("DepenseSignataire", fields: [signeParId], references: [id])
@@ -202,7 +201,7 @@ model BonCommande {
   fournisseur  String?
   description  String?
   date         DateTime
-  statut       StatutDocument @default(BROUILLON)
+  statut       StatutDocument @default(REVIEW)
   montantTotal Decimal        @db.Decimal(15, 2)
 
   lignes LigneBonCommande[]

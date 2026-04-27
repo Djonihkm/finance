@@ -4,7 +4,8 @@
       "Bash(npm run *)",
       "Bash(npx prisma *)",
       "Bash(npx tsc *)",
-      "Read(//c/Users/HKM/.claude/projects/e--app-finance/memory/**)"
+      "Read(//c/Users/HKM/.claude/projects/e--app-finance/memory/**)",
+      "Read(//c/Users/HKM/AppData/Local/Temp/claude/e--app-finance/49c9ee60-10da-4cd8-9489-e6e1a3d8646f/tasks/**)"
     ],
     "additionalDirectories": [
       "e:\\app\\finance\\app\\api\\etablissements",
