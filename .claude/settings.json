@@ -7,7 +7,9 @@
       "Read(//c/Users/HKM/.claude/projects/e--app-finance/memory/**)"
     ],
     "additionalDirectories": [
-      "e:\\app\\finance\\app\\api\\etablissements"
+      "e:\\app\\finance\\app\\api\\etablissements",
+      "e:\\app\\finance\\app\\(dashboard)\\depensesEtablissement\\[reference]",
+      "e:\\app\\finance\\app\\(dashboard)\\depensesEtablissement\\bons\\[reference]"
     ]
   }
 }
