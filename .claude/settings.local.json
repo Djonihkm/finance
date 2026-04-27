@@ -1,9 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mkdir -p \"e:/app/finance/app/depenses/[reference]\")",
-      "Bash(mkdir -p \"e:/app/finance/app/depenses/bons/[reference]\")",
-      "Bash(npm install *)"
+      "Bash(rm -f \"d:/Projets/finance/app/data/depenses.ts\" \"d:/Projets/finance/app/data/etablissements.ts\" \"d:/Projets/finance/app/data/utilisateurs.ts\")",
+      "Bash(rmdir \"d:/Projets/finance/app/data\")",
+      "Bash(rm -f \"d:/Projets/finance/lib/mock-users.ts\")",
+      "Bash(rm -f \"d:/Projets/finance/app/components/DepenseEtablissement.tsx\" \"d:/Projets/finance/app/components/DepenseDetail.tsx\" \"d:/Projets/finance/app/components/BonsEtablissement.tsx\" \"d:/Projets/finance/app/components/BonCommandeDetail.tsx\")"
     ]
   }
 }

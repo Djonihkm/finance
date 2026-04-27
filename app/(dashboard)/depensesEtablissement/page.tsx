@@ -10,6 +10,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { getDepenses, getBons } from "@/lib/queries";
+import { serialize } from "@/lib/utils/serialize";
 import DepensesView from "./_components/DepensesView";
 
 export default async function DepensesEtablissementPage() {
@@ -23,8 +24,8 @@ export default async function DepensesEtablissementPage() {
 
   return (
     <DepensesView
-      depenses={depenses}
-      bons={bons}
+      depenses={serialize(depenses)}
+      bons={serialize(bons)}
       basePath="/depensesEtablissement"
     />
   );

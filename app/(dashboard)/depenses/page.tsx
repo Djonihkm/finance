@@ -8,6 +8,7 @@
  */
 
 import { getAllDepenses, getAllBons } from "@/lib/queries";
+import { serialize } from "@/lib/utils/serialize";
 import DepensesView from "../depensesEtablissement/_components/DepensesView";
 
 export default async function DepensesAdminPage() {
@@ -18,8 +19,8 @@ export default async function DepensesAdminPage() {
 
   return (
     <DepensesView
-      depenses={depenses}
-      bons={bons}
+      depenses={serialize(depenses)}
+      bons={serialize(bons)}
       basePath="/depenses"
     />
   );

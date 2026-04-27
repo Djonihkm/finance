@@ -8,6 +8,7 @@
 
 import { notFound } from "next/navigation";
 import { getDepenseByReference } from "@/lib/queries";
+import { serialize } from "@/lib/utils/serialize";
 import DepenseDetailView from "./_components/DepenseDetailView";
 
 export default async function DepenseDetailPage({
@@ -19,5 +20,5 @@ export default async function DepenseDetailPage({
   const depense = await getDepenseByReference(decodeURIComponent(reference));
   if (!depense) notFound();
 
-  return <DepenseDetailView data={depense} backPath="/depensesEtablissement" />;
+  return <DepenseDetailView data={serialize(depense)} backPath="/depensesEtablissement" />;
 }

@@ -8,6 +8,7 @@
 
 import { notFound } from "next/navigation";
 import { getBonByReference } from "@/lib/queries";
+import { serialize } from "@/lib/utils/serialize";
 import BonDetailView from "./_components/BonDetailView";
 
 export default async function BonDetailPage({
@@ -19,5 +20,5 @@ export default async function BonDetailPage({
   const bon = await getBonByReference(decodeURIComponent(reference));
   if (!bon) notFound();
 
-  return <BonDetailView data={bon} backPath="/depensesEtablissement" />;
+  return <BonDetailView data={serialize(bon)} backPath="/depensesEtablissement" />;
 }
