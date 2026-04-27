@@ -9,7 +9,13 @@ export default async function ProtectedLayout({ children }: { children: React.Re
 
   return (
     <RoleProvider role={session.uiRole}>
-      <DashboardLayout>{children}</DashboardLayout>
+      <DashboardLayout
+        userNom={session.nom}
+        userPrenom={session.prenom}
+        userPrismaRole={session.role}
+      >
+        {children}
+      </DashboardLayout>
     </RoleProvider>
   );
 }
