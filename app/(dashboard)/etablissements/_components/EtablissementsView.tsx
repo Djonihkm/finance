@@ -65,14 +65,14 @@ export default function EtablissementsView({ data }: Props) {
     <div className="w-full max-w-7xl mx-auto space-y-4 md:space-y-6">
 
       {/* Titre + bouton nouveau */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-around md:justify-between gap-4">
         <h1 className="text-2xl font-bold text-[#11355b]">Établissements</h1>
         <button
           onClick={() => router.push("/etablissements/nouveau")}
-          className="bg-[#11355b] hover:bg-[#1a4a7a] text-white px-4 py-2.5 rounded-lg flex items-center gap-2 font-semibold text-sm transition-colors shadow-sm cursor-pointer"
+          className="bg-[#11355b] hover:bg-[#1a4a7a] text-white px-4 py-2.5 rounded-lg flex items-center  gap-2 font-semibold text-sm transition-colors shadow-sm cursor-pointer"
         >
           <Plus size={16} />
-          Nouveau
+          Nouveau Etablissement
         </button>
       </div>
 
@@ -132,7 +132,7 @@ export default function EtablissementsView({ data }: Props) {
                 <th className="hidden md:table-cell px-4 md:px-6 py-4">Région</th>
                 <th className="hidden lg:table-cell px-4 md:px-6 py-4">Créé le</th>
                 <th className="px-4 md:px-6 py-4">Statut</th>
-                <th className="px-4 md:px-6 py-4"></th>
+                <th className="px-4 md:px-6 py-4">Actions</th>
               </tr>
             </thead>
             <tbody className="text-sm">

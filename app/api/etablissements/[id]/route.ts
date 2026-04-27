@@ -32,18 +32,17 @@ export async function PUT(req: NextRequest, { params }: Params) {
   const { id } = await params;
   const body = await req.json();
 
-  const etab = await prisma.etablissement.update({
-    where: { id },
-    data: {
-      nom: body.nom,
-      type: body.type,
-      adresse: body.adresse,
-      ville: body.ville,
-      region: body.region,
-      telephone: body.telephone,
-      email: body.email,
-    },
-  });
+  const data: Record<string, unknown> = {};
+  if (body.nom !== undefined) data.nom = body.nom;
+  if (body.type !== undefined) data.type = body.type;
+  if (body.adresse !== undefined) data.adresse = body.adresse;
+  if (body.ville !== undefined) data.ville = body.ville;
+  if (body.region !== undefined) data.region = body.region;
+  if (body.telephone !== undefined) data.telephone = body.telephone;
+  if (body.email !== undefined) data.email = body.email;
+  if (body.isActive !== undefined) data.isActive = body.isActive;
+
+  const etab = await prisma.etablissement.update({ where: { id }, data });
 
   return NextResponse.json(etab);
 }

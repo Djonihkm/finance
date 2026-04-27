@@ -79,7 +79,7 @@ export default function DepensesView({ depenses, bons, basePath }: Props) {
       {/* Sélecteur mode */}
       <div className="flex w-full gap-4">
         <button onClick={() => handleModeSwitch("depenses")} className={btnClass("depenses")}>
-          Dépenses
+          Menues Dépenses
         </button>
         <button onClick={() => handleModeSwitch("bons")} className={btnClass("bons")}>
           Bons de commandes
@@ -88,10 +88,10 @@ export default function DepensesView({ depenses, bons, basePath }: Props) {
 
       {/* Section Liste */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-6 flex justify-between items-center">
-          <h2 className="text-xl font-bold text-[#11355b]">
+        <div className="p-6 flex justify-end gap-2 items-center">
+          {/* <h2 className="text-xl font-bold text-[#11355b]">
             {activeMode === "depenses" ? "Liste des dépenses" : "Liste des bons de commandes"}
-          </h2>
+          </h2> */}
           <button
             onClick={() =>
               router.push(
@@ -103,7 +103,7 @@ export default function DepensesView({ depenses, bons, basePath }: Props) {
             className="bg-[#11355b] hover:bg-[#1a4a7a] text-white px-5 py-3 rounded-lg flex items-center gap-2 font-semibold text-sm transition-colors shadow-md cursor-pointer"
           >
             <Plus size={18} />
-            AJOUTER {activeMode === "depenses" ? "DÉPENSE" : "BON"}
+            AJOUTER {activeMode === "depenses" ? "DÉPENSE" : "BON DE COMMANDE"}
           </button>
         </div>
 

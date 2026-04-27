@@ -38,13 +38,13 @@ type ScreenSize = "mobile" | "tablet" | "desktop";
 const superAdminMenuItems: MenuItem[] = [
   { label: "Établissements", icon: <Building2 className="w-5 h-5" />, href: "/etablissements" },
   { label: "Utilisateurs", icon: <Users className="w-5 h-5" />, href: "/utilisateurs" },
-  { label: "Paramètres", icon: <Settings className="w-5 h-5" />, href: "/parametres" },
+  // { label: "Paramètres", icon: <Settings className="w-5 h-5" />, href: "/parametres" },
 ];
 
 const ministereMenuItems: MenuItem[] = [
   { label: "Établissements", icon: <Building2 className="w-5 h-5" />, href: "/etablissements" },
   { label: "Budget", icon: <Wallet className="w-5 h-5" />, href: "/budget" },
-  { label: "Dépenses", icon: <Receipt className="w-5 h-5" />, href: "/depenses" },
+  { label: "Caisses", icon: <Receipt className="w-5 h-5" />, href: "/depenses" },
   { label: "Bons de commande", icon: <ClipboardList className="w-5 h-5" />, href: "/bons" },
   { label: "Bilan", icon: <FileText className="w-5 h-5" />, href: "/bilan" },
   { label: "Utilisateurs", icon: <Users className="w-5 h-5" />, href: "/utilisateurs" },
@@ -52,7 +52,7 @@ const ministereMenuItems: MenuItem[] = [
 
 const etablissementMenuItems: MenuItem[] = [
   { label: "Mon Établissement", icon: <School className="w-5 h-5" />, href: "/mon-etablissement" },
-  { label: "Dépenses", icon: <Receipt className="w-5 h-5" />, href: "/depensesEtablissement" },
+  { label: "Caisses", icon: <Receipt className="w-5 h-5" />, href: "/depensesEtablissement" },
   { label: "Profil", icon: <CircleUserRound className="w-5 h-5" />, href: "/profil" },
   { label: "Paramètres", icon: <Settings className="w-5 h-5" />, href: "/parametres" },
 ];

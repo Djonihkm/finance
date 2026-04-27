@@ -73,7 +73,7 @@ export type BudgetRow = Prisma.BudgetGetPayload<{
 /** Liste tous les établissements actifs (admin / ministère). */
 export async function getEtablissements(): Promise<EtablissementRow[]> {
   return prisma.etablissement.findMany({
-    where: { isActive: true, deletedAt: null },
+    where: { deletedAt: null },
     include: {
       budgets: { orderBy: { annee: "desc" }, take: 1 },
       _count: { select: { users: true, depenses: true } },
@@ -105,7 +105,6 @@ export async function getEtablissementById(id: string): Promise<EtablissementDet
 export async function getUsers(opts?: { etablissementId?: string }): Promise<UserRow[]> {
   return prisma.user.findMany({
     where: {
-      isActive: true,
       deletedAt: null,
       ...(opts?.etablissementId ? { etablissementId: opts.etablissementId } : {}),
     },

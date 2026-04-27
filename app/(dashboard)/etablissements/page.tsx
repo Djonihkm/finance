@@ -9,10 +9,10 @@
  * ─────────────────────────────────────────────────────────────
  */
 import { getEtablissements } from "@/lib/queries";
+import { serialize } from "@/lib/utils/serialize";
 import EtablissementsView from "./_components/EtablissementsView";
 
 export default async function EtablissementsPage() {
-  // Appel direct à Prisma (pas de fetch HTTP, pas de store)
-  const etablissements = await getEtablissements();
+  const etablissements = serialize(await getEtablissements());
   return <EtablissementsView data={etablissements} />;
 }
