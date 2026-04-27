@@ -1,20 +1,24 @@
-"use client";
+/**
+ * app/(dashboard)/depenses/[reference]/page.tsx — Server Component (vue admin)
+ * ──────────────────────────────────────────────────────────────────────────────
+ * Récupère une dépense par sa référence depuis Neon via Prisma.
+ * Affiche le détail avec les actions de validation / rejet.
+ *
+ * Flux : URL /depenses/[ref] → getDepenseByReference() → DepenseDetailView
+ */
 
-import { use } from 'react';
-import { notFound } from 'next/navigation';
-import DepenseDetail from '@/app/components/DepenseDetail';
-import { depenses } from '@/app/data/depenses';
+import { notFound } from "next/navigation";
+import { getDepenseByReference } from "@/lib/queries";
+import DepenseDetailView from "../../depensesEtablissement/[reference]/_components/DepenseDetailView";
 
-export default function DepenseDetailPage({
+export default async function DepenseDetailPage({
   params,
 }: {
   params: Promise<{ reference: string }>;
 }) {
-  const { reference } = use(params);
-  const decoded = decodeURIComponent(reference);
-  const item = depenses.find((d) => d.reference === decoded);
+  const { reference } = await params;
+  const depense = await getDepenseByReference(decodeURIComponent(reference));
+  if (!depense) notFound();
 
-  if (!item) notFound();
-
-  return <DepenseDetail data={item} />;
+  return <DepenseDetailView data={depense} backPath="/depenses" />;
 }

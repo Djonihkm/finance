@@ -1,20 +1,23 @@
-"use client";
+/**
+ * app/(dashboard)/depensesEtablissement/bons/[reference]/page.tsx — Server Component
+ * ──────────────────────────────────────────────────────────────────────────────────
+ * Récupère un bon de commande par sa référence depuis Neon via Prisma.
+ *
+ * Flux : URL → getBonByReference() → BonDetailView
+ */
 
-import { use } from 'react';
-import { notFound } from 'next/navigation';
-import BonCommandeDetail from '@/app/components/BonsEtablissement';
-import { bonsCommandes } from '@/app/data/depenses';
+import { notFound } from "next/navigation";
+import { getBonByReference } from "@/lib/queries";
+import BonDetailView from "./_components/BonDetailView";
 
-export default function BonCommandeDetailPage({
+export default async function BonDetailPage({
   params,
 }: {
   params: Promise<{ reference: string }>;
 }) {
-  const { reference } = use(params);
-  const decoded = decodeURIComponent(reference);
-  const item = bonsCommandes.find((b) => b.reference === decoded);
+  const { reference } = await params;
+  const bon = await getBonByReference(decodeURIComponent(reference));
+  if (!bon) notFound();
 
-  if (!item) notFound();
-
-  return <BonCommandeDetail data={item} />;
+  return <BonDetailView data={bon} backPath="/depensesEtablissement" />;
 }
