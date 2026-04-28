@@ -9,9 +9,9 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, FileText, Landmark, Wallet, UploadCloud, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, Landmark, Wallet, UploadCloud, CheckCircle2, X, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 
 const CATEGORIES = [
@@ -51,11 +51,15 @@ export default function NouvelleDepensePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [pieceJustificativeUrl, setPieceJustificativeUrl] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<FormData>({
     intitule: "",
     categorie: "FOURNITURE",
-    date: "",
+    date: new Date().toISOString().slice(0, 10),
     paiement: "VIREMENT",
     montant: "",
     fournisseur: "",
@@ -67,6 +71,30 @@ export default function NouvelleDepensePage() {
   ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingFile(true);
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error ?? "Erreur upload");
+      }
+      const { url } = await res.json();
+      setPieceJustificativeUrl(url);
+      setFileName(file.name);
+      toast.success("Fichier uploadé.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur lors de l'upload.");
+    } finally {
+      setUploadingFile(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -87,6 +115,7 @@ export default function NouvelleDepensePage() {
           date: form.date,
           fournisseur: form.fournisseur || undefined,
           description: form.description || undefined,
+          pieceJustificativeUrl: pieceJustificativeUrl || undefined,
         }),
       });
       if (!res.ok) {
@@ -239,12 +268,39 @@ export default function NouvelleDepensePage() {
 
                 <div>
                   <label className={labelClass}>Pièce justificative (optionnelle)</label>
-                  <div className="border-2 border-dashed border-gray-200 bg-blue-50/40 rounded-xl p-8 text-center hover:border-[#11355b] hover:bg-blue-50/70 transition-all cursor-pointer">
-                    <UploadCloud size={32} className="text-[#11355b] mx-auto mb-2" />
-                    <p className="text-sm font-semibold text-[#11355b]">Cliquez pour téléverser</p>
-                    <p className="text-xs text-gray-400 mt-1">PDF, JPG, PNG (Max. 10MB)</p>
-                    <input type="file" className="hidden" />
-                  </div>
+                  {pieceJustificativeUrl ? (
+                    <div className="flex items-center gap-3 border border-emerald-200 bg-emerald-50 rounded-xl px-4 py-3">
+                      <Paperclip size={18} className="text-emerald-600 shrink-0" />
+                      <span className="text-sm text-emerald-700 font-medium flex-1 truncate">{fileName}</span>
+                      <button
+                        type="button"
+                        onClick={() => { setPieceJustificativeUrl(null); setFileName(null); }}
+                        className="text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="border-2 border-dashed border-gray-200 bg-blue-50/40 rounded-xl p-8 text-center hover:border-[#11355b] hover:bg-blue-50/70 transition-all cursor-pointer flex flex-col items-center">
+                      {uploadingFile ? (
+                        <p className="text-sm text-[#11355b] font-semibold">Envoi en cours…</p>
+                      ) : (
+                        <>
+                          <UploadCloud size={32} className="text-[#11355b] mb-2" />
+                          <p className="text-sm font-semibold text-[#11355b]">Cliquez pour téléverser</p>
+                          <p className="text-xs text-gray-400 mt-1">PDF, JPG, PNG (Max. 10MB)</p>
+                        </>
+                      )}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png,.webp"
+                        className="hidden"
+                        onChange={handleFileChange}
+                        disabled={uploadingFile}
+                      />
+                    </label>
+                  )}
                 </div>
               </div>
             </div>
@@ -267,7 +323,7 @@ export default function NouvelleDepensePage() {
                   />
                 </div>
                 <div className="mt-5 pt-5 border-t border-gray-100">
-                  <p className="text-xs italic text-blue-600 bg-blue-50 p-3 rounded-lg">
+                  <p className="text-xs italic text-red-600 bg-red-100 p-3 rounded-lg">
                     Vérifiez l&apos;exactitude des données avant la soumission.
                   </p>
                 </div>

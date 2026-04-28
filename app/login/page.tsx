@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    if (state && "redirect" in state) {
+    if (state && "redirect" in state && typeof state.redirect === "string") {
       window.location.href = state.redirect;
     }
   }, [state]);

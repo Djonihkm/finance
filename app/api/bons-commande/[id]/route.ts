@@ -77,6 +77,23 @@ export async function PUT(req: NextRequest, { params }: Params) {
     return NextResponse.json(bon);
   }
 
+  if (action === "resoumettre") {
+    if (session.role !== "COMPTABLE" && session.role !== "ADMIN") {
+      return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    }
+    const bon = await prisma.$transaction(async (tx) => {
+      const b = await tx.bonCommande.update({
+        where: { id, statut: "REVISION" },
+        data: { statut: "ATTENTE", commentaire: null },
+      });
+      await tx.historique.create({
+        data: { action: "SOUMIS", userId: session.userId, bonCommandeId: id },
+      });
+      return b;
+    });
+    return NextResponse.json(bon);
+  }
+
   if (action === "renvoyer") {
     if (session.role !== "DIRECTEUR") {
       return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
@@ -94,7 +111,37 @@ export async function PUT(req: NextRequest, { params }: Params) {
     return NextResponse.json(bon);
   }
 
-  return NextResponse.json({ error: "Action inconnue" }, { status: 400 });
+  // Simple update (ATTENTE or REVISION) — replaces lignes
+  const { intitule, fournisseur, date, lignes } = body;
+  const bon = await prisma.$transaction(async (tx) => {
+    const existing = await tx.bonCommande.findUnique({ where: { id } });
+    if (!existing || (existing.statut !== "ATTENTE" && existing.statut !== "REVISION")) {
+      throw new Error("Non modifiable");
+    }
+    const montantTotal = (lignes as { quantite: number; prixUnitaire: number }[]).reduce(
+      (acc, l) => acc + l.quantite * l.prixUnitaire, 0
+    );
+    await tx.ligneBonCommande.deleteMany({ where: { bonCommandeId: id } });
+    return tx.bonCommande.update({
+      where: { id },
+      data: {
+        intitule,
+        fournisseur: fournisseur ?? null,
+        date: date ? new Date(date) : undefined,
+        montantTotal,
+        lignes: {
+          create: (lignes as { designation: string; quantite: number; prixUnitaire: number }[]).map((l) => ({
+            designation: l.designation,
+            quantite: l.quantite,
+            prixUnitaire: l.prixUnitaire,
+            montant: l.quantite * l.prixUnitaire,
+          })),
+        },
+      },
+      include: { lignes: true },
+    });
+  });
+  return NextResponse.json(bon);
 }
 
 export async function DELETE(_req: NextRequest, { params }: Params) {

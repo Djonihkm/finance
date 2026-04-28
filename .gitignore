@@ -36,6 +36,8 @@ yarn-error.log*
 seed-*.ts
 prisma/seed.ts
 
+informations.txt
+
 mock-users.ts
 
 # vercel

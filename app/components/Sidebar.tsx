@@ -65,7 +65,6 @@ const etablissementMenuItems: MenuItem[] = [
   { label: "Mon Établissement", icon: <School className="w-5 h-5" />, href: "/mon-etablissement" },
   { label: "Caisses", icon: <Receipt className="w-5 h-5" />, href: "/depensesEtablissement" },
   { label: "Profil", icon: <CircleUserRound className="w-5 h-5" />, href: "/profil" },
-  { label: "Paramètres", icon: <Settings className="w-5 h-5" />, href: "/parametres" },
 ];
 
 const roleConfig: Record<UserRole, {
@@ -134,7 +133,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, on
     screenSize === "desktop" || (screenSize === "mobile" && isMobileOpen);
 
   const renderMenuItem = (item: MenuItem) => {
-    const isActive = pathname === item.href;
+    const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
     return (
       <button
         key={item.href}

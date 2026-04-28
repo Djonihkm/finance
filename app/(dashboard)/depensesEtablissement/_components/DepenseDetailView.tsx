@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle, XCircle, RotateCcw, FileText, Info, MessageSquare, Loader2 } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, RotateCcw, FileText, Info, MessageSquare, Loader2, Pencil, Send } from "lucide-react";
 import { toast } from "sonner";
 import { type DepenseRow } from "@/lib/queries";
 import {
@@ -24,7 +24,27 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
   const [pdfLoading, setPdfLoading] = useState(false);
 
   const isDirecteur = userPrismaRole === "DIRECTEUR";
-  const canAct = isDirecteur && (data.statut === "ATTENTE" || data.statut === "REVIEW" || data.statut === "REVISION");
+  const isComptable = userPrismaRole === "COMPTABLE" || userPrismaRole === "ADMIN";
+  const canAct = isDirecteur && (data.statut === "ATTENTE" || data.statut === "REVISION");
+  const canResoumettre = isComptable && data.statut === "REVISION";
+
+  const handleResoumettre = async () => {
+    setLoading("resoumettre");
+    try {
+      const res = await fetch(`/api/depenses/${data.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "resoumettre" }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success("Dépense resoumise pour validation.");
+      router.refresh();
+    } catch {
+      toast.error("Erreur lors de l'opération.");
+    } finally {
+      setLoading(null);
+    }
+  };
 
   const handleAction = async (action: "valider" | "rejeter" | "renvoyer") => {
     if (action === "renvoyer" && !commentaire.trim()) {
@@ -64,7 +84,7 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
         className="flex items-center gap-2 text-gray-600 hover:text-[#11355b] transition-colors cursor-pointer font-medium py-2 mb-4"
       >
         <ArrowLeft size={18} />
-        Retour
+        Retour Dépenses
       </button>
 
       <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-4 lg:gap-6">
@@ -104,17 +124,36 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
             </div>
           )}
 
-          {data.commentaire && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3">
-              <MessageSquare size={16} className="text-amber-600 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider mb-1">
-                  Commentaire du directeur
-                </p>
-                <p className="text-sm text-amber-800">{data.commentaire}</p>
+          {data.pieceJustificativeUrl && (() => {
+            const url = data.pieceJustificativeUrl!;
+            const isImage = /\.(jpg|jpeg|png|webp)(\?|$)/i.test(url);
+            return (
+              <div className="mt-4">
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Pièce justificative</p>
+                {isImage ? (
+                  <a href={url} target="_blank" rel="noopener noreferrer" className="block">
+                    <img
+                      src={url}
+                      alt="Pièce justificative"
+                      className="w-full max-h-64 object-contain rounded-lg border border-gray-200 bg-gray-50 hover:opacity-90 transition-opacity cursor-zoom-in"
+                    />
+                    <p className="text-xs text-gray-400 mt-1 text-center">Cliquer pour agrandir</p>
+                  </a>
+                ) : (
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 border border-gray-200 bg-gray-50 hover:bg-gray-100 rounded-lg px-4 py-3 transition-colors"
+                  >
+                    <FileText size={20} className="text-red-500 shrink-0" />
+                    <span className="text-sm font-medium text-[#11355b]">Voir le document PDF</span>
+                  </a>
+                )}
               </div>
-            </div>
-          )}
+            );
+          })()}
+
         </div>
 
         {/* Sidebar actions */}
@@ -187,7 +226,29 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
               </div>
             )}
 
-            {!canAct && (
+            {canResoumettre && (
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => router.push(`/depensesEtablissement/${encodeURIComponent(data.reference)}/modifier`)}
+                  className="w-full bg-[#11355b] hover:bg-[#1a4a7a] text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                >
+                  <Pencil size={18} />
+                  Modifier
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResoumettre}
+                  disabled={loading !== null}
+                  className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                >
+                  <Send size={18} />
+                  {loading === "resoumettre" ? "En cours…" : "Resoumettre"}
+                </button>
+              </div>
+            )}
+
+            {!canAct && !canResoumettre && (
               <p className="text-xs text-gray-400 text-center py-2">
                 {data.statut === "VALIDE" ? "Dépense validée." :
                  data.statut === "REJETE" ? "Dépense rejetée." :
@@ -224,12 +285,27 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
             </div>
           </div>
 
-          <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 flex gap-3">
+          {/* <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 flex gap-3">
             <Info size={18} className="text-amber-600 shrink-0 mt-0.5" />
             <p className="text-xs text-amber-800">
               Ce document est officiel. Toute modification après validation nécessite une réémission.
             </p>
-          </div>
+          </div> */}
+
+          {data.commentaire && (
+            <div
+              style={{ animation: "wiggle 4s ease-in-out infinite" }}
+              className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3"
+            >
+              <MessageSquare size={15} className="text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider mb-1.5">
+                  Commentaire du directeur
+                </p>
+                <p className="text-xs text-amber-800 leading-relaxed">{data.commentaire}</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
