@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { User, Key, Camera, Eye, EyeOff, Save, Lock, Info } from "lucide-react";
+import { User, Key, Camera, Eye, EyeOff, Save, Lock, Info, X, ZoomIn } from "lucide-react";
 import { toast } from "sonner";
 import type { UserDetail } from "@/lib/queries";
 import { formatRole } from "@/lib/utils/formatters";
@@ -20,6 +20,7 @@ export default function ProfilView({ user, userId }: Props) {
   const [profileImage, setProfileImage] = useState<string | null>(user.avatarUrl ?? null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(user.avatarUrl ?? null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [showLightbox, setShowLightbox] = useState(false);
   const [showPasswordCurrent, setShowPasswordCurrent] = useState(false);
   const [showPasswordNew, setShowPasswordNew] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
@@ -166,13 +167,21 @@ export default function ProfilView({ user, userId }: Props) {
         <div className="md:col-span-1">
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center h-full">
             <div className="relative w-32 h-32 mx-auto mb-4 group">
-              <div className="w-full h-full rounded-2xl overflow-hidden bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center shadow-md">
+              <div
+                className={`w-full h-full rounded-2xl overflow-hidden bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center shadow-md ${profileImage ? "cursor-zoom-in" : ""}`}
+                onClick={() => profileImage && setShowLightbox(true)}
+              >
                 {profileImage ? (
                   <Image src={profileImage} alt="Profile" width={128} height={128} className="w-full h-full object-cover" />
                 ) : (
                   <div className="text-white text-center">
                     <User size={48} className="mx-auto mb-1" />
                     <p className="text-[9px] font-bold tracking-wider">PROFIL</p>
+                  </div>
+                )}
+                {profileImage && (
+                  <div className="absolute inset-0 rounded-2xl bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                    <ZoomIn size={24} className="text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
                 )}
               </div>
@@ -324,6 +333,27 @@ export default function ProfilView({ user, userId }: Props) {
           {saving ? "Enregistrement…" : "Enregistrer les modifications"}
         </button>
       </div>
+
+      {/* Lightbox photo */}
+      {showLightbox && profileImage && (
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setShowLightbox(false)}
+        >
+          <button
+            onClick={() => setShowLightbox(false)}
+            className="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center text-white transition-colors cursor-pointer"
+          >
+            <X size={20} />
+          </button>
+          <div
+            className="relative max-w-lg w-full max-h-[80vh] aspect-square rounded-2xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Image src={profileImage} alt="Photo de profil" fill className="object-cover" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
