@@ -17,7 +17,9 @@ export default function ProfilView({ user, userId }: Props) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(user.avatarUrl ?? null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(user.avatarUrl ?? null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [showPasswordCurrent, setShowPasswordCurrent] = useState(false);
   const [showPasswordNew, setShowPasswordNew] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
@@ -48,12 +50,33 @@ export default function ProfilView({ user, userId }: Props) {
     setPasswords((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setProfileImage(reader.result as string);
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Preview immédiat
+    const reader = new FileReader();
+    reader.onloadend = () => setProfileImage(reader.result as string);
+    reader.readAsDataURL(file);
+
+    // Upload Cloudinary
+    setUploadingAvatar(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error ?? "Erreur upload");
+      }
+      const { url } = await res.json();
+      setAvatarUrl(url);
+      toast.success("Photo chargée. Cliquez sur Enregistrer pour sauvegarder.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erreur lors de l'upload.");
+      setProfileImage(user.avatarUrl ?? null);
+    } finally {
+      setUploadingAvatar(false);
     }
   };
 
@@ -68,6 +91,7 @@ export default function ProfilView({ user, userId }: Props) {
           prenom: formData.prenom,
           telephone: formData.telephone,
           poste: formData.poste,
+          ...(avatarUrl !== user.avatarUrl ? { avatarUrl } : {}),
         }),
       });
       if (!res.ok) {
@@ -153,10 +177,18 @@ export default function ProfilView({ user, userId }: Props) {
                 )}
               </div>
               <button
-                onClick={() => fileInputRef.current?.click()}
-                className="absolute bottom-0 right-0 w-9 h-9 bg-orange-500 hover:bg-orange-600 rounded-full flex items-center justify-center shadow-md transition-colors cursor-pointer border-2 border-white"
+                onClick={() => !uploadingAvatar && fileInputRef.current?.click()}
+                disabled={uploadingAvatar}
+                className="absolute bottom-0 right-0 w-9 h-9 bg-orange-500 hover:bg-orange-600 disabled:opacity-70 rounded-full flex items-center justify-center shadow-md transition-colors cursor-pointer border-2 border-white"
               >
-                <Camera size={16} className="text-white" />
+                {uploadingAvatar ? (
+                  <svg className="animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                ) : (
+                  <Camera size={16} className="text-white" />
+                )}
               </button>
               <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
             </div>

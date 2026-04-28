@@ -6,7 +6,8 @@
       "Bash(rm \"d:/Projets/finance/app/\\(dashboard\\)/depensesEtablissement/bons/[reference]/_components/BonDetailView.tsx\")",
       "Bash(rmdir \"d:/Projets/finance/app/\\(dashboard\\)/depensesEtablissement/[reference]/_components\")",
       "Bash(rmdir \"d:/Projets/finance/app/\\(dashboard\\)/depensesEtablissement/bons/[reference]/_components\")",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(grep -r *)"
     ]
   }
 }

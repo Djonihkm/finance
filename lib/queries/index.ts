@@ -44,7 +44,7 @@ export type UserRow = Prisma.UserGetPayload<{
 export type UserDetail = Prisma.UserGetPayload<{
   select: {
     id: true; nom: true; prenom: true; email: true; role: true;
-    telephone: true; poste: true; isActive: true; createdAt: true;
+    telephone: true; poste: true; avatarUrl: true; isActive: true; createdAt: true;
     etablissement: { select: { id: true; nom: true; code: true } };
   };
 }>;
@@ -129,7 +129,7 @@ export async function getUserById(id: string): Promise<UserDetail | null> {
     where: { id },
     select: {
       id: true, nom: true, prenom: true, email: true, role: true,
-      telephone: true, poste: true, isActive: true, createdAt: true,
+      telephone: true, poste: true, avatarUrl: true, isActive: true, createdAt: true,
       etablissement: { select: { id: true, nom: true, code: true } },
     },
   });

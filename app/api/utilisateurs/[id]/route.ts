@@ -14,7 +14,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
     where: { id },
     select: {
       id: true, nom: true, prenom: true, email: true, role: true,
-      telephone: true, poste: true, isActive: true, createdAt: true,
+      telephone: true, poste: true, avatarUrl: true, isActive: true, createdAt: true,
       etablissement: { select: { id: true, nom: true } },
     },
   });
@@ -36,6 +36,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
   if (body.telephone !== undefined) data.telephone = body.telephone;
   if (body.poste !== undefined) data.poste = body.poste;
   if (body.isActive !== undefined) data.isActive = body.isActive;
+  if (body.avatarUrl !== undefined) data.avatarUrl = body.avatarUrl;
   if (body.role !== undefined && (session.role === "SUPER_ADMIN" || session.role === "MINISTERE" || session.role === "ADMIN")) {
     data.role = body.role;
   }
