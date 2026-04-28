@@ -129,9 +129,9 @@ export default function BonDetailView({
               </p>
             </div>
             <div className="text-right text-xs text-gray-600 leading-relaxed">
-              <p>Cité Ministérielle</p>
-              <p>Quartier Cadjèhoun – Ahouanléko</p>
-              <p>Cotonou, République du Bénin</p>
+              {data.etablissement.adresse && <p>{data.etablissement.adresse}</p>}
+              {data.etablissement.region && <p>{data.etablissement.region}</p>}
+              {data.etablissement.ville && <p>{data.etablissement.ville}, République du Bénin</p>}
             </div>
           </div>
 

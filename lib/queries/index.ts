@@ -60,7 +60,7 @@ export type BonRow = Prisma.BonCommandeGetPayload<{
   include: {
     lignes: true;
     createdBy: { select: { nom: true; prenom: true } };
-    etablissement: { select: { id: true; nom: true } };
+    etablissement: { select: { id: true; nom: true; adresse: true; ville: true; region: true } };
   };
 }>;
 
@@ -182,7 +182,7 @@ export async function getBons(etablissementId: string): Promise<BonRow[]> {
     include: {
       lignes: true,
       createdBy: { select: { nom: true, prenom: true } },
-      etablissement: { select: { id: true, nom: true } },
+      etablissement: { select: { id: true, nom: true, adresse: true, ville: true, region: true } },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -195,7 +195,7 @@ export async function getAllBons(): Promise<BonRow[]> {
     include: {
       lignes: true,
       createdBy: { select: { nom: true, prenom: true } },
-      etablissement: { select: { id: true, nom: true } },
+      etablissement: { select: { id: true, nom: true, adresse: true, ville: true, region: true } },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -208,7 +208,7 @@ export async function getBonByReference(reference: string): Promise<BonRow | nul
     include: {
       lignes: true,
       createdBy: { select: { nom: true, prenom: true } },
-      etablissement: { select: { id: true, nom: true } },
+      etablissement: { select: { id: true, nom: true, adresse: true, ville: true, region: true } },
     },
   });
 }

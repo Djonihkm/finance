@@ -114,9 +114,9 @@ export default function ModifierBonForm({ data }: { data: BonRow }) {
                 <p className="text-[11px] text-gray-400 uppercase tracking-widest mt-1 font-mono">{data.reference}</p>
               </div>
               <div className="text-xs text-gray-600 text-right leading-relaxed">
-                <p>Cité Ministérielle</p>
-                <p>Quartier Cadjèhoun – Ahouanléko</p>
-                <p>Cotonou, République du Bénin</p>
+                {data.etablissement.adresse && <p>{data.etablissement.adresse}</p>}
+                {data.etablissement.region && <p>{data.etablissement.region}</p>}
+                {data.etablissement.ville && <p> République du Bénin</p>}
               </div>
             </div>
 
