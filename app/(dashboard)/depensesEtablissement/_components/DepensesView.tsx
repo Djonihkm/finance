@@ -103,7 +103,7 @@ export default function DepensesView({
             {activeMode === "depenses" ? "Liste des dépenses" : "Liste des bons de commandes"}
           </h2> */}
           {/* Seuls les rôles autorisés peuvent ajouter des dépenses */}
-          {userPrismaRole !== "DIRECTEUR" && (
+          {userPrismaRole === "COMPTABLE" && (
             <button
               onClick={() =>
                 router.push(

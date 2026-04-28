@@ -53,6 +53,8 @@ export type DepenseRow = Prisma.DepenseGetPayload<{
   include: {
     createdBy: { select: { nom: true; prenom: true } };
     etablissement: { select: { id: true; nom: true } };
+    signePar: { select: { nom: true; prenom: true } };
+    validePar: { select: { nom: true; prenom: true } };
   };
 }>;
 
@@ -61,6 +63,8 @@ export type BonRow = Prisma.BonCommandeGetPayload<{
     lignes: true;
     createdBy: { select: { nom: true; prenom: true } };
     etablissement: { select: { id: true; nom: true } };
+    signePar: { select: { nom: true; prenom: true } };
+    validePar: { select: { nom: true; prenom: true } };
   };
 }>;
 
@@ -143,6 +147,8 @@ export async function getDepenses(etablissementId: string): Promise<DepenseRow[]
     include: {
       createdBy: { select: { nom: true, prenom: true } },
       etablissement: { select: { id: true, nom: true } },
+      signePar: { select: { nom: true, prenom: true } },
+      validePar: { select: { nom: true, prenom: true } },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -157,6 +163,8 @@ export async function getAllDepenses(): Promise<DepenseRow[]> {
     include: {
       createdBy: { select: { nom: true, prenom: true } },
       etablissement: { select: { id: true, nom: true } },
+      signePar: { select: { nom: true, prenom: true } },
+      validePar: { select: { nom: true, prenom: true } },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -169,6 +177,8 @@ export async function getDepenseByReference(reference: string): Promise<DepenseR
     include: {
       createdBy: { select: { nom: true, prenom: true } },
       etablissement: { select: { id: true, nom: true } },
+      signePar: { select: { nom: true, prenom: true } },
+      validePar: { select: { nom: true, prenom: true } },
     },
   });
 }
@@ -183,6 +193,8 @@ export async function getBons(etablissementId: string): Promise<BonRow[]> {
       lignes: true,
       createdBy: { select: { nom: true, prenom: true } },
       etablissement: { select: { id: true, nom: true } },
+      signePar: { select: { nom: true, prenom: true } },
+      validePar: { select: { nom: true, prenom: true } },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -196,6 +208,8 @@ export async function getAllBons(): Promise<BonRow[]> {
       lignes: true,
       createdBy: { select: { nom: true, prenom: true } },
       etablissement: { select: { id: true, nom: true } },
+      signePar: { select: { nom: true, prenom: true } },
+      validePar: { select: { nom: true, prenom: true } },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -209,6 +223,8 @@ export async function getBonByReference(reference: string): Promise<BonRow | nul
       lignes: true,
       createdBy: { select: { nom: true, prenom: true } },
       etablissement: { select: { id: true, nom: true } },
+      signePar: { select: { nom: true, prenom: true } },
+      validePar: { select: { nom: true, prenom: true } },
     },
   });
 }

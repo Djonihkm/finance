@@ -25,14 +25,20 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
 export async function PUT(req: NextRequest, { params }: Params) {
   const session = await getSession();
-  if (!session || (session.role !== "SUPER_ADMIN" && session.role !== "MINISTERE")) {
+  if (!session) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+
+  const { id } = await params;
+
+  const isSuperAdmin = session.role === "SUPER_ADMIN" || session.role === "MINISTERE";
+  const isOwnAdmin = session.role === "ADMIN" && session.etablissementId === id;
+
+  if (!isSuperAdmin && !isOwnAdmin) {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 
-  const { id } = await params;
   const body = await req.json();
-
   const data: Record<string, unknown> = {};
+
   if (body.nom !== undefined) data.nom = body.nom;
   if (body.type !== undefined) data.type = body.type;
   if (body.adresse !== undefined) data.adresse = body.adresse;
@@ -40,7 +46,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
   if (body.region !== undefined) data.region = body.region;
   if (body.telephone !== undefined) data.telephone = body.telephone;
   if (body.email !== undefined) data.email = body.email;
-  if (body.isActive !== undefined) data.isActive = body.isActive;
+  // isActive et deletedAt réservés aux super-admins uniquement
+  if (isSuperAdmin && body.isActive !== undefined) data.isActive = body.isActive;
 
   const etab = await prisma.etablissement.update({ where: { id }, data });
 

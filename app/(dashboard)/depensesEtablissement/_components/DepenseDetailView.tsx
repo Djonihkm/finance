@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle, XCircle, RotateCcw, FileText, Info, MessageSquare } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, RotateCcw, FileText, Info, MessageSquare, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { type DepenseRow } from "@/lib/queries";
 import {
@@ -21,6 +21,7 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
   const [loading, setLoading] = useState<string | null>(null);
   const [showRenvoyer, setShowRenvoyer] = useState(false);
   const [commentaire, setCommentaire] = useState("");
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   const isDirecteur = userPrismaRole === "DIRECTEUR";
   const canAct = isDirecteur && (data.statut === "ATTENTE" || data.statut === "REVIEW" || data.statut === "REVISION");
@@ -198,11 +199,27 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
             <div className={`space-y-3 border-t border-gray-100 pt-3 ${canAct ? "mt-4" : ""}`}>
               <button
                 type="button"
-                onClick={() => toast.info("Export PDF non disponible.")}
-                className="flex items-center gap-3 text-sm text-orange-500 hover:text-orange-600 py-2 w-full font-medium cursor-pointer transition-colors"
+                disabled={pdfLoading}
+                onClick={async () => {
+                  setPdfLoading(true);
+                  try {
+                    const { createElement } = await import("react");
+                    const { DepensePDF } = await import("@/lib/pdf/DepensePDF");
+                    const { downloadPDF } = await import("@/lib/pdf/downloadPDF");
+                    await downloadPDF(
+                      createElement(DepensePDF, { data }),
+                      `${data.reference}.pdf`,
+                    );
+                  } catch {
+                    toast.error("Erreur lors de la génération du PDF.");
+                  } finally {
+                    setPdfLoading(false);
+                  }
+                }}
+                className="flex items-center gap-3 text-sm text-orange-500 hover:text-orange-600 py-2 w-full font-medium cursor-pointer transition-colors disabled:opacity-60"
               >
-                <FileText size={16} />
-                Télécharger PDF
+                {pdfLoading ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
+                {pdfLoading ? "Génération…" : "Télécharger PDF"}
               </button>
             </div>
           </div>
