@@ -2,7 +2,19 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle, XCircle, RotateCcw, FileText, Info, MessageSquare, Loader2, Pencil, Send, Truck } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle,
+  XCircle,
+  RotateCcw,
+  FileText,
+  Info,
+  MessageSquare,
+  Loader2,
+  Pencil,
+  Send,
+  Truck,
+} from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { type BonRow } from "@/lib/queries";
@@ -229,7 +241,6 @@ export default function BonDetailView({
               </div>
             </div>
           </div>
-
         </div>
 
         {/* Sidebar actions */}
@@ -310,38 +321,44 @@ export default function BonDetailView({
             {canResoumettre && (
               <div className="space-y-2">
                 {userPrismaRole === "COMPTABLE" && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      router.push(
-                        `/depensesEtablissement/bons/${encodeURIComponent(data.reference)}/modifier`,
-                      )
-                    }
-                    className="w-full bg-[#11355b] hover:bg-[#1a4a7a] text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
-                  >
-                    <Pencil size={18} />
-                    Modifier
-                  </button>
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        router.push(
+                          `/depensesEtablissement/bons/${encodeURIComponent(data.reference)}/modifier`,
+                        )
+                      }
+                      className="w-full bg-[#11355b] hover:bg-[#1a4a7a] text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                    >
+                      <Pencil size={18} />
+                      Modifier
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleResoumettre}
+                      disabled={loading !== null}
+                      className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                    >
+                      <Send size={18} />
+                      {loading === "resoumettre" ? "En cours…" : "Resoumettre"}
+                    </button>
+                  </div>
                 )}
-                <button
-                  type="button"
-                  onClick={handleResoumettre}
-                  disabled={loading !== null}
-                  className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
-                >
-                  <Send size={18} />
-                  {loading === "resoumettre" ? "En cours…" : "Resoumettre"}
-                </button>
               </div>
             )}
 
             {!canAct && !canResoumettre && (
               <>
                 <p className="text-xs text-gray-400 text-center py-2">
-                  {data.statut === "VALIDE" ? "Bon validé." :
-                   data.statut === "REJETE" ? "Bon rejeté." :
-                   !isDirecteur ? "En attente de décision du directeur." :
-                   "Aucune action disponible."}
+                  {data.statut === "VALIDE"
+                    ? "Bon validé."
+                    : data.statut === "REJETE"
+                      ? "Bon rejeté."
+                      : !isDirecteur
+                        ? "En attente de décision du directeur."
+                        : "Aucune action disponible."}
                 </p>
 
                 {data.statut === "VALIDE" && (
@@ -352,22 +369,30 @@ export default function BonDetailView({
                       setBlLoading(true);
                       try {
                         const { createElement } = await import("react");
-                        const { BonLivraisonPDF } = await import("@/lib/pdf/BonLivraisonPDF");
-                        const { downloadPDF } = await import("@/lib/pdf/downloadPDF");
+                        const { BonLivraisonPDF } =
+                          await import("@/lib/pdf/BonLivraisonPDF");
+                        const { downloadPDF } =
+                          await import("@/lib/pdf/downloadPDF");
                         const logoUrl = window.location.origin + "/fav.png";
                         await downloadPDF(
                           createElement(BonLivraisonPDF, { data, logoUrl }),
                           `BL-${data.reference}.pdf`,
                         );
                       } catch {
-                        toast.error("Erreur lors de la génération du bon de livraison.");
+                        toast.error(
+                          "Erreur lors de la génération du bon de livraison.",
+                        );
                       } finally {
                         setBlLoading(false);
                       }
                     }}
                     className="w-full mt-2 bg-[#11355b] hover:bg-[#1a4a7a] disabled:opacity-60 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
                   >
-                    {blLoading ? <Loader2 size={16} className="animate-spin" /> : <Truck size={16} />}
+                    {blLoading ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <Truck size={16} />
+                    )}
                     {blLoading ? "Génération…" : "Générer bon de livraison"}
                   </button>
                 )}
@@ -384,8 +409,10 @@ export default function BonDetailView({
                   setPdfLoading(true);
                   try {
                     const { createElement } = await import("react");
-                    const { BonCommandePDF } = await import("@/lib/pdf/BonCommandePDF");
-                    const { downloadPDF } = await import("@/lib/pdf/downloadPDF");
+                    const { BonCommandePDF } =
+                      await import("@/lib/pdf/BonCommandePDF");
+                    const { downloadPDF } =
+                      await import("@/lib/pdf/downloadPDF");
                     await downloadPDF(
                       createElement(BonCommandePDF, { data }),
                       `${data.reference}.pdf`,
@@ -398,7 +425,11 @@ export default function BonDetailView({
                 }}
                 className="flex items-center gap-3 text-sm text-orange-500 hover:text-orange-600 py-2 w-full font-medium cursor-pointer transition-colors disabled:opacity-60"
               >
-                {pdfLoading ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
+                {pdfLoading ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <FileText size={16} />
+                )}
                 {pdfLoading ? "Génération…" : "Télécharger PDF"}
               </button>
             </div>
@@ -417,12 +448,17 @@ export default function BonDetailView({
               style={{ animation: "wiggle 4s ease-in-out infinite" }}
               className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3"
             >
-              <MessageSquare size={15} className="text-amber-600 shrink-0 mt-0.5" />
+              <MessageSquare
+                size={15}
+                className="text-amber-600 shrink-0 mt-0.5"
+              />
               <div>
                 <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider mb-1.5">
                   Commentaire du directeur
                 </p>
-                <p className="text-xs text-amber-800 leading-relaxed">{data.commentaire}</p>
+                <p className="text-xs text-amber-800 leading-relaxed">
+                  {data.commentaire}
+                </p>
               </div>
             </div>
           )}
