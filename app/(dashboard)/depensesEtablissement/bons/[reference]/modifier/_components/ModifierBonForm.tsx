@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
+import { QRCodeSVG } from "qrcode.react";
 import { type BonRow } from "@/lib/queries";
 
 interface Ligne {
@@ -46,6 +47,13 @@ export default function ModifierBonForm({ data }: { data: BonRow }) {
   const supprimerLigne = (i: number) => setLignes(lignes.filter((_, idx) => idx !== i));
 
   const sousTotal = lignes.reduce((acc, l) => acc + l.quantite * l.prixUnitaire, 0);
+
+  const qrContent = [
+    bonData.intitule || "Bon de commande",
+    bonData.fournisseur || "Fournisseur inconnu",
+    `Montant: ${sousTotal.toLocaleString("fr-FR")} FCFA`,
+    `Réf: ${data.reference}`,
+  ].join(" | ");
 
   const handleSubmit = async (resoumettre = false) => {
     if (!bonData.intitule.trim()) { toast.error("L'intitulé est requis."); return; }
@@ -116,34 +124,37 @@ export default function ModifierBonForm({ data }: { data: BonRow }) {
               <div className="text-xs text-gray-600 text-right leading-relaxed">
                 {data.etablissement.adresse && <p>{data.etablissement.adresse}</p>}
                 {data.etablissement.region && <p>{data.etablissement.region}</p>}
-                {data.etablissement.ville && <p> République du Bénin</p>}
+                {data.etablissement.ville && <p>{data.etablissement.ville}, République du Bénin</p>}
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <div className="space-y-4">
-                <div className="border-l-4 border-[#11355b] pl-4">
-                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Intitulé du bon</p>
+                <div className="relative border-l-4 border-[#11355b] pl-4 rounded-r-lg py-2 pr-2 hover:bg-blue-50/40 hover:border-blue-400 transition-all duration-150 cursor-text group">
+                  <span className="absolute top-2 right-2 text-[9px] font-bold text-blue-400 uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity duration-150">✎ Modifier</span>
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1 group-hover:text-blue-500 transition-colors">Intitulé du bon</p>
                   <input
                     type="text"
                     value={bonData.intitule}
                     onChange={(e) => handleBonChange("intitule", e.target.value)}
-                    className="text-base font-bold text-[#11355b] bg-transparent w-full focus:outline-none focus:bg-blue-50/50 rounded px-1 -ml-1"
+                    className="text-base font-bold text-[#11355b] bg-transparent w-full focus:outline-none rounded px-1 -ml-1"
                   />
                 </div>
-                <div className="border-l-4 border-[#11355b] pl-4">
-                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Date d&apos;émission</p>
+                <div className="relative border-l-4 border-[#11355b] pl-4 rounded-r-lg py-2 pr-2 hover:bg-blue-50/40 hover:border-blue-400 transition-all duration-150 cursor-text group">
+                  <span className="absolute top-2 right-2 text-[9px] font-bold text-blue-400 uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity duration-150">✎ Modifier</span>
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1 group-hover:text-blue-500 transition-colors">Date d&apos;émission</p>
                   <input
                     type="date"
                     value={bonData.date}
                     onChange={(e) => handleBonChange("date", e.target.value)}
-                    className="text-base font-semibold text-[#11355b] bg-transparent w-full focus:outline-none focus:bg-blue-50/50 rounded px-1 -ml-1"
+                    className="text-base font-semibold text-[#11355b] bg-transparent w-full focus:outline-none rounded px-1 -ml-1"
                   />
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-lg p-5 border border-gray-100">
-                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3">Fournisseur</p>
+              <div className="relative bg-gray-50 rounded-lg p-5 border border-gray-100 hover:border-blue-200 hover:bg-blue-50/20 transition-all duration-150 cursor-text group">
+                <span className="absolute top-3 right-3 text-[9px] font-bold text-blue-400 uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity duration-150">✎ Modifier</span>
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3 group-hover:text-blue-500 transition-colors">Fournisseur</p>
                 <input
                   type="text"
                   value={bonData.fournisseur}
@@ -167,7 +178,7 @@ export default function ModifierBonForm({ data }: { data: BonRow }) {
                 </thead>
                 <tbody>
                   {lignes.map((ligne, i) => (
-                    <tr key={i} className="border-b border-gray-100 hover:bg-gray-50/50">
+                    <tr key={i} className="border-b border-gray-100 hover:bg-blue-50/30 transition-colors duration-100 cursor-text">
                       <td className="px-4 py-3">
                         <input
                           type="text"
@@ -214,17 +225,29 @@ export default function ModifierBonForm({ data }: { data: BonRow }) {
             <button
               type="button"
               onClick={ajouterLigne}
-              className="flex items-center gap-2 text-sm font-semibold text-[#11355b] hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors mb-6 cursor-pointer"
+              className="flex items-center gap-2 text-sm font-semibold text-[#11355b] hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors mb-8 cursor-pointer"
             >
               <Plus size={16} />
               Ajouter une ligne
             </button>
 
-            <div className="flex justify-end pt-4 border-t border-gray-100">
-              <div className="bg-gray-50 rounded-lg p-5 w-full max-w-xs">
-                <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-100">
+              <div className="bg-gray-50 rounded-lg p-5">
+                <div className="flex justify-between items-center pt-3 border-t border-gray-200">
                   <span className="text-base font-bold text-[#11355b] uppercase tracking-wide">Total TTC</span>
                   <span className="text-xl font-bold text-[#11355b]">{sousTotal.toLocaleString("fr-FR")} FCFA</span>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Signature du comptable</p>
+                  <div className="h-20 border border-gray-300 rounded-lg bg-white" />
+                </div>
+                <div className="shrink-0 flex flex-col items-center">
+                  <p className="text-[11px] font-bold uppercase tracking-wider mb-2 invisible select-none">QR</p>
+                  <QRCodeSVG value={qrContent} size={80} bgColor="#ffffff" fgColor="#11355b" level="M" className="rounded border border-gray-200" />
+                  <p className="text-[9px] text-gray-400 uppercase tracking-wider mt-1">Vérification</p>
                 </div>
               </div>
             </div>

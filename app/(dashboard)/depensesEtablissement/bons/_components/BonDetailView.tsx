@@ -329,7 +329,7 @@ export default function BonDetailView({
                           `/depensesEtablissement/bons/${encodeURIComponent(data.reference)}/modifier`,
                         )
                       }
-                      className="w-full bg-[#11355b] hover:bg-[#1a4a7a] text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                      className="w-full bg-[#11355b] hover:bg-[#1a4a7a] text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors mb-3"
                     >
                       <Pencil size={18} />
                       Modifier
