@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, CheckCircle, XCircle, RotateCcw, FileText, Info, MessageSquare } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, RotateCcw, FileText, Info, MessageSquare, Pencil, Send } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
 import { type BonRow } from "@/lib/queries";
@@ -23,7 +23,27 @@ export default function BonDetailView({ data, backPath, userPrismaRole }: Props)
   const [commentaire, setCommentaire] = useState("");
 
   const isDirecteur = userPrismaRole === "DIRECTEUR";
-  const canAct = isDirecteur && (data.statut === "ATTENTE" || data.statut === "REVIEW" || data.statut === "REVISION");
+  const isComptable = userPrismaRole === "COMPTABLE" || userPrismaRole === "ADMIN";
+  const canAct = isDirecteur && (data.statut === "ATTENTE" || data.statut === "REVISION");
+  const canResoumettre = isComptable && data.statut === "REVISION";
+
+  const handleResoumettre = async () => {
+    setLoading("resoumettre");
+    try {
+      const res = await fetch(`/api/bons-commande/${data.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "resoumettre" }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success("Bon resoumis pour validation.");
+      router.refresh();
+    } catch {
+      toast.error("Erreur lors de l'opération.");
+    } finally {
+      setLoading(null);
+    }
+  };
 
   const handleAction = async (action: "valider" | "rejeter" | "renvoyer") => {
     if (action === "renvoyer" && !commentaire.trim()) {
@@ -246,7 +266,29 @@ export default function BonDetailView({ data, backPath, userPrismaRole }: Props)
               </div>
             )}
 
-            {!canAct && (
+            {canResoumettre && (
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => router.push(`/depensesEtablissement/bons/${encodeURIComponent(data.reference)}/modifier`)}
+                  className="w-full bg-[#11355b] hover:bg-[#1a4a7a] text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                >
+                  <Pencil size={18} />
+                  Modifier
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResoumettre}
+                  disabled={loading !== null}
+                  className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                >
+                  <Send size={18} />
+                  {loading === "resoumettre" ? "En cours…" : "Resoumettre"}
+                </button>
+              </div>
+            )}
+
+            {!canAct && !canResoumettre && (
               <p className="text-xs text-gray-400 text-center py-2">
                 {data.statut === "VALIDE" ? "Bon validé." :
                  data.statut === "REJETE" ? "Bon rejeté." :

@@ -76,6 +76,23 @@ export async function PUT(req: NextRequest, { params }: Params) {
     return NextResponse.json(depense);
   }
 
+  if (action === "resoumettre") {
+    if (session.role !== "COMPTABLE" && session.role !== "ADMIN") {
+      return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    }
+    const depense = await prisma.$transaction(async (tx) => {
+      const d = await tx.depense.update({
+        where: { id, statut: "REVISION" },
+        data: { statut: "ATTENTE", commentaire: null },
+      });
+      await tx.historique.create({
+        data: { action: "SOUMIS", userId: session.userId, depenseId: id },
+      });
+      return d;
+    });
+    return NextResponse.json(depense);
+  }
+
   if (action === "renvoyer") {
     if (session.role !== "DIRECTEUR") {
       return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
@@ -95,7 +112,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
   // Simple update (ATTENTE only)
   const depense = await prisma.depense.update({
-    where: { id, statut: "ATTENTE" },
+    where: { id, statut: { in: ["ATTENTE", "REVISION"] } },
     data: {
       intitule: body.intitule,
       montant: body.montant,
