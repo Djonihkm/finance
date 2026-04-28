@@ -1,18 +1,9 @@
-/**
- * app/(dashboard)/depensesEtablissement/[reference]/_components/DepenseDetailView.tsx
- * ─────────────────────────────────────────────────────────────────────────────────────
- * Client Component — affiche le détail d'une dépense avec actions (valider / rejeter).
- * Utilisé par la route établissement ET la route admin (/depenses/[ref]).
- *
- * Flux : [reference]/page.tsx → ici → PUT /api/depenses/[id]
- */
-
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft, CheckCircle, XCircle, Printer, FileText, Info,
+  ArrowLeft, CheckCircle, XCircle, FileText, Info,
 } from "lucide-react";
 import { toast } from "sonner";
 import { type DepenseRow } from "@/lib/queries";
@@ -54,6 +45,7 @@ export default function DepenseDetailView({ data, backPath }: Props) {
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
 
       <button
+        type="button"
         onClick={() => router.push(backPath)}
         className="flex items-center gap-2 text-gray-600 hover:text-[#11355b] transition-colors cursor-pointer font-medium py-2 mb-4"
       >
@@ -81,10 +73,7 @@ export default function DepenseDetailView({ data, backPath }: Props) {
             <InfoBlock label="Catégorie" value={formatCategorie(data.categorie)} />
             <InfoBlock label="Mode de paiement" value={formatPaiement(data.paiement)} />
             <InfoBlock label="Établissement" value={data.etablissement.nom} />
-            <InfoBlock
-              label="Créé par"
-              value={`${data.createdBy.prenom} ${data.createdBy.nom}`}
-            />
+            <InfoBlock label="Créé par" value={`${data.createdBy.prenom} ${data.createdBy.nom}`} />
           </div>
 
           {data.fournisseur && (
@@ -109,9 +98,10 @@ export default function DepenseDetailView({ data, backPath }: Props) {
               Actions
             </h3>
 
-            {data.statut === "SOUMIS" && (
+            {data.statut === "REVIEW" && (
               <>
                 <button
+                  type="button"
                   onClick={() => handleAction("valider")}
                   disabled={loading !== null}
                   className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 mb-2 cursor-pointer transition-colors"
@@ -121,6 +111,7 @@ export default function DepenseDetailView({ data, backPath }: Props) {
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => handleAction("rejeter")}
                   disabled={loading !== null}
                   className="w-full bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
@@ -131,15 +122,9 @@ export default function DepenseDetailView({ data, backPath }: Props) {
               </>
             )}
 
-            <div className={`space-y-3 border-t border-gray-100 pt-3 ${data.statut === "SOUMIS" ? "mt-4" : ""}`}>
-              {/* <button
-                onClick={() => window.print()}
-                className="flex items-center gap-3 text-sm text-gray-700 hover:text-[#11355b] py-2 w-full cursor-pointer transition-colors"
-              >
-                <Printer size={16} />
-                Imprimer
-              </button> */}
+            <div className={`space-y-3 border-t border-gray-100 pt-3 ${data.statut === "REVIEW" ? "mt-4" : ""}`}>
               <button
+                type="button"
                 onClick={() => toast.info("Export PDF non disponible.")}
                 className="flex items-center gap-3 text-sm text-orange-500 hover:text-orange-600 py-2 w-full font-medium cursor-pointer transition-colors"
               >

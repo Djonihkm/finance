@@ -9,7 +9,7 @@
 import { notFound } from "next/navigation";
 import { getBonByReference } from "@/lib/queries";
 import { serialize } from "@/lib/utils/serialize";
-import BonDetailView from "./_components/BonDetailView";
+import BonDetailView from "../_components/BonDetailView";
 
 export default async function BonDetailPage({
   params,

@@ -9,7 +9,7 @@
 import { notFound } from "next/navigation";
 import { getDepenseByReference } from "@/lib/queries";
 import { serialize } from "@/lib/utils/serialize";
-import DepenseDetailView from "./_components/DepenseDetailView";
+import DepenseDetailView from "../_components/DepenseDetailView";
 
 export default async function DepenseDetailPage({
   params,
