@@ -28,11 +28,17 @@ interface Props {
   depenses: DepenseRow[];
   bons: BonRow[];
   basePath: string;
+  userPrismaRole?: string;
 }
 
 const PAGE_SIZE = 10;
 
-export default function DepensesView({ depenses, bons, basePath }: Props) {
+export default function DepensesView({
+  depenses,
+  bons,
+  basePath,
+  userPrismaRole,
+}: Props) {
   const router = useRouter();
   const [activeMode, setActiveMode] = useState<Mode>("depenses");
   const [page, setPage] = useState(1);
@@ -65,22 +71,27 @@ export default function DepensesView({ depenses, bons, basePath }: Props) {
   // Totaux calculés depuis les vraies données Prisma
   const totalDepenses = depenses.reduce(
     (sum, d) => sum + parseFloat(d.montant.toString()),
-    0
+    0,
   );
   const totalBons = bons.reduce(
     (sum, b) => sum + parseFloat(b.montantTotal.toString()),
-    0
+    0,
   );
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-
       {/* Sélecteur mode */}
       <div className="flex w-full gap-4">
-        <button onClick={() => handleModeSwitch("depenses")} className={btnClass("depenses")}>
+        <button
+          onClick={() => handleModeSwitch("depenses")}
+          className={btnClass("depenses")}
+        >
           Menues Dépenses
         </button>
-        <button onClick={() => handleModeSwitch("bons")} className={btnClass("bons")}>
+        <button
+          onClick={() => handleModeSwitch("bons")}
+          className={btnClass("bons")}
+        >
           Bons de commandes
         </button>
       </div>
@@ -91,19 +102,23 @@ export default function DepensesView({ depenses, bons, basePath }: Props) {
           {/* <h2 className="text-xl font-bold text-[#11355b]">
             {activeMode === "depenses" ? "Liste des dépenses" : "Liste des bons de commandes"}
           </h2> */}
-          <button
-            onClick={() =>
-              router.push(
-                activeMode === "depenses"
-                  ? `${basePath}/nouveau`
-                  : `${basePath}/bons/nouveau`
-              )
-            }
-            className="bg-[#11355b] hover:bg-[#1a4a7a] text-white px-5 py-3 rounded-lg flex items-center gap-2 font-semibold text-sm transition-colors shadow-md cursor-pointer"
-          >
-            <Plus size={18} />
-            AJOUTER {activeMode === "depenses" ? "DÉPENSE" : "BON DE COMMANDE"}
-          </button>
+          {/* Seuls les rôles autorisés peuvent ajouter des dépenses */}
+          {userPrismaRole !== "DIRECTEUR" && (
+            <button
+              onClick={() =>
+                router.push(
+                  activeMode === "depenses"
+                    ? `${basePath}/nouveau`
+                    : `${basePath}/bons/nouveau`,
+                )
+              }
+              className="bg-[#11355b] hover:bg-[#1a4a7a] text-white px-5 py-3 rounded-lg flex items-center gap-2 font-semibold text-sm transition-colors shadow-md cursor-pointer"
+            >
+              <Plus size={18} />
+              AJOUTER{" "}
+              {activeMode === "depenses" ? "DÉPENSE" : "BON DE COMMANDE"}
+            </button>
+          )}
         </div>
 
         <div className="overflow-x-auto">
@@ -115,14 +130,22 @@ export default function DepensesView({ depenses, bons, basePath }: Props) {
                 <th className="px-4 py-4">Montant</th>
                 {activeMode === "depenses" ? (
                   <>
-                    <th className="hidden md:table-cell px-4 py-4">Catégorie</th>
-                    <th className="hidden lg:table-cell px-4 py-4">Référence</th>
+                    <th className="hidden md:table-cell px-4 py-4">
+                      Catégorie
+                    </th>
+                    <th className="hidden lg:table-cell px-4 py-4">
+                      Référence
+                    </th>
                     <th className="px-4 py-4">Statut</th>
                   </>
                 ) : (
                   <>
-                    <th className="hidden md:table-cell px-4 py-4">Fournisseur</th>
-                    <th className="hidden lg:table-cell px-4 py-4">Référence</th>
+                    <th className="hidden md:table-cell px-4 py-4">
+                      Fournisseur
+                    </th>
+                    <th className="hidden lg:table-cell px-4 py-4">
+                      Référence
+                    </th>
                     <th className="px-4 py-4">Statut</th>
                   </>
                 )}
@@ -131,7 +154,10 @@ export default function DepensesView({ depenses, bons, basePath }: Props) {
             <tbody className="text-sm text-gray-700">
               {paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-10 text-center text-gray-400 text-sm">
+                  <td
+                    colSpan={6}
+                    className="px-6 py-10 text-center text-gray-400 text-sm"
+                  >
                     Aucun document trouvé.
                   </td>
                 </tr>
@@ -147,9 +173,13 @@ export default function DepensesView({ depenses, bons, basePath }: Props) {
                     </td>
                     <td className="px-4 py-4 font-medium text-gray-800">
                       {d.intitule}
-                      <p className="sm:hidden text-xs text-gray-400 mt-0.5">{formatDate(d.date)}</p>
+                      <p className="sm:hidden text-xs text-gray-400 mt-0.5">
+                        {formatDate(d.date)}
+                      </p>
                     </td>
-                    <td className="px-4 py-4 font-bold text-[#11355b]">{formatMontant(d.montant)}</td>
+                    <td className="px-4 py-4 font-bold text-[#11355b]">
+                      {formatMontant(d.montant)}
+                    </td>
                     <td className="hidden md:table-cell px-4 py-4 text-gray-500">
                       {formatCategorie(d.categorie)}
                     </td>
@@ -157,7 +187,9 @@ export default function DepensesView({ depenses, bons, basePath }: Props) {
                       {d.reference}
                     </td>
                     <td className="px-4 py-4">
-                      <span className={`px-2 py-1 rounded text-[11px] font-bold uppercase ${STATUT_COLORS[d.statut] ?? "bg-gray-100 text-gray-600"}`}>
+                      <span
+                        className={`px-2 py-1 rounded text-[11px] font-bold uppercase ${STATUT_COLORS[d.statut] ?? "bg-gray-100 text-gray-600"}`}
+                      >
                         {formatStatut(d.statut)}
                       </span>
                     </td>
@@ -175,9 +207,13 @@ export default function DepensesView({ depenses, bons, basePath }: Props) {
                     </td>
                     <td className="px-4 py-4 font-medium text-gray-800">
                       {b.intitule}
-                      <p className="sm:hidden text-xs text-gray-400 mt-0.5">{formatDate(b.date)}</p>
+                      <p className="sm:hidden text-xs text-gray-400 mt-0.5">
+                        {formatDate(b.date)}
+                      </p>
                     </td>
-                    <td className="px-4 py-4 font-bold text-[#11355b]">{formatMontant(b.montantTotal)}</td>
+                    <td className="px-4 py-4 font-bold text-[#11355b]">
+                      {formatMontant(b.montantTotal)}
+                    </td>
                     <td className="hidden md:table-cell px-4 py-4 text-gray-500">
                       {b.fournisseur ?? "—"}
                     </td>
@@ -185,7 +221,9 @@ export default function DepensesView({ depenses, bons, basePath }: Props) {
                       {b.reference}
                     </td>
                     <td className="px-4 py-4">
-                      <span className={`px-2 py-1 rounded text-[11px] font-bold uppercase ${STATUT_COLORS[b.statut] ?? "bg-gray-100 text-gray-600"}`}>
+                      <span
+                        className={`px-2 py-1 rounded text-[11px] font-bold uppercase ${STATUT_COLORS[b.statut] ?? "bg-gray-100 text-gray-600"}`}
+                      >
                         {formatStatut(b.statut)}
                       </span>
                     </td>
@@ -226,32 +264,44 @@ export default function DepensesView({ depenses, bons, basePath }: Props) {
 
       {/* KPI Cartes */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-8">
-        <div className={`p-6 rounded-xl shadow-sm border relative overflow-hidden transition-all ${
-          activeMode === "depenses"
-            ? "bg-[#11355b] text-white shadow-lg border-transparent"
-            : "bg-white border-gray-100"
-        }`}>
-          <p className={`text-[11px] font-bold uppercase tracking-wider mb-1 ${
-            activeMode === "depenses" ? "opacity-70" : "text-orange-400"
-          }`}>
+        <div
+          className={`p-6 rounded-xl shadow-sm border relative overflow-hidden transition-all ${
+            activeMode === "depenses"
+              ? "bg-[#11355b] text-white shadow-lg border-transparent"
+              : "bg-white border-gray-100"
+          }`}
+        >
+          <p
+            className={`text-[11px] font-bold uppercase tracking-wider mb-1 ${
+              activeMode === "depenses" ? "opacity-70" : "text-orange-400"
+            }`}
+          >
             Total Dépenses
           </p>
-          <p className={`text-2xl font-bold ${activeMode === "depenses" ? "text-white" : "text-[#11355b]"}`}>
+          <p
+            className={`text-2xl font-bold ${activeMode === "depenses" ? "text-white" : "text-[#11355b]"}`}
+          >
             {formatMontant(totalDepenses)}
           </p>
         </div>
 
-        <div className={`p-6 rounded-xl shadow-sm border relative overflow-hidden transition-all ${
-          activeMode === "bons"
-            ? "bg-[#11355b] text-white shadow-lg border-transparent"
-            : "bg-white border-gray-100"
-        }`}>
-          <p className={`text-[11px] font-bold uppercase tracking-wider mb-1 ${
-            activeMode === "bons" ? "opacity-70" : "text-blue-400"
-          }`}>
+        <div
+          className={`p-6 rounded-xl shadow-sm border relative overflow-hidden transition-all ${
+            activeMode === "bons"
+              ? "bg-[#11355b] text-white shadow-lg border-transparent"
+              : "bg-white border-gray-100"
+          }`}
+        >
+          <p
+            className={`text-[11px] font-bold uppercase tracking-wider mb-1 ${
+              activeMode === "bons" ? "opacity-70" : "text-blue-400"
+            }`}
+          >
             Total Bons de commande
           </p>
-          <p className={`text-2xl font-bold ${activeMode === "bons" ? "text-white" : "text-[#11355b]"}`}>
+          <p
+            className={`text-2xl font-bold ${activeMode === "bons" ? "text-white" : "text-[#11355b]"}`}
+          >
             {formatMontant(totalBons)}
           </p>
         </div>

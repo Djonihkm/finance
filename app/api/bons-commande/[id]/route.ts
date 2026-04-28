@@ -33,23 +33,8 @@ export async function PUT(req: NextRequest, { params }: Params) {
   const body = await req.json();
   const { action } = body;
 
-  if (action === "signer") {
-    if (session.role !== "DIRECTEUR" && session.role !== "ADMIN") {
-      return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
-    }
-    const bon = await prisma.$transaction(async (tx) => {
-      const b = await tx.bonCommande.update({
-        where: { id },
-        data: { statut: "REVIEW", signeParId: session.userId, signeAt: new Date() },
-      });
-      await tx.historique.create({ data: { action: "SIGNE", userId: session.userId, bonCommandeId: id } });
-      return b;
-    });
-    return NextResponse.json(bon);
-  }
-
   if (action === "valider") {
-    if (session.role !== "SUPER_ADMIN" && session.role !== "MINISTERE") {
+    if (session.role !== "DIRECTEUR") {
       return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
     }
     const bon = await prisma.$transaction(async (tx) => {
@@ -58,7 +43,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
       const b = await tx.bonCommande.update({
         where: { id },
-        data: { statut: "VALIDE", valideParId: session.userId, valideAt: new Date(), commentaire: body.commentaire },
+        data: { statut: "VALIDE", valideParId: session.userId, valideAt: new Date() },
       });
 
       const year = new Date(existing.date).getFullYear();
@@ -68,7 +53,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
       });
 
       await tx.historique.create({
-        data: { action: "VALIDE", userId: session.userId, bonCommandeId: id, commentaire: body.commentaire },
+        data: { action: "VALIDE", userId: session.userId, bonCommandeId: id },
       });
       return b;
     });
@@ -76,6 +61,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
   }
 
   if (action === "rejeter") {
+    if (session.role !== "DIRECTEUR") {
+      return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    }
     const bon = await prisma.$transaction(async (tx) => {
       const b = await tx.bonCommande.update({
         where: { id },
@@ -83,6 +71,23 @@ export async function PUT(req: NextRequest, { params }: Params) {
       });
       await tx.historique.create({
         data: { action: "REJETE", userId: session.userId, bonCommandeId: id, commentaire: body.commentaire },
+      });
+      return b;
+    });
+    return NextResponse.json(bon);
+  }
+
+  if (action === "renvoyer") {
+    if (session.role !== "DIRECTEUR") {
+      return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    }
+    const bon = await prisma.$transaction(async (tx) => {
+      const b = await tx.bonCommande.update({
+        where: { id },
+        data: { statut: "REVIEW", commentaire: body.commentaire },
+      });
+      await tx.historique.create({
+        data: { action: "MODIFIE", userId: session.userId, bonCommandeId: id, commentaire: body.commentaire },
       });
       return b;
     });
@@ -98,7 +103,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
 
   const { id } = await params;
   await prisma.bonCommande.update({
-    where: { id, statut: "REVIEW", createdById: session.userId },
+    where: { id, statut: "ATTENTE", createdById: session.userId },
     data: { deletedAt: new Date() },
   });
 

@@ -7,6 +7,7 @@
  */
 
 import { notFound } from "next/navigation";
+import { getSession } from "@/lib/session";
 import { getBonByReference } from "@/lib/queries";
 import { serialize } from "@/lib/utils/serialize";
 import BonDetailView from "./_components/BonDetailView";
@@ -17,8 +18,15 @@ export default async function BonDetailPage({
   params: Promise<{ reference: string }>;
 }) {
   const { reference } = await params;
+  const session = await getSession();
   const bon = await getBonByReference(decodeURIComponent(reference));
   if (!bon) notFound();
 
-  return <BonDetailView data={serialize(bon)} backPath="/depensesEtablissement" />;
+  return (
+    <BonDetailView
+      data={serialize(bon)}
+      backPath="/depensesEtablissement"
+      userPrismaRole={session?.role}
+    />
+  );
 }

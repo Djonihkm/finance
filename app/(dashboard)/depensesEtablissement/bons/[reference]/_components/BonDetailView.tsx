@@ -12,7 +12,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft, CheckCircle, XCircle, Printer, FileText, Info,
+  ArrowLeft, CheckCircle, XCircle, RotateCcw, FileText, Info, MessageSquare,
 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -24,27 +24,42 @@ import {
 interface Props {
   data: BonRow;
   backPath: string;
+  userPrismaRole?: string;
 }
 
-export default function BonDetailView({ data, backPath }: Props) {
+export default function BonDetailView({ data, backPath, userPrismaRole }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
+  const [showRenvoyer, setShowRenvoyer] = useState(false);
+  const [commentaire, setCommentaire] = useState("");
 
-  const handleAction = async (action: "valider" | "rejeter") => {
+  const isDirecteur = userPrismaRole === "DIRECTEUR";
+  const canAct = isDirecteur && (data.statut === "ATTENTE" || data.statut === "REVIEW");
+
+  const handleAction = async (action: "valider" | "rejeter" | "renvoyer") => {
+    if (action === "renvoyer" && !commentaire.trim()) {
+      toast.error("Un commentaire est requis pour renvoyer.");
+      return;
+    }
     setLoading(action);
     try {
       const res = await fetch(`/api/bons-commande/${data.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ action, commentaire: commentaire || undefined }),
       });
       if (!res.ok) throw new Error();
-      toast.success(action === "valider" ? "Bon validé." : "Bon rejeté.");
+      toast.success(
+        action === "valider" ? "Bon validé." :
+        action === "rejeter" ? "Bon rejeté." :
+        "Bon renvoyé pour révision."
+      );
       router.refresh();
     } catch {
       toast.error("Erreur lors de l'opération.");
     } finally {
       setLoading(null);
+      setShowRenvoyer(false);
     }
   };
 
@@ -149,7 +164,7 @@ export default function BonDetailView({ data, backPath }: Props) {
           </div>
 
           {/* Total */}
-          <div className="flex justify-end">
+          <div className="flex justify-end mb-6">
             <div className="bg-gray-50 rounded-lg p-5 w-full max-w-xs">
               <div className="flex justify-between pt-2 border-t border-gray-200">
                 <span className="text-base font-bold text-[#11355b] uppercase tracking-wide">Total TTC</span>
@@ -157,6 +172,19 @@ export default function BonDetailView({ data, backPath }: Props) {
               </div>
             </div>
           </div>
+
+          {/* Commentaire du directeur visible par tous */}
+          {data.commentaire && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3">
+              <MessageSquare size={16} className="text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider mb-1">
+                  Commentaire du directeur
+                </p>
+                <p className="text-sm text-amber-800">{data.commentaire}</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Sidebar actions */}
@@ -166,15 +194,23 @@ export default function BonDetailView({ data, backPath }: Props) {
               Actions
             </h3>
 
-            {data.statut === "REVIEW" && (
-              <>
+            {canAct && !showRenvoyer && (
+              <div className="space-y-2">
                 <button
                   onClick={() => handleAction("valider")}
                   disabled={loading !== null}
-                  className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 mb-2 cursor-pointer transition-colors"
+                  className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
                 >
                   <CheckCircle size={18} />
                   {loading === "valider" ? "En cours…" : "Valider"}
+                </button>
+                <button
+                  onClick={() => setShowRenvoyer(true)}
+                  disabled={loading !== null}
+                  className="w-full bg-orange-400 hover:bg-orange-500 disabled:opacity-50 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                >
+                  <RotateCcw size={18} />
+                  Renvoyer pour révision
                 </button>
                 <button
                   onClick={() => handleAction("rejeter")}
@@ -184,17 +220,46 @@ export default function BonDetailView({ data, backPath }: Props) {
                   <XCircle size={18} />
                   {loading === "rejeter" ? "En cours…" : "Rejeter"}
                 </button>
-              </>
+              </div>
             )}
 
-            <div className={`space-y-3 border-t border-gray-100 pt-3 ${data.statut === "REVIEW" ? "mt-4" : ""}`}>
-              {/* <button
-                onClick={() => window.print()}
-                className="flex items-center gap-3 text-sm text-gray-700 hover:text-[#11355b] py-2 w-full cursor-pointer transition-colors"
-              >
-                <Printer size={16} />
-                Imprimer
-              </button> */}
+            {canAct && showRenvoyer && (
+              <div className="space-y-3">
+                <p className="text-xs text-gray-500">Précisez ce qui doit être corrigé :</p>
+                <textarea
+                  value={commentaire}
+                  onChange={(e) => setCommentaire(e.target.value)}
+                  rows={4}
+                  placeholder="Indiquez les corrections à apporter…"
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all resize-none"
+                />
+                <button
+                  onClick={() => handleAction("renvoyer")}
+                  disabled={loading !== null}
+                  className="w-full bg-orange-400 hover:bg-orange-500 disabled:opacity-50 text-white py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                >
+                  <RotateCcw size={16} />
+                  {loading === "renvoyer" ? "En cours…" : "Confirmer le renvoi"}
+                </button>
+                <button
+                  onClick={() => { setShowRenvoyer(false); setCommentaire(""); }}
+                  className="w-full text-gray-500 hover:text-gray-700 text-sm py-1 cursor-pointer transition-colors"
+                >
+                  Annuler
+                </button>
+              </div>
+            )}
+
+            {!canAct && (
+              <p className="text-xs text-gray-400 text-center py-2">
+                {data.statut === "VALIDE" ? "Bon validé." :
+                 data.statut === "REJETE" ? "Bon rejeté." :
+                 !isDirecteur ? "En attente de décision du directeur." :
+                 "Aucune action disponible."}
+              </p>
+            )}
+
+            <div className={`space-y-3 border-t border-gray-100 pt-3 ${canAct ? "mt-4" : ""}`}>
               <button
                 onClick={() => toast.info("Export PDF non disponible.")}
                 className="flex items-center gap-3 text-sm text-orange-500 hover:text-orange-600 py-2 w-full font-medium cursor-pointer transition-colors"

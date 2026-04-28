@@ -18,7 +18,7 @@ export async function getSession(): Promise<SessionData | null> {
 export async function setSession(data: SessionData): Promise<void> {
   const cookieStore = await cookies();
   const encoded = Buffer.from(JSON.stringify(data)).toString("base64");
-  const opts = { path: "/", sameSite: "lax" as const, httpOnly: true };
+  const opts = { path: "/", sameSite: "lax" as const, httpOnly: true, maxAge: 60 * 60 * 8 };
   cookieStore.set(SESSION_COOKIE, encoded, opts);
   cookieStore.set(ROLE_COOKIE, data.uiRole, { path: "/", sameSite: "lax" as const });
 }

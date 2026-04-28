@@ -21,6 +21,7 @@ enum Role {
 }
 
 enum StatutDocument {
+  ATTENTE
   REVIEW
   VALIDE
   REJETE
@@ -166,7 +167,7 @@ model Depense {
   fournisseur String?
   description String?
   date        DateTime
-  statut      StatutDocument   @default(REVIEW)
+  statut      StatutDocument   @default(ATTENTE)
 
   signeParId String?
   signePar   User?     @relation("DepenseSignataire", fields: [signeParId], references: [id])
@@ -201,7 +202,7 @@ model BonCommande {
   fournisseur  String?
   description  String?
   date         DateTime
-  statut       StatutDocument @default(REVIEW)
+  statut       StatutDocument @default(ATTENTE)
   montantTotal Decimal        @db.Decimal(15, 2)
 
   lignes LigneBonCommande[]

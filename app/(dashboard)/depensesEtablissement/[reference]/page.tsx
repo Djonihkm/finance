@@ -7,6 +7,7 @@
  */
 
 import { notFound } from "next/navigation";
+import { getSession } from "@/lib/session";
 import { getDepenseByReference } from "@/lib/queries";
 import { serialize } from "@/lib/utils/serialize";
 import DepenseDetailView from "./_components/DepenseDetailView";
@@ -17,8 +18,15 @@ export default async function DepenseDetailPage({
   params: Promise<{ reference: string }>;
 }) {
   const { reference } = await params;
+  const session = await getSession();
   const depense = await getDepenseByReference(decodeURIComponent(reference));
   if (!depense) notFound();
 
-  return <DepenseDetailView data={serialize(depense)} backPath="/depensesEtablissement" />;
+  return (
+    <DepenseDetailView
+      data={serialize(depense)}
+      backPath="/depensesEtablissement"
+      userPrismaRole={session?.role}
+    />
+  );
 }

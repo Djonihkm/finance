@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useEffect } from "react";
 import { login } from "@/lib/auth";
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
@@ -9,6 +9,12 @@ import Link from "next/link";
 export default function LoginPage() {
   const [state, action, isPending] = useActionState(login, null);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (state && "redirect" in state) {
+      window.location.href = state.redirect;
+    }
+  }, [state]);
 
   return (
     <div className="min-h-screen flex">

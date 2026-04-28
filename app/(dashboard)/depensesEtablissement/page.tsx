@@ -27,6 +27,7 @@ export default async function DepensesEtablissementPage() {
       depenses={serialize(depenses)}
       bons={serialize(bons)}
       basePath="/depensesEtablissement"
+        userPrismaRole={session.role}
     />
   );
 }

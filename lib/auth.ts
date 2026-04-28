@@ -5,7 +5,7 @@ import { prisma } from "./prisma";
 import { setSession, clearSession } from "./session";
 import type { PrismaRole, UserRole } from "./types";
 
-export type LoginState = { error: string } | null;
+export type LoginState = { error: string } | { redirect: string } | null;
 
 function toUiRole(role: PrismaRole): UserRole {
   if (role === "SUPER_ADMIN") return "superadmin";
@@ -40,7 +40,7 @@ export async function login(_prevState: LoginState, formData: FormData) {
     email: user.email,
   });
 
-  redirect(dashboardFor(uiRole));
+  return { redirect: dashboardFor(uiRole) };
 }
 
 export async function logout() {
