@@ -1,10 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(rm -f \"d:/Projets/finance/app/data/depenses.ts\" \"d:/Projets/finance/app/data/etablissements.ts\" \"d:/Projets/finance/app/data/utilisateurs.ts\")",
-      "Bash(rmdir \"d:/Projets/finance/app/data\")",
-      "Bash(rm -f \"d:/Projets/finance/lib/mock-users.ts\")",
-      "Bash(rm -f \"d:/Projets/finance/app/components/DepenseEtablissement.tsx\" \"d:/Projets/finance/app/components/DepenseDetail.tsx\" \"d:/Projets/finance/app/components/BonsEtablissement.tsx\" \"d:/Projets/finance/app/components/BonCommandeDetail.tsx\")"
+      "Bash(npx prisma *)",
+      "Bash(rm \"d:/Projets/finance/app/\\(dashboard\\)/depensesEtablissement/[reference]/_components/DepenseDetailView.tsx\")",
+      "Bash(rm \"d:/Projets/finance/app/\\(dashboard\\)/depensesEtablissement/bons/[reference]/_components/BonDetailView.tsx\")",
+      "Bash(rmdir \"d:/Projets/finance/app/\\(dashboard\\)/depensesEtablissement/[reference]/_components\")",
+      "Bash(rmdir \"d:/Projets/finance/app/\\(dashboard\\)/depensesEtablissement/bons/[reference]/_components\")",
+      "Bash(npm install *)"
     ]
   }
 }

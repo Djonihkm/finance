@@ -5,11 +5,19 @@ import { useRouter } from "next/navigation";
 import {
   ArrowLeft, Building2, MapPin, Phone, Mail,
   CheckCircle, XCircle, Pencil, Printer, FileText,
-  Calendar, Wallet, Save, X, Users,
+  Calendar, Wallet, Save, X, Users, ChevronDown, ChevronUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { EtablissementDetail } from "@/lib/queries";
-import { formatTypeEtablissement, formatDate, formatMontant } from "@/lib/utils/formatters";
+import { formatTypeEtablissement, formatDate, formatMontant, formatRole } from "@/lib/utils/formatters";
+
+const ROLE_BADGE: Record<string, string> = {
+  SUPER_ADMIN: "bg-[#11355b] text-white",
+  MINISTERE:   "bg-[#1a4a7a] text-white",
+  ADMIN:       "bg-blue-100 text-blue-700",
+  DIRECTEUR:   "bg-emerald-100 text-emerald-700",
+  COMPTABLE:   "bg-gray-100 text-gray-600",
+};
 
 const inputClass =
   "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#11355b]/20 focus:border-[#11355b] transition-colors";
@@ -36,6 +44,7 @@ export default function EtablissementDetailView({ data }: { data: EtablissementD
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [usersOpen, setUsersOpen] = useState(true);
   const [draft, setDraft] = useState<Draft>({
     nom: data.nom,
     type: data.type,
@@ -348,6 +357,76 @@ export default function EtablissementDetailView({ data }: { data: EtablissementD
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ===== TABLEAU UTILISATEURS PLIABLE ===== */}
+      <div className="mt-5 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setUsersOpen((v) => !v)}
+          className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50/50 transition-colors cursor-pointer"
+        >
+          <div className="flex items-center gap-2">
+            <Users size={16} className="text-[#11355b]" />
+            <span className="text-sm font-bold text-[#11355b] uppercase tracking-wider">
+              Utilisateurs rattachés
+            </span>
+            <span className="ml-1 px-2 py-0.5 rounded-full bg-[#11355b]/10 text-[#11355b] text-[11px] font-bold">
+              {data.users.length}
+            </span>
+          </div>
+          {usersOpen
+            ? <ChevronUp size={16} className="text-gray-400" />
+            : <ChevronDown size={16} className="text-gray-400" />}
+        </button>
+
+        {usersOpen && (
+          data.users.length === 0 ? (
+            <div className="px-6 py-8 text-center text-gray-400 text-sm border-t border-gray-100">
+              Aucun utilisateur rattaché à cet établissement.
+            </div>
+          ) : (
+            <div className="overflow-x-auto border-t border-gray-100">
+              <table className="w-full text-left border-collapse min-w-[500px]">
+                <thead>
+                  <tr className="text-[11px] font-bold text-gray-400 uppercase tracking-wider bg-gray-50/70">
+                    <th className="px-6 py-3">Nom</th>
+                    <th className="px-6 py-3 hidden sm:table-cell">Email</th>
+                    <th className="px-6 py-3">Rôle</th>
+                    <th className="px-6 py-3 hidden md:table-cell">Poste</th>
+                    <th className="px-6 py-3">Statut</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {data.users.map((u) => (
+                    <tr
+                      key={u.id}
+                      onClick={() => router.push(`/utilisateurs/${u.id}`)}
+                      className="border-t border-gray-50 hover:bg-blue-50/30 transition-colors cursor-pointer"
+                    >
+                      <td className="px-6 py-3">
+                        <p className="font-semibold text-[#11355b] leading-tight">{u.prenom} {u.nom}</p>
+                      </td>
+                      <td className="px-6 py-3 text-gray-500 hidden sm:table-cell">{u.email}</td>
+                      <td className="px-6 py-3">
+                        <span className={`px-2 py-1 rounded text-[11px] font-bold uppercase tracking-wider ${ROLE_BADGE[u.role] ?? "bg-gray-100 text-gray-600"}`}>
+                          {formatRole(u.role)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-3 text-gray-500 hidden md:table-cell">{u.poste ?? "—"}</td>
+                      <td className="px-6 py-3">
+                        <span className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider ${u.isActive ? "text-emerald-600" : "text-red-500"}`}>
+                          <span className={`w-2 h-2 rounded-full shrink-0 ${u.isActive ? "bg-emerald-500" : "bg-red-500"}`} />
+                          {u.isActive ? "Actif" : "Inactif"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        )}
       </div>
     </div>
   );

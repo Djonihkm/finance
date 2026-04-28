@@ -39,17 +39,19 @@ export function formatRole(role: string): string {
 // ── Documents ─────────────────────────────────────────────────────────────────
 
 export const STATUT_LABELS: Record<string, string> = {
-  ATTENTE: "En attente",
-  REVIEW:  "En révision",
-  VALIDE:  "Validé",
-  REJETE:  "Rejeté",
+  ATTENTE:  "En attente",
+  REVIEW:   "En cours de revue",
+  REVISION: "En révision",
+  VALIDE:   "Validé",
+  REJETE:   "Rejeté",
 };
 
 export const STATUT_COLORS: Record<string, string> = {
-  ATTENTE: "bg-yellow-100 text-yellow-700",
-  REVIEW:  "bg-blue-100 text-blue-700",
-  VALIDE:  "bg-emerald-100 text-emerald-700",
-  REJETE:  "bg-red-100 text-red-600",
+  ATTENTE:  "bg-gray-100 text-gray-600",
+  REVIEW:   "bg-blue-100 text-blue-700",
+  REVISION: "bg-amber-100 text-amber-700",
+  VALIDE:   "bg-emerald-100 text-emerald-700",
+  REJETE:   "bg-red-100 text-red-600",
 };
 
 export function formatStatut(statut: string): string {

@@ -23,7 +23,7 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
   const [commentaire, setCommentaire] = useState("");
 
   const isDirecteur = userPrismaRole === "DIRECTEUR";
-  const canAct = isDirecteur && (data.statut === "ATTENTE" || data.statut === "REVIEW");
+  const canAct = isDirecteur && (data.statut === "ATTENTE" || data.statut === "REVIEW" || data.statut === "REVISION");
 
   const handleAction = async (action: "valider" | "rejeter" | "renvoyer") => {
     if (action === "renvoyer" && !commentaire.trim()) {
@@ -58,6 +58,7 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
 
       <button
+        type="button"
         onClick={() => router.push(backPath)}
         className="flex items-center gap-2 text-gray-600 hover:text-[#11355b] transition-colors cursor-pointer font-medium py-2 mb-4"
       >
@@ -102,7 +103,6 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
             </div>
           )}
 
-          {/* Commentaire du directeur visible par tous */}
           {data.commentaire && (
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3">
               <MessageSquare size={16} className="text-amber-600 shrink-0 mt-0.5" />
@@ -126,6 +126,7 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
             {canAct && !showRenvoyer && (
               <div className="space-y-2">
                 <button
+                  type="button"
                   onClick={() => handleAction("valider")}
                   disabled={loading !== null}
                   className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
@@ -135,6 +136,7 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => setShowRenvoyer(true)}
                   disabled={loading !== null}
                   className="w-full bg-orange-400 hover:bg-orange-500 disabled:opacity-50 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
@@ -144,6 +146,7 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => handleAction("rejeter")}
                   disabled={loading !== null}
                   className="w-full bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
@@ -165,6 +168,7 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-300 focus:border-orange-400 transition-all resize-none"
                 />
                 <button
+                  type="button"
                   onClick={() => handleAction("renvoyer")}
                   disabled={loading !== null}
                   className="w-full bg-orange-400 hover:bg-orange-500 disabled:opacity-50 text-white py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
@@ -173,6 +177,7 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
                   {loading === "renvoyer" ? "En cours…" : "Confirmer le renvoi"}
                 </button>
                 <button
+                  type="button"
                   onClick={() => { setShowRenvoyer(false); setCommentaire(""); }}
                   className="w-full text-gray-500 hover:text-gray-700 text-sm py-1 cursor-pointer transition-colors"
                 >
@@ -192,6 +197,7 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
 
             <div className={`space-y-3 border-t border-gray-100 pt-3 ${canAct ? "mt-4" : ""}`}>
               <button
+                type="button"
                 onClick={() => toast.info("Export PDF non disponible.")}
                 className="flex items-center gap-3 text-sm text-orange-500 hover:text-orange-600 py-2 w-full font-medium cursor-pointer transition-colors"
               >

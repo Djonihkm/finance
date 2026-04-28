@@ -84,7 +84,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
     const bon = await prisma.$transaction(async (tx) => {
       const b = await tx.bonCommande.update({
         where: { id },
-        data: { statut: "REVIEW", commentaire: body.commentaire },
+        data: { statut: "REVISION", commentaire: body.commentaire },
       });
       await tx.historique.create({
         data: { action: "MODIFIE", userId: session.userId, bonCommandeId: id, commentaire: body.commentaire },

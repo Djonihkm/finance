@@ -83,7 +83,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
     const depense = await prisma.$transaction(async (tx) => {
       const d = await tx.depense.update({
         where: { id },
-        data: { statut: "REVIEW", commentaire: body.commentaire },
+        data: { statut: "REVISION", commentaire: body.commentaire },
       });
       await tx.historique.create({
         data: { action: "MODIFIE", userId: session.userId, depenseId: id, commentaire: body.commentaire },
@@ -93,7 +93,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
     return NextResponse.json(depense);
   }
 
-  // Simple update (BROUILLON only)
+  // Simple update (ATTENTE only)
   const depense = await prisma.depense.update({
     where: { id, statut: "ATTENTE" },
     data: {
