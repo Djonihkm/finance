@@ -10,8 +10,8 @@
 
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { type DepenseRow, type BonRow } from "@/lib/queries";
 import {
@@ -40,8 +40,16 @@ export default function DepensesView({
   userPrismaRole,
 }: Props) {
   const router = useRouter();
-  const [activeMode, setActiveMode] = useState<Mode>("depenses");
+  const searchParams = useSearchParams();
+  const [activeMode, setActiveMode] = useState<Mode>(
+    searchParams.get("tab") === "bons" ? "bons" : "depenses"
+  );
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    setActiveMode(tab === "bons" ? "bons" : "depenses");
+  }, [searchParams]);
 
   const currentData = activeMode === "depenses" ? depenses : bons;
   const totalPages = Math.max(1, Math.ceil(currentData.length / PAGE_SIZE));
@@ -50,6 +58,7 @@ export default function DepensesView({
   const handleModeSwitch = (mode: Mode) => {
     setActiveMode(mode);
     setPage(1);
+    router.replace(mode === "bons" ? "?tab=bons" : "?", { scroll: false });
   };
 
   const handleRowClick = (reference: string) => {

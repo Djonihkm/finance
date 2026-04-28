@@ -134,7 +134,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, on
     screenSize === "desktop" || (screenSize === "mobile" && isMobileOpen);
 
   const renderMenuItem = (item: MenuItem) => {
-    const isActive = pathname === item.href;
+    const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
     return (
       <button
         key={item.href}

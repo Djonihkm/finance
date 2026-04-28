@@ -83,7 +83,7 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
         className="flex items-center gap-2 text-gray-600 hover:text-[#11355b] transition-colors cursor-pointer font-medium py-2 mb-4"
       >
         <ArrowLeft size={18} />
-        Retour
+        Retour Dépenses
       </button>
 
       <div className="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-4 lg:gap-6">
@@ -123,8 +123,38 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
             </div>
           )}
 
+          {data.pieceJustificativeUrl && (() => {
+            const url = data.pieceJustificativeUrl!;
+            const isImage = /\.(jpg|jpeg|png|webp)(\?|$)/i.test(url);
+            return (
+              <div className="mt-4">
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Pièce justificative</p>
+                {isImage ? (
+                  <a href={url} target="_blank" rel="noopener noreferrer" className="block">
+                    <img
+                      src={url}
+                      alt="Pièce justificative"
+                      className="w-full max-h-64 object-contain rounded-lg border border-gray-200 bg-gray-50 hover:opacity-90 transition-opacity cursor-zoom-in"
+                    />
+                    <p className="text-xs text-gray-400 mt-1 text-center">Cliquer pour agrandir</p>
+                  </a>
+                ) : (
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 border border-gray-200 bg-gray-50 hover:bg-gray-100 rounded-lg px-4 py-3 transition-colors"
+                  >
+                    <FileText size={20} className="text-red-500 shrink-0" />
+                    <span className="text-sm font-medium text-[#11355b]">Voir le document PDF</span>
+                  </a>
+                )}
+              </div>
+            );
+          })()}
+
           {data.commentaire && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3 mt-4">
               <MessageSquare size={16} className="text-amber-600 shrink-0 mt-0.5" />
               <div>
                 <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider mb-1">

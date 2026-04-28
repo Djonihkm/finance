@@ -8,6 +8,7 @@
  */
 
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { getSession } from "@/lib/session";
 import { getDepenses, getBons } from "@/lib/queries";
 import { serialize } from "@/lib/utils/serialize";
@@ -23,11 +24,13 @@ export default async function DepensesEtablissementPage() {
   ]);
 
   return (
-    <DepensesView
-      depenses={serialize(depenses)}
-      bons={serialize(bons)}
-      basePath="/depensesEtablissement"
+    <Suspense>
+      <DepensesView
+        depenses={serialize(depenses)}
+        bons={serialize(bons)}
+        basePath="/depensesEtablissement"
         userPrismaRole={session.role}
-    />
+      />
+    </Suspense>
   );
 }

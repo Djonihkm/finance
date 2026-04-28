@@ -25,7 +25,7 @@ export default async function BonDetailPage({
   return (
     <BonDetailView
       data={serialize(bon)}
-      backPath="/depensesEtablissement"
+      backPath="/depensesEtablissement?tab=bons"
       userPrismaRole={session?.role}
     />
   );
