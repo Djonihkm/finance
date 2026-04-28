@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Search, ChevronDown, Users, ShieldCheck, Lock, Plus, Pencil, Trash2, X } from "lucide-react";
+import { Search, ChevronDown, Users, ShieldCheck, Lock, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { type UserRow } from "@/lib/queries";
 import { formatRole, ROLE_LABELS } from "@/lib/utils/formatters";
@@ -151,7 +151,7 @@ export default function UtilisateursView({ data }: Props) {
                   <th className="px-4 md:px-6 py-4 hidden md:table-cell">Établissement</th>
                   <th className="px-4 md:px-6 py-4 hidden lg:table-cell">Créé le</th>
                   <th className="px-4 md:px-6 py-4">Statut</th>
-                  <th className="px-4 md:px-6 py-4 text-right">Actions</th>
+                  <th className="px-4 md:px-6 py-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="text-sm">
@@ -195,15 +195,7 @@ export default function UtilisateursView({ data }: Props) {
                         </span>
                       </td>
                       <td className="px-4 md:px-6 py-4">
-                        <div className="flex items-center justify-end gap-3">
-                          <button
-                            type="button"
-                            onClick={(ev) => { ev.stopPropagation(); router.push(`/utilisateurs/${u.id}`); }}
-                            className="inline-flex items-center gap-1 text-xs text-[#11355b] hover:text-[#1a4a7a] font-medium transition-colors cursor-pointer"
-                          >
-                            <Pencil size={13} />
-                            Modifier
-                          </button>
+                        <div className="flex items-center justify-end">
                           <button
                             type="button"
                             onClick={(ev) => { ev.stopPropagation(); setConfirmTarget({ id: u.id, nom: `${u.prenom} ${u.nom}` }); }}

@@ -36,6 +36,12 @@ export async function PUT(req: NextRequest, { params }: Params) {
   if (body.telephone !== undefined) data.telephone = body.telephone;
   if (body.poste !== undefined) data.poste = body.poste;
   if (body.isActive !== undefined) data.isActive = body.isActive;
+  if (body.role !== undefined && (session.role === "SUPER_ADMIN" || session.role === "MINISTERE" || session.role === "ADMIN")) {
+    data.role = body.role;
+  }
+  if (body.etablissementId !== undefined && (session.role === "SUPER_ADMIN" || session.role === "MINISTERE" || session.role === "ADMIN")) {
+    data.etablissementId = body.etablissementId || null;
+  }
 
   if (body.newPassword && body.currentPassword) {
     const userWithPwd = await prisma.user.findUnique({ where: { id } });

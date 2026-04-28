@@ -20,6 +20,14 @@ import {
 import type { UserRole } from "@/lib/types";
 import LogoutModal from "./LogoutModal";
 
+const PRISMA_ROLE_CONFIG: Record<string, { label: string; badge: string }> = {
+  SUPER_ADMIN: { label: "Super Admin",     badge: "bg-yellow-400/10 border-yellow-400/30 text-yellow-300" },
+  MINISTERE:   { label: "Ministère",       badge: "bg-blue-400/10 border-blue-400/30 text-blue-300" },
+  DIRECTEUR:   { label: "Directeur",       badge: "bg-purple-400/10 border-purple-400/30 text-purple-300" },
+  ADMIN:       { label: "Administrateur",  badge: "bg-cyan-400/10 border-cyan-400/30 text-cyan-300" },
+  COMPTABLE:   { label: "Comptable",       badge: "bg-emerald-400/10 border-emerald-400/30 text-emerald-300" },
+};
+
 interface MenuItem {
   label: string;
   icon: React.ReactNode;
@@ -31,6 +39,9 @@ interface SidebarProps {
   isMobileOpen: boolean;
   onCloseMobile: () => void;
   onNavigate: (href: string) => void;
+  userNom?: string;
+  userPrenom?: string;
+  userPrismaRole?: string;
 }
 
 type ScreenSize = "mobile" | "tablet" | "desktop";
@@ -87,12 +98,20 @@ const roleConfig: Record<UserRole, {
   },
 };
 
-const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, onNavigate }) => {
+const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, onNavigate, userNom, userPrenom, userPrismaRole }) => {
   const pathname = usePathname();
   const [screenSize, setScreenSize] = useState<ScreenSize>("desktop");
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const config = roleConfig[role];
+
+  // Nom réel depuis la session, fallback sur les valeurs statiques du roleConfig
+  const displayName = userPrenom && userNom ? `${userPrenom} ${userNom}` : config.userLabel;
+  const displaySub  = userPrismaRole ? (PRISMA_ROLE_CONFIG[userPrismaRole]?.label ?? config.userSub) : config.userSub;
+  const displayInitials = userPrenom && userNom
+    ? `${userPrenom[0]}${userNom[0]}`.toUpperCase()
+    : config.userInitials;
+  const badgeCfg = userPrismaRole ? PRISMA_ROLE_CONFIG[userPrismaRole] : null;
 
   useEffect(() => {
     const check = () => {
@@ -180,11 +199,11 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, on
           )}
         </div>
 
-        {/* Badge rôle visible uniquement pour superadmin */}
-        {role === "superadmin" && showLabels && (
-          <div className="mx-4 mt-3 flex items-center gap-2 px-3 py-1.5 rounded-md bg-yellow-400/10 border border-yellow-400/30">
-            <ShieldCheck size={13} className="text-yellow-400 shrink-0" />
-            <span className="text-xs font-semibold text-yellow-300 uppercase tracking-wider">Super Admin</span>
+        {/* Badge rôle — affiché pour tous les rôles connectés */}
+        {badgeCfg && showLabels && (
+          <div className={`mx-4 mt-3 flex items-center gap-2 px-3 py-1.5 rounded-md border ${badgeCfg.badge}`}>
+            <ShieldCheck size={13} className="shrink-0" />
+            <span className="text-xs font-semibold uppercase tracking-wider">{badgeCfg.label}</span>
           </div>
         )}
 
@@ -205,15 +224,15 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, on
           <div className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${!showLabels ? "justify-center" : ""}`}>
             <div className="relative shrink-0">
               <div className="w-9 h-9 rounded-full bg-slate-600 flex items-center justify-center text-sm font-bold border-2 border-blue-400">
-                {config.userInitials}
+                {displayInitials}
               </div>
               <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-[#1a365d] rounded-full" />
             </div>
             {showLabels && (
               <>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">{config.userLabel}</p>
-                  <p className="text-xs text-blue-300 truncate">{config.userSub}</p>
+                  <p className="text-sm font-semibold text-white truncate">{displayName}</p>
+                  <p className="text-xs text-blue-300 truncate">{displaySub}</p>
                 </div>
                 <button
                   type="button"

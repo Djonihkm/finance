@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, User, Mail, Lock, Phone, Briefcase, Building2, ChevronRight, CheckCircle2 } from "lucide-react";
+import {
+  ArrowLeft, User, Mail, Phone, Briefcase,
+  Building2, ChevronRight, CheckCircle2, Send,
+} from "lucide-react";
 import { toast } from "sonner";
 import { ROLE_LABELS } from "@/lib/utils/formatters";
 
@@ -21,8 +24,6 @@ interface FormData {
   nom: string;
   prenom: string;
   email: string;
-  password: string;
-  confirmPassword: string;
   role: string;
   telephone: string;
   poste: string;
@@ -39,14 +40,13 @@ export default function NouveauUtilisateurView({ etablissements }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [createdEmail, setCreatedEmail] = useState("");
   const [createdName, setCreatedName] = useState("");
 
   const [form, setForm] = useState<FormData>({
     nom: "",
     prenom: "",
     email: "",
-    password: "",
-    confirmPassword: "",
     role: "COMPTABLE",
     telephone: "",
     poste: "",
@@ -62,9 +62,6 @@ export default function NouveauUtilisateurView({ etablissements }: Props) {
     if (!form.nom.trim()) { toast.error("Le nom est requis."); return; }
     if (!form.prenom.trim()) { toast.error("Le prénom est requis."); return; }
     if (!form.email.trim()) { toast.error("L'email est requis."); return; }
-    if (!form.password) { toast.error("Le mot de passe est requis."); return; }
-    if (form.password.length < 8) { toast.error("Le mot de passe doit contenir au moins 8 caractères."); return; }
-    if (form.password !== form.confirmPassword) { toast.error("Les mots de passe ne correspondent pas."); return; }
 
     setLoading(true);
     try {
@@ -75,7 +72,6 @@ export default function NouveauUtilisateurView({ etablissements }: Props) {
           nom: form.nom,
           prenom: form.prenom,
           email: form.email,
-          password: form.password,
           role: form.role,
           telephone: form.telephone || undefined,
           poste: form.poste || undefined,
@@ -87,6 +83,7 @@ export default function NouveauUtilisateurView({ etablissements }: Props) {
         throw new Error(err.error ?? "Erreur");
       }
       setCreatedName(`${form.prenom} ${form.nom}`);
+      setCreatedEmail(form.email);
       setShowSuccess(true);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur lors de la création.");
@@ -112,7 +109,9 @@ export default function NouveauUtilisateurView({ etablissements }: Props) {
 
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-[#11355b]">Nouvel utilisateur</h1>
-          <p className="text-gray-500 text-sm mt-2">Créez un nouveau compte utilisateur dans le système</p>
+          <p className="text-gray-500 text-sm mt-2">
+            Un email d&apos;activation sera automatiquement envoyé à l&apos;utilisateur.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-6">
@@ -176,26 +175,14 @@ export default function NouveauUtilisateurView({ etablissements }: Props) {
               </div>
             </Section>
 
-            {/* Mot de passe */}
-            <Section icon={<Lock size={18} className="text-white" />} iconBg="bg-orange-400" title="Mot de passe">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <Field label="Mot de passe">
-                  <div className="relative">
-                    <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input type="password" value={form.password} onChange={set("password")} placeholder="Min. 8 caractères" className={`${inputClass} pl-9`} />
-                  </div>
-                </Field>
-                <Field label="Confirmer le mot de passe">
-                  <div className="relative">
-                    <Lock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input type="password" value={form.confirmPassword} onChange={set("confirmPassword")} placeholder="••••••••" className={`${inputClass} pl-9`} />
-                  </div>
-                </Field>
-              </div>
-              <p className="text-xs text-gray-400 mt-3">
-                Le mot de passe doit contenir au moins 8 caractères. L&apos;utilisateur pourra le modifier depuis son profil.
+            {/* Info mot de passe */}
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-3">
+              <Send size={16} className="text-blue-500 shrink-0 mt-0.5" />
+              <p className="text-sm text-blue-800 leading-relaxed">
+                Un email sera envoyé à l&apos;adresse indiquée avec un lien d&apos;activation valable{" "}
+                <strong>24 heures</strong>. L&apos;utilisateur définira son propre mot de passe en cliquant sur ce lien.
               </p>
-            </Section>
+            </div>
           </div>
 
           {/* Récapitulatif */}
@@ -229,7 +216,7 @@ export default function NouveauUtilisateurView({ etablissements }: Props) {
                 disabled={loading}
                 className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm"
               >
-                {loading ? "Création…" : "Créer l'utilisateur"}
+                {loading ? "Envoi en cours…" : "Créer et envoyer l'invitation"}
                 {!loading && <ChevronRight size={16} />}
               </button>
             </div>
@@ -244,9 +231,13 @@ export default function NouveauUtilisateurView({ etablissements }: Props) {
             <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
               <CheckCircle2 size={44} className="text-emerald-500" strokeWidth={2.5} />
             </div>
-            <h3 className="text-xl font-bold text-[#11355b] mb-3">Utilisateur créé avec succès</h3>
-            <p className="text-sm text-gray-500 mb-6">
-              Le compte de <span className="font-semibold text-[#11355b]">{createdName}</span> a été créé et est prêt à l&apos;emploi.
+            <h3 className="text-xl font-bold text-[#11355b] mb-2">Invitation envoyée !</h3>
+            <p className="text-sm text-gray-500 mb-1">
+              Le compte de <span className="font-semibold text-[#11355b]">{createdName}</span> a été créé.
+            </p>
+            <p className="text-sm text-gray-400 mb-6">
+              Un email d&apos;activation a été envoyé à{" "}
+              <span className="font-medium text-gray-600">{createdEmail}</span>.
             </p>
             <button
               type="button"

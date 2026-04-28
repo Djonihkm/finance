@@ -26,7 +26,7 @@ export type EtablissementRow = Prisma.EtablissementGetPayload<{
 
 export type EtablissementDetail = Prisma.EtablissementGetPayload<{
   include: {
-    users: { where: { isActive: true; deletedAt: null } };
+    users: { where: { deletedAt: null } };
     budgets: { orderBy: { annee: "desc" } };
     depenses: { where: { deletedAt: null }; orderBy: { createdAt: "desc" }; take: 10 };
     bons: { where: { deletedAt: null }; orderBy: { createdAt: "desc" }; take: 10 };
@@ -80,14 +80,16 @@ export async function getEtablissements(): Promise<EtablissementRow[]> {
     },
     orderBy: { createdAt: "desc" },
   });
+
+  
 }
 
 /** Détail complet d'un établissement avec ses utilisateurs, budgets et docs. */
 export async function getEtablissementById(id: string): Promise<EtablissementDetail | null> {
   return prisma.etablissement.findUnique({
-    where: { id, isActive: true, deletedAt: null },
+    where: { id, deletedAt: null },
     include: {
-      users: { where: { isActive: true, deletedAt: null }, orderBy: { role: "asc" } },
+      users: { where: { deletedAt: null }, orderBy: { role: "asc" } },
       budgets: { orderBy: { annee: "desc" } },
       depenses: { where: { deletedAt: null }, orderBy: { createdAt: "desc" }, take: 10 },
       bons: { where: { deletedAt: null }, orderBy: { createdAt: "desc" }, take: 10 },

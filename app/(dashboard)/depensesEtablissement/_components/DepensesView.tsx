@@ -18,7 +18,6 @@ import {
   formatMontant,
   formatDate,
   formatCategorie,
-  formatPaiement,
   STATUT_COLORS,
   formatStatut,
 } from "@/lib/utils/formatters";
@@ -116,14 +115,14 @@ export default function DepensesView({ depenses, bons, basePath }: Props) {
                 <th className="px-4 py-4">Montant</th>
                 {activeMode === "depenses" ? (
                   <>
-                    <th className="hidden md:table-cell px-4 py-4">Paiement</th>
-                    <th className="hidden md:table-cell px-4 py-4">Référence</th>
-                    <th className="px-4 py-4">Catégorie</th>
+                    <th className="hidden md:table-cell px-4 py-4">Catégorie</th>
+                    <th className="hidden lg:table-cell px-4 py-4">Référence</th>
+                    <th className="px-4 py-4">Statut</th>
                   </>
                 ) : (
                   <>
                     <th className="hidden md:table-cell px-4 py-4">Fournisseur</th>
-                    <th className="hidden md:table-cell px-4 py-4">Référence</th>
+                    <th className="hidden lg:table-cell px-4 py-4">Référence</th>
                     <th className="px-4 py-4">Statut</th>
                   </>
                 )}
@@ -152,14 +151,14 @@ export default function DepensesView({ depenses, bons, basePath }: Props) {
                     </td>
                     <td className="px-4 py-4 font-bold text-[#11355b]">{formatMontant(d.montant)}</td>
                     <td className="hidden md:table-cell px-4 py-4 text-gray-500">
-                      {formatPaiement(d.paiement)}
+                      {formatCategorie(d.categorie)}
                     </td>
-                    <td className="hidden md:table-cell px-4 py-4 text-gray-400 font-mono text-xs">
+                    <td className="hidden lg:table-cell px-4 py-4 text-gray-400 font-mono text-xs">
                       {d.reference}
                     </td>
                     <td className="px-4 py-4">
-                      <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-[11px] font-bold uppercase">
-                        {formatCategorie(d.categorie)}
+                      <span className={`px-2 py-1 rounded text-[11px] font-bold uppercase ${STATUT_COLORS[d.statut] ?? "bg-gray-100 text-gray-600"}`}>
+                        {formatStatut(d.statut)}
                       </span>
                     </td>
                   </tr>

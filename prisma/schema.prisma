@@ -32,6 +32,8 @@ model User {
   etablissementsCreates Etablissement[] @relation("EtablissementCreateur")
   historiques           Historique[]
   etablissement         Etablissement?  @relation("EtablissementUsers", fields: [etablissementId], references: [id])
+  resetToken            String?         @unique
+  resetTokenExp         DateTime?
 }
 
 model Etablissement {

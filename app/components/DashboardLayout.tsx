@@ -7,7 +7,14 @@ import { useRole } from "@/lib/role-context";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+interface DashboardLayoutProps {
+  children: React.ReactNode;
+  userNom?: string;
+  userPrenom?: string;
+  userPrismaRole?: string;
+}
+
+export default function DashboardLayout({ children, userNom, userPrenom, userPrismaRole }: DashboardLayoutProps) {
   const role = useRole();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -25,6 +32,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         isMobileOpen={isMobileOpen}
         onCloseMobile={() => setIsMobileOpen(false)}
         onNavigate={handleNav}
+        userNom={userNom}
+        userPrenom={userPrenom}
+        userPrismaRole={userPrismaRole}
       />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <Header onMenuClick={() => setIsMobileOpen((v) => !v)} />
