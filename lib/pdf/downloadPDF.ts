@@ -1,8 +1,9 @@
 import { pdf } from "@react-pdf/renderer";
+import type { DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 
 export async function downloadPDF(element: ReactElement, filename: string): Promise<void> {
-  const blob = await pdf(element).toBlob();
+  const blob = await pdf(element as ReactElement<DocumentProps>).toBlob();
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
