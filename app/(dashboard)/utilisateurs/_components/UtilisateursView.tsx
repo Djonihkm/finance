@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useNavigation } from "@/lib/navigation-context";
 import { Search, ChevronDown, Users, ShieldCheck, Lock, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { type UserRow } from "@/lib/queries";
@@ -23,6 +24,7 @@ interface Props {
 
 export default function UtilisateursView({ data }: Props) {
   const router = useRouter();
+  const { navigate } = useNavigation();
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [deleting, setDeleting] = useState(false);
@@ -70,7 +72,7 @@ export default function UtilisateursView({ data }: Props) {
           <h1 className="text-2xl font-bold text-[#11355b]">Liste des utilisateurs</h1>
           <button
             type="button"
-            onClick={() => router.push("/utilisateurs/nouveau")}
+            onClick={() => navigate("/utilisateurs/nouveau")}
             className="bg-[#11355b] hover:bg-[#1a4a7a] text-white px-4 py-2.5 rounded-lg flex items-center gap-2 font-semibold text-sm transition-colors shadow-sm cursor-pointer"
           >
             <Plus size={16} />
@@ -165,7 +167,7 @@ export default function UtilisateursView({ data }: Props) {
                   filtered.map((u) => (
                     <tr
                       key={u.id}
-                      onClick={() => router.push(`/utilisateurs/${u.id}`)}
+                      onClick={() => navigate(`/utilisateurs/${u.id}`)}
                       className="border-b border-gray-50 hover:bg-blue-50/30 transition-colors cursor-pointer"
                     >
                       <td className="px-4 md:px-6 py-4">
