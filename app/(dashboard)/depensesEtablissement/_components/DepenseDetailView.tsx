@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useNavigation } from "@/lib/navigation-context";
 import { ArrowLeft, CheckCircle, XCircle, RotateCcw, FileText, Info, MessageSquare, Loader2, Pencil, Send } from "lucide-react";
 import { toast } from "sonner";
 import { type DepenseRow } from "@/lib/queries";
@@ -18,6 +19,7 @@ interface Props {
 
 export default function DepenseDetailView({ data, backPath, userPrismaRole }: Props) {
   const router = useRouter();
+  const { navigate } = useNavigation();
   const [loading, setLoading] = useState<string | null>(null);
   const [showRenvoyer, setShowRenvoyer] = useState(false);
   const [commentaire, setCommentaire] = useState("");
@@ -80,7 +82,7 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
 
       <button
         type="button"
-        onClick={() => router.push(backPath)}
+        onClick={() => navigate(backPath)}
         className="flex items-center gap-2 text-gray-600 hover:text-[#11355b] transition-colors cursor-pointer font-medium py-2 mb-4"
       >
         <ArrowLeft size={18} />
@@ -230,7 +232,7 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
               <div className="space-y-2">
                 <button
                   type="button"
-                  onClick={() => router.push(`/depensesEtablissement/${encodeURIComponent(data.reference)}/modifier`)}
+                  onClick={() => navigate(`/depensesEtablissement/${encodeURIComponent(data.reference)}/modifier`)}
                   className="w-full bg-[#11355b] hover:bg-[#1a4a7a] text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
                 >
                   <Pencil size={18} />
@@ -300,7 +302,7 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
               <MessageSquare size={15} className="text-amber-600 shrink-0 mt-0.5" />
               <div>
                 <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider mb-1.5">
-                  Commentaire du directeur
+                  {isDirecteur ? "Votre commentaire" : "Commentaire du directeur"}
                 </p>
                 <p className="text-xs text-amber-800 leading-relaxed">{data.commentaire}</p>
               </div>

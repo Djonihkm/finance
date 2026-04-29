@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useNavigation } from "@/lib/navigation-context";
 import {
   ArrowLeft,
   CheckCircle,
@@ -37,6 +38,7 @@ export default function BonDetailView({
   userPrismaRole,
 }: Props) {
   const router = useRouter();
+  const { navigate } = useNavigation();
   const [loading, setLoading] = useState<string | null>(null);
   const [showRenvoyer, setShowRenvoyer] = useState(false);
   const [commentaire, setCommentaire] = useState("");
@@ -103,7 +105,7 @@ export default function BonDetailView({
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
       <button
         type="button"
-        onClick={() => router.push(backPath)}
+        onClick={() => navigate(backPath)}
         className="flex items-center gap-2 text-gray-600 hover:text-[#11355b] transition-colors cursor-pointer font-medium py-2 mb-4"
       >
         <ArrowLeft size={18} />
@@ -325,11 +327,11 @@ export default function BonDetailView({
                     <button
                       type="button"
                       onClick={() =>
-                        router.push(
+                        navigate(
                           `/depensesEtablissement/bons/${encodeURIComponent(data.reference)}/modifier`,
                         )
                       }
-                      className="w-full bg-[#11355b] hover:bg-[#1a4a7a] text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                      className="w-full bg-[#11355b] hover:bg-[#1a4a7a] text-white py-3 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer transition-colors mb-3"
                     >
                       <Pencil size={18} />
                       Modifier
@@ -454,7 +456,7 @@ export default function BonDetailView({
               />
               <div>
                 <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wider mb-1.5">
-                  Commentaire du directeur
+                  {isDirecteur ? "Votre commentaire" : "Commentaire du directeur"}
                 </p>
                 <p className="text-xs text-amber-800 leading-relaxed">
                   {data.commentaire}

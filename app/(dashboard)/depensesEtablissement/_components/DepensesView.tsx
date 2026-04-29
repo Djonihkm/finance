@@ -10,9 +10,10 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { useNavigation } from "@/lib/navigation-context";
 import { type DepenseRow, type BonRow } from "@/lib/queries";
 import {
   formatMontant,
@@ -41,22 +42,16 @@ export default function DepensesView({
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [activeMode, setActiveMode] = useState<Mode>(
-    searchParams.get("tab") === "bons" ? "bons" : "depenses"
-  );
-  const [page, setPage] = useState(1);
+  const { navigate } = useNavigation();
 
-  useEffect(() => {
-    const tab = searchParams.get("tab");
-    setActiveMode(tab === "bons" ? "bons" : "depenses");
-  }, [searchParams]);
+  const activeMode: Mode = searchParams.get("tab") === "bons" ? "bons" : "depenses";
+  const [page, setPage] = useState(1);
 
   const currentData = activeMode === "depenses" ? depenses : bons;
   const totalPages = Math.max(1, Math.ceil(currentData.length / PAGE_SIZE));
   const paginated = currentData.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleModeSwitch = (mode: Mode) => {
-    setActiveMode(mode);
     setPage(1);
     router.replace(mode === "bons" ? "?tab=bons" : "?", { scroll: false });
   };
@@ -64,9 +59,9 @@ export default function DepensesView({
   const handleRowClick = (reference: string) => {
     const encoded = encodeURIComponent(reference);
     if (activeMode === "depenses") {
-      router.push(`${basePath}/${encoded}`);
+      navigate(`${basePath}/${encoded}`);
     } else {
-      router.push(`${basePath}/bons/${encoded}`);
+      navigate(`${basePath}/bons/${encoded}`);
     }
   };
 
@@ -115,7 +110,7 @@ export default function DepensesView({
           {userPrismaRole === "COMPTABLE" && (
             <button
               onClick={() =>
-                router.push(
+                navigate(
                   activeMode === "depenses"
                     ? `${basePath}/nouveau`
                     : `${basePath}/bons/nouveau`,

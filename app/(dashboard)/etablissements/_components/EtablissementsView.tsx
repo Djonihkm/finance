@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useNavigation } from "@/lib/navigation-context";
 import { Search, Building2, CheckCircle2, XCircle, Plus, ChevronLeft, ChevronRight, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { type EtablissementRow } from "@/lib/queries";
@@ -15,6 +16,7 @@ interface Props {
 
 export default function EtablissementsView({ data }: Props) {
   const router = useRouter();
+  const { navigate } = useNavigation();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [deleting, setDeleting] = useState(false);
@@ -63,7 +65,7 @@ export default function EtablissementsView({ data }: Props) {
           <h1 className="text-2xl font-bold text-[#11355b]">Établissements</h1>
           <button
             type="button"
-            onClick={() => router.push("/etablissements/nouveau")}
+            onClick={() => navigate("/etablissements/nouveau")}
             className="bg-[#11355b] hover:bg-[#1a4a7a] text-white px-4 py-2.5 rounded-lg flex items-center gap-2 font-semibold text-sm transition-colors shadow-sm cursor-pointer"
           >
             <Plus size={16} />
@@ -141,7 +143,7 @@ export default function EtablissementsView({ data }: Props) {
                   paginated.map((e) => (
                     <tr
                       key={e.id}
-                      onClick={() => router.push(`/etablissements/${encodeURIComponent(e.id)}`)}
+                      onClick={() => navigate(`/etablissements/${encodeURIComponent(e.id)}`)}
                       className="border-b border-gray-50 hover:bg-blue-50/30 transition-colors cursor-pointer"
                     >
                       <td className="px-4 md:px-6 py-4">
