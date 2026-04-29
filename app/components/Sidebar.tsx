@@ -67,6 +67,11 @@ const etablissementMenuItems: MenuItem[] = [
   { label: "Profil", icon: <CircleUserRound className="w-5 h-5" />, href: "/profil" },
 ];
 
+const etablissementAdminMenuItems: MenuItem[] = [
+  ...etablissementMenuItems,
+  { label: "Utilisateurs", icon: <Users className="w-5 h-5" />, href: "/utilisateurs" },
+];
+
 const roleConfig: Record<UserRole, {
   menuItems: MenuItem[];
   sectionLabel: string;
@@ -103,6 +108,10 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, on
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const config = roleConfig[role];
+  const menuItems =
+    role === "etablissement" && userPrismaRole === "ADMIN"
+      ? etablissementAdminMenuItems
+      : config.menuItems;
 
   // Nom réel depuis la session, fallback sur les valeurs statiques du roleConfig
   const displayName = userPrenom && userNom ? `${userPrenom} ${userNom}` : config.userLabel;
@@ -215,7 +224,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, on
           ) : (
             <div className="w-8 h-px bg-white/20 mx-auto my-2" />
           )}
-          <div className="space-y-1">{config.menuItems.map(renderMenuItem)}</div>
+          <div className="space-y-1">{menuItems.map(renderMenuItem)}</div>
         </nav>
 
         {/* Footer utilisateur */}

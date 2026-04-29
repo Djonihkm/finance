@@ -10,6 +10,10 @@ import { toast } from "sonner";
 import type { UserDetail } from "@/lib/queries";
 import { formatRole, formatDate, ROLE_LABELS } from "@/lib/utils/formatters";
 
+const ETAB_ROLE_LABELS = Object.fromEntries(
+  Object.entries(ROLE_LABELS).filter(([k]) => ["ADMIN", "DIRECTEUR", "COMPTABLE"].includes(k))
+);
+
 const ROLE_COLORS: Record<string, string> = {
   SUPER_ADMIN: "bg-[#11355b] text-white",
   MINISTERE:   "bg-[#1a4a7a] text-white",
@@ -23,6 +27,7 @@ const ROLES_NEED_ETABLISSEMENT = new Set(["ADMIN", "DIRECTEUR", "COMPTABLE"]);
 interface Props {
   data: UserDetail;
   etablissements: { id: string; nom: string }[];
+  isEtabAdmin?: boolean;
 }
 
 interface EditForm {
@@ -34,7 +39,7 @@ interface EditForm {
   etablissementId: string;
 }
 
-export default function UtilisateurDetailView({ data, etablissements }: Props) {
+export default function UtilisateurDetailView({ data, etablissements, isEtabAdmin = false }: Props) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -240,12 +245,12 @@ export default function UtilisateurDetailView({ data, etablissements }: Props) {
                     onChange={(e) => handleField("role", e.target.value)}
                     className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#11355b]/20 focus:border-[#11355b] transition-colors"
                   >
-                    {Object.entries(ROLE_LABELS).map(([key, label]) => (
+                    {Object.entries(isEtabAdmin ? ETAB_ROLE_LABELS : ROLE_LABELS).map(([key, label]) => (
                       <option key={key} value={key}>{label}</option>
                     ))}
                   </select>
                 </div>
-                {ROLES_NEED_ETABLISSEMENT.has(form.role) && (
+                {ROLES_NEED_ETABLISSEMENT.has(form.role) && !isEtabAdmin && (
                   <div className="sm:col-span-2">
                     <label htmlFor="edit-etablissement" className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5">
                       Établissement

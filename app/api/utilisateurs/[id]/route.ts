@@ -23,12 +23,22 @@ export async function GET(_req: NextRequest, { params }: Params) {
   return NextResponse.json(user);
 }
 
+const ETAB_ROLES = ["ADMIN", "DIRECTEUR", "COMPTABLE"];
+
 export async function PUT(req: NextRequest, { params }: Params) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
   const { id } = await params;
   const body = await req.json();
+
+  // ADMIN d'établissement : vérifier que l'utilisateur cible lui appartient
+  if (session.role === "ADMIN") {
+    const target = await prisma.user.findUnique({ where: { id }, select: { etablissementId: true } });
+    if (!target || target.etablissementId !== session.etablissementId) {
+      return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    }
+  }
 
   const data: Record<string, unknown> = {};
   if (body.nom !== undefined) data.nom = body.nom;
@@ -37,10 +47,13 @@ export async function PUT(req: NextRequest, { params }: Params) {
   if (body.poste !== undefined) data.poste = body.poste;
   if (body.isActive !== undefined) data.isActive = body.isActive;
   if (body.avatarUrl !== undefined) data.avatarUrl = body.avatarUrl;
-  if (body.role !== undefined && (session.role === "SUPER_ADMIN" || session.role === "MINISTERE" || session.role === "ADMIN")) {
+  if (body.role !== undefined && (session.role === "SUPER_ADMIN" || session.role === "MINISTERE")) {
     data.role = body.role;
   }
-  if (body.etablissementId !== undefined && (session.role === "SUPER_ADMIN" || session.role === "MINISTERE" || session.role === "ADMIN")) {
+  if (body.role !== undefined && session.role === "ADMIN" && ETAB_ROLES.includes(body.role)) {
+    data.role = body.role;
+  }
+  if (body.etablissementId !== undefined && (session.role === "SUPER_ADMIN" || session.role === "MINISTERE")) {
     data.etablissementId = body.etablissementId || null;
   }
 
@@ -68,6 +81,15 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   }
 
   const { id } = await params;
+
+  // ADMIN d'établissement : vérifier que l'utilisateur cible lui appartient
+  if (session.role === "ADMIN") {
+    const target = await prisma.user.findUnique({ where: { id }, select: { etablissementId: true } });
+    if (!target || target.etablissementId !== session.etablissementId) {
+      return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
+    }
+  }
+
   await prisma.user.update({
     where: { id },
     data: { isActive: false, deletedAt: new Date() },

@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { ROLE_LABELS } from "@/lib/utils/formatters";
 
 const ROLES = Object.entries(ROLE_LABELS);
+const ETAB_ROLES = Object.entries(ROLE_LABELS).filter(([k]) => ["ADMIN", "DIRECTEUR", "COMPTABLE"].includes(k));
 
 interface Etablissement {
   id: string;
@@ -18,6 +19,7 @@ interface Etablissement {
 
 interface Props {
   etablissements: Etablissement[];
+  isEtabAdmin?: boolean;
 }
 
 interface FormData {
@@ -36,7 +38,7 @@ const selectClass =
   "w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#11355b]/20 focus:border-[#11355b] transition-colors bg-white cursor-pointer";
 const labelClass = "block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1.5";
 
-export default function NouveauUtilisateurView({ etablissements }: Props) {
+export default function NouveauUtilisateurView({ etablissements, isEtabAdmin = false }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -153,17 +155,17 @@ export default function NouveauUtilisateurView({ etablissements }: Props) {
                   </div>
                 </Field>
                 <Field label="Rôle">
-                  <select value={form.role} onChange={set("role")} className={selectClass}>
-                    {ROLES.map(([value, label]) => (
+                  <select value={form.role} onChange={set("role")} className={selectClass} aria-label="Rôle">
+                    {(isEtabAdmin ? ETAB_ROLES : ROLES).map(([value, label]) => (
                       <option key={value} value={value}>{label}</option>
                     ))}
                   </select>
                 </Field>
-                {roleNeedsEtab && (
+                {roleNeedsEtab && !isEtabAdmin && (
                   <Field label="Établissement">
                     <div className="relative">
                       <Building2 size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <select value={form.etablissementId} onChange={set("etablissementId")} className={`${selectClass} pl-9`}>
+                      <select value={form.etablissementId} onChange={set("etablissementId")} className={`${selectClass} pl-9`} aria-label="Établissement">
                         <option value="">— Sélectionner —</option>
                         {etablissements.map((e) => (
                           <option key={e.id} value={e.id}>{e.nom}</option>
@@ -196,7 +198,7 @@ export default function NouveauUtilisateurView({ etablissements }: Props) {
                 <RecapRow label="Nom" value={form.nom} />
                 <RecapRow label="Email" value={form.email} />
                 <RecapRow label="Rôle" value={ROLE_LABELS[form.role] ?? form.role} />
-                {roleNeedsEtab && (
+                {roleNeedsEtab && !isEtabAdmin && (
                   <RecapRow
                     label="Établissement"
                     value={etablissements.find((e) => e.id === form.etablissementId)?.nom ?? "—"}

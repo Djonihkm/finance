@@ -40,6 +40,8 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(users);
 }
 
+const ETAB_ROLES = ["ADMIN", "DIRECTEUR", "COMPTABLE"];
+
 export async function POST(req: NextRequest) {
   const session = await getSession();
   if (!session || (session.role !== "SUPER_ADMIN" && session.role !== "MINISTERE" && session.role !== "ADMIN")) {
@@ -47,10 +49,18 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { nom, prenom, email, role, telephone, poste, etablissementId } = body;
+  let { nom, prenom, email, role, telephone, poste, etablissementId } = body;
 
   if (!nom || !prenom || !email || !role) {
     return NextResponse.json({ error: "Champs requis manquants" }, { status: 400 });
+  }
+
+  // ADMIN d'établissement : forcer son étab et limiter les rôles
+  if (session.role === "ADMIN") {
+    if (!ETAB_ROLES.includes(role)) {
+      return NextResponse.json({ error: "Rôle non autorisé." }, { status: 403 });
+    }
+    etablissementId = session.etablissementId;
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });

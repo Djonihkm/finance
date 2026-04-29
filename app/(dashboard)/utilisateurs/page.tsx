@@ -14,8 +14,17 @@ import UtilisateursView from "./_components/UtilisateursView";
 
 export default async function UtilisateursPage() {
   const session = await getSession();
-  if (!session || session.uiRole === "etablissement") redirect("/mon-etablissement");
+  if (!session) redirect("/login");
 
-  const utilisateurs = await getUsers();
-  return <UtilisateursView data={utilisateurs} />;
+  // Seuls les rôles autorisés accèdent à cette page
+  if (session.uiRole === "etablissement" && session.role !== "ADMIN") {
+    redirect("/mon-etablissement");
+  }
+
+  const isEtabAdmin = session.role === "ADMIN";
+  const utilisateurs = isEtabAdmin
+    ? await getUsers({ etablissementId: session.etablissementId! })
+    : await getUsers();
+
+  return <UtilisateursView data={utilisateurs} isEtabAdmin={isEtabAdmin} />;
 }

@@ -8,6 +8,7 @@ import { type UserRow } from "@/lib/queries";
 import { formatRole, ROLE_LABELS } from "@/lib/utils/formatters";
 
 const ROLES = Object.keys(ROLE_LABELS);
+const ETAB_ROLES = ["ADMIN", "DIRECTEUR", "COMPTABLE"];
 
 const roleBadge: Record<string, string> = {
   SUPER_ADMIN: "bg-[#11355b] text-white",
@@ -19,9 +20,10 @@ const roleBadge: Record<string, string> = {
 
 interface Props {
   data: UserRow[];
+  isEtabAdmin?: boolean;
 }
 
-export default function UtilisateursView({ data }: Props) {
+export default function UtilisateursView({ data, isEtabAdmin = false }: Props) {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
@@ -131,7 +133,7 @@ export default function UtilisateursView({ data }: Props) {
               className="w-full sm:w-auto appearance-none pl-3 pr-8 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#11355b]/20 focus:border-[#11355b] transition-colors bg-white cursor-pointer"
             >
               <option value="">Tous les rôles</option>
-              {ROLES.map((r) => (
+              {(isEtabAdmin ? ETAB_ROLES : ROLES).map((r) => (
                 <option key={r} value={r}>{formatRole(r)}</option>
               ))}
             </select>
@@ -148,7 +150,7 @@ export default function UtilisateursView({ data }: Props) {
                   <th className="px-4 md:px-6 py-4">Nom</th>
                   <th className="px-4 md:px-6 py-4 hidden sm:table-cell">Email</th>
                   <th className="px-4 md:px-6 py-4">Rôle</th>
-                  <th className="px-4 md:px-6 py-4 hidden md:table-cell">Établissement</th>
+                  {!isEtabAdmin && <th className="px-4 md:px-6 py-4 hidden md:table-cell">Établissement</th>}
                   <th className="px-4 md:px-6 py-4 hidden lg:table-cell">Créé le</th>
                   <th className="px-4 md:px-6 py-4">Statut</th>
                   <th className="px-4 md:px-6 py-4 text-right">Action</th>
@@ -157,7 +159,7 @@ export default function UtilisateursView({ data }: Props) {
               <tbody className="text-sm">
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-10 text-center text-gray-400 text-sm">
+                    <td colSpan={isEtabAdmin ? 6 : 7} className="px-6 py-10 text-center text-gray-400 text-sm">
                       Aucun utilisateur trouvé.
                     </td>
                   </tr>
@@ -180,9 +182,11 @@ export default function UtilisateursView({ data }: Props) {
                           {formatRole(u.role)}
                         </span>
                       </td>
-                      <td className="px-4 md:px-6 py-4 text-gray-600 hidden md:table-cell">
-                        {u.etablissement?.nom ?? "—"}
-                      </td>
+                      {!isEtabAdmin && (
+                        <td className="px-4 md:px-6 py-4 text-gray-600 hidden md:table-cell">
+                          {u.etablissement?.nom ?? "—"}
+                        </td>
+                      )}
                       <td className="px-4 md:px-6 py-4 text-gray-400 hidden lg:table-cell">
                         {new Date(u.createdAt).toLocaleDateString("fr-FR")}
                       </td>

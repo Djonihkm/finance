@@ -10,11 +10,15 @@ export default async function NouvelUtilisateurPage() {
     redirect("/utilisateurs");
   }
 
-  const etablissements = await prisma.etablissement.findMany({
-    where: { deletedAt: null, isActive: true },
-    select: { id: true, nom: true },
-    orderBy: { nom: "asc" },
-  });
+  const isEtabAdmin = session.role === "ADMIN";
 
-  return <NouveauUtilisateurView etablissements={etablissements} />;
+  const etablissements = isEtabAdmin
+    ? []
+    : await prisma.etablissement.findMany({
+        where: { deletedAt: null, isActive: true },
+        select: { id: true, nom: true },
+        orderBy: { nom: "asc" },
+      });
+
+  return <NouveauUtilisateurView etablissements={etablissements} isEtabAdmin={isEtabAdmin} />;
 }
