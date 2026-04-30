@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
       {
         folder: "gest-finance/pieces-jointes",
         resource_type: "auto",
+        access_mode: "public",
         use_filename: true,
         unique_filename: true,
       },

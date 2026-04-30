@@ -11,6 +11,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useNavigation } from "@/lib/navigation-context";
 import { ArrowLeft, ArrowRight, FileText, Landmark, Wallet, UploadCloud, CheckCircle2, X, Paperclip } from "lucide-react";
 import { toast } from "sonner";
 
@@ -49,6 +50,7 @@ const labelClass = "block text-[11px] font-bold text-gray-500 uppercase tracking
 
 export default function NouvelleDepensePage() {
   const router = useRouter();
+  const { navigate } = useNavigation();
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
@@ -132,8 +134,7 @@ export default function NouvelleDepensePage() {
 
   const handleCloseModal = () => {
     setShowSuccess(false);
-    router.push("/depensesEtablissement");
-    router.refresh();
+    navigate("/depensesEtablissement");
   };
 
   return (
