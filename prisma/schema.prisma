@@ -73,47 +73,50 @@ model Budget {
 }
 
 model Depense {
-  id              String           @id @default(uuid())
-  reference       String           @unique
-  intitule        String
-  montant         Decimal          @db.Decimal(15, 2)
-  categorie       CategorieDepense
-  paiement        TypePaiement
-  fournisseur     String?
-  description     String?
-  date            DateTime
-  statut          StatutDocument   @default(ATTENTE)
-  signeParId      String?
-  signeAt         DateTime?
-  valideParId     String?
-  valideAt        DateTime?
-  commentaire            String?
-  pieceJustificativeUrl  String?
-  etablissementId        String
-  createdById            String
-  createdAt              DateTime         @default(now())
-  updatedAt              DateTime         @updatedAt
-  deletedAt              DateTime?
-  createdBy              User             @relation("DepenseCreateur", fields: [createdById], references: [id])
-  etablissement          Etablissement    @relation(fields: [etablissementId], references: [id])
-  signePar        User?            @relation("DepenseSignataire", fields: [signeParId], references: [id])
-  validePar       User?            @relation("DepenseValideur", fields: [valideParId], references: [id])
-  historiques     Historique[]
+  id                    String           @id @default(uuid())
+  reference             String           @unique
+  intitule              String
+  montant               Decimal          @db.Decimal(15, 2)
+  compteId              Int?
+  categorie             CategorieDepense
+  paiement              TypePaiement
+  fournisseur           String?
+  description           String?
+  date                  DateTime
+  statut                StatutDocument   @default(ATTENTE)
+  signeParId            String?
+  signeAt               DateTime?
+  valideParId           String?
+  valideAt              DateTime?
+  commentaire           String?
+  pieceJustificativeUrl String?
+  etablissementId       String
+  createdById           String
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  deletedAt             DateTime?
+  createdBy             User             @relation("DepenseCreateur", fields: [createdById], references: [id])
+  etablissement         Etablissement    @relation(fields: [etablissementId], references: [id])
+  signePar              User?            @relation("DepenseSignataire", fields: [signeParId], references: [id])
+  validePar             User?            @relation("DepenseValideur", fields: [valideParId], references: [id])
+  compte                Compte?          @relation(fields: [compteId], references: [id])
+  historiques           Historique[]
 }
 
 model BonCommande {
-  id              String             @id @default(uuid())
-  reference       String             @unique
-  intitule        String
-  fournisseur     String?
-  description     String?
-  date            DateTime
-  statut          StatutDocument     @default(ATTENTE)
-  montantTotal    Decimal            @db.Decimal(15, 2)
-  signeParId      String?
-  signeAt         DateTime?
-  valideParId     String?
-  valideAt        DateTime?
+  id                    String             @id @default(uuid())
+  reference             String             @unique
+  intitule              String
+  fournisseur           String?
+  compteId              Int?
+  description           String?
+  date                  DateTime
+  statut                StatutDocument     @default(ATTENTE)
+  montantTotal          Decimal            @db.Decimal(15, 2)
+  signeParId            String?
+  signeAt               DateTime?
+  valideParId           String?
+  valideAt              DateTime?
   commentaire           String?
   pieceJustificativeUrl String?
   etablissementId       String
@@ -122,11 +125,12 @@ model BonCommande {
   updatedAt             DateTime           @updatedAt
   deletedAt             DateTime?
   createdBy             User               @relation("BonCreateur", fields: [createdById], references: [id])
-  etablissement   Etablissement      @relation(fields: [etablissementId], references: [id])
-  signePar        User?              @relation("BonSignataire", fields: [signeParId], references: [id])
-  validePar       User?              @relation("BonValideur", fields: [valideParId], references: [id])
-  historiques     Historique[]
-  lignes          LigneBonCommande[]
+  etablissement         Etablissement      @relation(fields: [etablissementId], references: [id])
+  signePar              User?              @relation("BonSignataire", fields: [signeParId], references: [id])
+  validePar             User?              @relation("BonValideur", fields: [valideParId], references: [id])
+  compte                Compte?            @relation(fields: [compteId], references: [id])
+  historiques           Historique[]
+  lignes                LigneBonCommande[]
 }
 
 model LigneBonCommande {
@@ -157,23 +161,25 @@ model Historique {
 // Comptes et classes pour la comptabilité (plan comptable)
 
 model Classe {
-  id       Int      @id @default(autoincrement())
-  numero   String   @unique  // "6", "7", "5"
-  nom      String             // "Charges", "Produits", "Trésorerie"
-  comptes  Compte[]
+  id      Int      @id @default(autoincrement())
+  numero  String   @unique // "6", "7", "5"
+  nom     String // "Charges", "Produits", "Trésorerie"
+  comptes Compte[]
 }
 
 model Compte {
-  id        Int      @id @default(autoincrement())
-  numero    String   @unique  // "6100", "6503", etc.
-  nom       String             // "Fournitures scolaires", "Heures supplémentaires"
-  classeId  Int
-  classe    Classe   @relation(fields: [classeId], references: [id])
+  id       Int    @id @default(autoincrement())
+  numero   String @unique // "6100", "6503", etc.
+  nom      String // "Fournitures scolaires", "Heures supplémentaires"
+  classeId Int
+  classe   Classe @relation(fields: [classeId], references: [id])
 
   // Optionnel : parentId pour hiérarchie (compte principal / sous-compte)
-  parentId  Int?
-  parent    Compte?  @relation("CompteHierarchy", fields: [parentId], references: [id])
-  enfants   Compte[] @relation("CompteHierarchy")
+  parentId Int?
+  parent   Compte?   @relation("CompteHierarchy", fields: [parentId], references: [id])
+  enfants  Compte[]  @relation("CompteHierarchy")
+  depenses Depense[]
+  bonsCommande BonCommande[]
 }
 
 enum Role {
