@@ -55,6 +55,9 @@ export type DepenseRow = Prisma.DepenseGetPayload<{
     etablissement: { select: { id: true; nom: true } };
     signePar: { select: { nom: true; prenom: true } };
     validePar: { select: { nom: true; prenom: true } };
+    compte: {
+      select: { id: true, numero: true, nom: true }
+    };
   };
 }>;
 
@@ -85,7 +88,7 @@ export async function getEtablissements(): Promise<EtablissementRow[]> {
     orderBy: { createdAt: "desc" },
   });
 
-  
+
 }
 
 /** Détail complet d'un établissement avec ses utilisateurs, budgets et docs. */
@@ -149,6 +152,7 @@ export async function getDepenses(etablissementId: string): Promise<DepenseRow[]
       etablissement: { select: { id: true, nom: true } },
       signePar: { select: { nom: true, prenom: true } },
       validePar: { select: { nom: true, prenom: true } },
+      compte: { select: { id: true, numero: true, nom: true } }
     },
     orderBy: { createdAt: "desc" },
   });
@@ -165,6 +169,7 @@ export async function getAllDepenses(): Promise<DepenseRow[]> {
       etablissement: { select: { id: true, nom: true } },
       signePar: { select: { nom: true, prenom: true } },
       validePar: { select: { nom: true, prenom: true } },
+      compte: { select: { id: true, numero: true, nom: true } }
     },
     orderBy: { createdAt: "desc" },
   });
@@ -179,6 +184,7 @@ export async function getDepenseByReference(reference: string): Promise<DepenseR
       etablissement: { select: { id: true, nom: true } },
       signePar: { select: { nom: true, prenom: true } },
       validePar: { select: { nom: true, prenom: true } },
+      compte: { select: { id: true, numero: true, nom: true } }
     },
   });
 }

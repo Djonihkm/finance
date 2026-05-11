@@ -108,6 +108,14 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
             <InfoBlock label="Montant" value={formatMontant(montant)} highlight />
             <InfoBlock label="Catégorie" value={formatCategorie(data.categorie)} />
             <InfoBlock label="Mode de paiement" value={formatPaiement(data.paiement)} />
+            
+            {/* --- AJOUT DU COMPTE ICI --- */}
+            <InfoBlock 
+              label="Compte" 
+              value={data.compte ? `${data.compte.numero} - ${data.compte.nom}` : "Non spécifié"} 
+            />
+            {/* --------------------------- */}
+
             <InfoBlock label="Établissement" value={data.etablissement.nom} />
             <InfoBlock label="Créé par" value={`${data.createdBy.prenom} ${data.createdBy.nom}`} />
           </div>
@@ -286,13 +294,6 @@ export default function DepenseDetailView({ data, backPath, userPrismaRole }: Pr
               </button>
             </div>
           </div>
-
-          {/* <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 flex gap-3">
-            <Info size={18} className="text-amber-600 shrink-0 mt-0.5" />
-            <p className="text-xs text-amber-800">
-              Ce document est officiel. Toute modification après validation nécessite une réémission.
-            </p>
-          </div> */}
 
           {data.commentaire && (
             <div
