@@ -154,6 +154,28 @@ model Historique {
   user          User             @relation(fields: [userId], references: [id])
 }
 
+// Comptes et classes pour la comptabilité (plan comptable)
+
+model Classe {
+  id       Int      @id @default(autoincrement())
+  numero   String   @unique  // "6", "7", "5"
+  nom      String             // "Charges", "Produits", "Trésorerie"
+  comptes  Compte[]
+}
+
+model Compte {
+  id        Int      @id @default(autoincrement())
+  numero    String   @unique  // "6100", "6503", etc.
+  nom       String             // "Fournitures scolaires", "Heures supplémentaires"
+  classeId  Int
+  classe    Classe   @relation(fields: [classeId], references: [id])
+
+  // Optionnel : parentId pour hiérarchie (compte principal / sous-compte)
+  parentId  Int?
+  parent    Compte?  @relation("CompteHierarchy", fields: [parentId], references: [id])
+  enfants   Compte[] @relation("CompteHierarchy")
+}
+
 enum Role {
   SUPER_ADMIN
   MINISTERE
