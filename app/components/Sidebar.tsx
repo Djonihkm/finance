@@ -16,6 +16,7 @@ import {
   LogOut,
   ShieldCheck,
   ClipboardList,
+   BarChart3, 
 } from "lucide-react";
 import type { UserRole } from "@/lib/types";
 import LogoutModal from "./LogoutModal";
@@ -64,6 +65,7 @@ const ministereMenuItems: MenuItem[] = [
 const etablissementMenuItems: MenuItem[] = [
   { label: "Mon Établissement", icon: <School className="w-5 h-5" />, href: "/mon-etablissement" },
   { label: "Caisses", icon: <Receipt className="w-5 h-5" />, href: "/depensesEtablissement" },
+  { label: "État Financier",    icon: <BarChart3 className="w-5 h-5" />,     href: "/etat-financier" },
   { label: "Profil", icon: <CircleUserRound className="w-5 h-5" />, href: "/profil" },
 ];
 
