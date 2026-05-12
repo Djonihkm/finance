@@ -77,7 +77,6 @@ model Depense {
   reference             String           @unique
   intitule              String
   montant               Decimal          @db.Decimal(15, 2)
-  compteId              Int?
   categorie             CategorieDepense
   paiement              TypePaiement
   fournisseur           String?
@@ -95,12 +94,25 @@ model Depense {
   createdAt             DateTime         @default(now())
   updatedAt             DateTime         @updatedAt
   deletedAt             DateTime?
-  createdBy             User             @relation("DepenseCreateur", fields: [createdById], references: [id])
-  etablissement         Etablissement    @relation(fields: [etablissementId], references: [id])
-  signePar              User?            @relation("DepenseSignataire", fields: [signeParId], references: [id])
-  validePar             User?            @relation("DepenseValideur", fields: [valideParId], references: [id])
-  compte                Compte?          @relation(fields: [compteId], references: [id])
-  historiques           Historique[]
+
+  // Compte de charge (classe 6) — déjà existant, juste renommé pour clarté
+  compteId             Int?
+  compte               Compte?  @relation("DepenseCompteCharge", fields: [compteId], references: [id])
+
+  // Compte de trésorerie (classe 5) — nouveau
+  // Déduit automatiquement du mode de paiement lors de la validation
+  // ESPECES → 5700 Caisse | VIREMENT/autres → 5200 Banque
+  compteTresorerieId   Int?
+  compteTresorerie     Compte?  @relation("DepenseCompteTresorerie", fields: [compteTresorerieId], references: [id])
+
+  // Écritures comptables générées à la validation (partie double)
+  ecritures            Ecriture[]
+
+  createdBy     User          @relation("DepenseCreateur", fields: [createdById], references: [id])
+  etablissement Etablissement @relation(fields: [etablissementId], references: [id])
+  signePar      User?         @relation("DepenseSignataire", fields: [signeParId], references: [id])
+  validePar     User?         @relation("DepenseValideur", fields: [valideParId], references: [id])
+  historiques   Historique[]
 }
 
 model BonCommande {
@@ -108,7 +120,6 @@ model BonCommande {
   reference             String             @unique
   intitule              String
   fournisseur           String?
-  compteId              Int?
   description           String?
   date                  DateTime
   statut                StatutDocument     @default(ATTENTE)
@@ -124,13 +135,24 @@ model BonCommande {
   createdAt             DateTime           @default(now())
   updatedAt             DateTime           @updatedAt
   deletedAt             DateTime?
-  createdBy             User               @relation("BonCreateur", fields: [createdById], references: [id])
-  etablissement         Etablissement      @relation(fields: [etablissementId], references: [id])
-  signePar              User?              @relation("BonSignataire", fields: [signeParId], references: [id])
-  validePar             User?              @relation("BonValideur", fields: [valideParId], references: [id])
-  compte                Compte?            @relation(fields: [compteId], references: [id])
-  historiques           Historique[]
-  lignes                LigneBonCommande[]
+
+  // Compte de charge (classe 6)
+  compteId             Int?
+  compte               Compte?  @relation("BonCommandeCompteCharge", fields: [compteId], references: [id])
+
+  // Compte de trésorerie (classe 5) — nouveau
+  compteTresorerieId   Int?
+  compteTresorerie     Compte?  @relation("BonCommandeCompteTresorerie", fields: [compteTresorerieId], references: [id])
+
+  // Écritures comptables générées à la validation
+  ecritures            Ecriture[]
+
+  createdBy     User               @relation("BonCreateur", fields: [createdById], references: [id])
+  etablissement Etablissement      @relation(fields: [etablissementId], references: [id])
+  signePar      User?              @relation("BonSignataire", fields: [signeParId], references: [id])
+  validePar     User?              @relation("BonValideur", fields: [valideParId], references: [id])
+  historiques   Historique[]
+  lignes        LigneBonCommande[]
 }
 
 model LigneBonCommande {
@@ -158,29 +180,69 @@ model Historique {
   user          User             @relation(fields: [userId], references: [id])
 }
 
-// Comptes et classes pour la comptabilité (plan comptable)
+// ============================================================
+// PLAN COMPTABLE
+// ============================================================
 
 model Classe {
   id      Int      @id @default(autoincrement())
-  numero  String   @unique // "6", "7", "5"
-  nom     String // "Charges", "Produits", "Trésorerie"
+  numero  String   @unique // "5", "6", "7"
+  nom     String           // "Trésorerie", "Charges", "Produits"
   comptes Compte[]
 }
 
 model Compte {
   id       Int    @id @default(autoincrement())
-  numero   String @unique // "6100", "6503", etc.
-  nom      String // "Fournitures scolaires", "Heures supplémentaires"
+  numero   String @unique
+  nom      String
   classeId Int
   classe   Classe @relation(fields: [classeId], references: [id])
 
-  // Optionnel : parentId pour hiérarchie (compte principal / sous-compte)
   parentId Int?
-  parent   Compte?   @relation("CompteHierarchy", fields: [parentId], references: [id])
-  enfants  Compte[]  @relation("CompteHierarchy")
-  depenses Depense[]
-  bonsCommande BonCommande[]
+  parent   Compte?  @relation("CompteHierarchy", fields: [parentId], references: [id])
+  enfants  Compte[] @relation("CompteHierarchy")
+
+  // Relations vers les documents (nommées pour éviter l'ambiguïté)
+  depensesCharge       Depense[]     @relation("DepenseCompteCharge")
+  depensesTresorerie   Depense[]     @relation("DepenseCompteTresorerie")
+  bonsCharge           BonCommande[] @relation("BonCommandeCompteCharge")
+  bonsTresorerie       BonCommande[] @relation("BonCommandeCompteTresorerie")
+
+  // Toutes les écritures passées sur ce compte
+  ecritures            Ecriture[]
 }
+
+// ============================================================
+// ÉCRITURES COMPTABLES — Partie double
+// Chaque validation génère exactement 2 écritures :
+//   DÉBIT  → compte de charge (classe 6) — la dépense augmente
+//   CRÉDIT → compte de trésorerie (classe 5) — l'argent sort
+// Règle : Σ débits = Σ crédits (équilibre comptable)
+// ============================================================
+
+model Ecriture {
+  id      String       @id @default(uuid())
+  date    DateTime     // date comptable de l'opération
+  sens    SensEcriture // DEBIT ou CREDIT
+  montant Decimal      @db.Decimal(15, 2)
+  libelle String?      // description libre
+
+  // Compte mouvementé
+  compteId Int
+  compte   Compte @relation(fields: [compteId], references: [id])
+
+  // Source de l'écriture (l'un ou l'autre, jamais les deux)
+  depenseId     String?
+  depense       Depense?     @relation(fields: [depenseId], references: [id])
+  bonCommandeId String?
+  bonCommande   BonCommande? @relation(fields: [bonCommandeId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+// ============================================================
+// ÉNUMÉRATIONS
+// ============================================================
 
 enum Role {
   SUPER_ADMIN
@@ -196,6 +258,7 @@ enum StatutDocument {
   REVISION
   VALIDE
   REJETE
+  PAYE     // futur module de paiement
 }
 
 enum TypeEtablissement {
@@ -233,4 +296,10 @@ enum ActionHistorique {
   SIGNE
   VALIDE
   REJETE
+  PAYE     // traçabilité du paiement
+}
+
+enum SensEcriture {
+  DEBIT  // charge qui augmente / argent qui entre
+  CREDIT // trésorerie qui diminue / argent qui sort
 }
