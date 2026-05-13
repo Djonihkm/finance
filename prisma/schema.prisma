@@ -37,26 +37,27 @@ model User {
 }
 
 model Etablissement {
-  id          String            @id @default(uuid())
-  nom         String
-  code        String            @unique
-  type        TypeEtablissement
-  adresse     String?
-  ville       String?
-  region      String?
-  telephone   String?
-  email       String?
-  logoUrl     String?
-  isActive    Boolean           @default(true)
-  deletedAt   DateTime?
-  createdById String
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  bons        BonCommande[]
-  budgets     Budget[]
-  depenses    Depense[]
-  createdBy   User              @relation("EtablissementCreateur", fields: [createdById], references: [id])
-  users       User[]            @relation("EtablissementUsers")
+  id                String             @id @default(uuid())
+  nom               String
+  code              String             @unique
+  type              TypeEtablissement
+  adresse           String?
+  ville             String?
+  region            String?
+  telephone         String?
+  email             String?
+  logoUrl           String?
+  isActive          Boolean            @default(true)
+  deletedAt         DateTime?
+  createdById       String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  bons              BonCommande[]
+  budgets           Budget[]
+  depenses          Depense[]
+  createdBy         User               @relation("EtablissementCreateur", fields: [createdById], references: [id])
+  users             User[]             @relation("EtablissementUsers")
+  entreesTresorerie EntreeTresorerie[]
 }
 
 model Budget {
@@ -96,17 +97,17 @@ model Depense {
   deletedAt             DateTime?
 
   // Compte de charge (classe 6) — déjà existant, juste renommé pour clarté
-  compteId             Int?
-  compte               Compte?  @relation("DepenseCompteCharge", fields: [compteId], references: [id])
+  compteId Int?
+  compte   Compte? @relation("DepenseCompteCharge", fields: [compteId], references: [id])
 
   // Compte de trésorerie (classe 5) — nouveau
   // Déduit automatiquement du mode de paiement lors de la validation
   // ESPECES → 5700 Caisse | VIREMENT/autres → 5200 Banque
-  compteTresorerieId   Int?
-  compteTresorerie     Compte?  @relation("DepenseCompteTresorerie", fields: [compteTresorerieId], references: [id])
+  compteTresorerieId Int?
+  compteTresorerie   Compte? @relation("DepenseCompteTresorerie", fields: [compteTresorerieId], references: [id])
 
   // Écritures comptables générées à la validation (partie double)
-  ecritures            Ecriture[]
+  ecritures Ecriture[]
 
   createdBy     User          @relation("DepenseCreateur", fields: [createdById], references: [id])
   etablissement Etablissement @relation(fields: [etablissementId], references: [id])
@@ -116,14 +117,14 @@ model Depense {
 }
 
 model BonCommande {
-  id                    String             @id @default(uuid())
-  reference             String             @unique
+  id                    String         @id @default(uuid())
+  reference             String         @unique
   intitule              String
   fournisseur           String?
   description           String?
   date                  DateTime
-  statut                StatutDocument     @default(ATTENTE)
-  montantTotal          Decimal            @db.Decimal(15, 2)
+  statut                StatutDocument @default(ATTENTE)
+  montantTotal          Decimal        @db.Decimal(15, 2)
   signeParId            String?
   signeAt               DateTime?
   valideParId           String?
@@ -132,20 +133,20 @@ model BonCommande {
   pieceJustificativeUrl String?
   etablissementId       String
   createdById           String
-  createdAt             DateTime           @default(now())
-  updatedAt             DateTime           @updatedAt
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
   deletedAt             DateTime?
 
   // Compte de charge (classe 6)
-  compteId             Int?
-  compte               Compte?  @relation("BonCommandeCompteCharge", fields: [compteId], references: [id])
+  compteId Int?
+  compte   Compte? @relation("BonCommandeCompteCharge", fields: [compteId], references: [id])
 
   // Compte de trésorerie (classe 5) — nouveau
-  compteTresorerieId   Int?
-  compteTresorerie     Compte?  @relation("BonCommandeCompteTresorerie", fields: [compteTresorerieId], references: [id])
+  compteTresorerieId Int?
+  compteTresorerie   Compte? @relation("BonCommandeCompteTresorerie", fields: [compteTresorerieId], references: [id])
 
   // Écritures comptables générées à la validation
-  ecritures            Ecriture[]
+  ecritures Ecriture[]
 
   createdBy     User               @relation("BonCreateur", fields: [createdById], references: [id])
   etablissement Etablissement      @relation(fields: [etablissementId], references: [id])
@@ -187,7 +188,7 @@ model Historique {
 model Classe {
   id      Int      @id @default(autoincrement())
   numero  String   @unique // "5", "6", "7"
-  nom     String           // "Trésorerie", "Charges", "Produits"
+  nom     String // "Trésorerie", "Charges", "Produits"
   comptes Compte[]
 }
 
@@ -203,13 +204,30 @@ model Compte {
   enfants  Compte[] @relation("CompteHierarchy")
 
   // Relations vers les documents (nommées pour éviter l'ambiguïté)
-  depensesCharge       Depense[]     @relation("DepenseCompteCharge")
-  depensesTresorerie   Depense[]     @relation("DepenseCompteTresorerie")
-  bonsCharge           BonCommande[] @relation("BonCommandeCompteCharge")
-  bonsTresorerie       BonCommande[] @relation("BonCommandeCompteTresorerie")
-
+  depensesCharge     Depense[]          @relation("DepenseCompteCharge")
+  depensesTresorerie Depense[]          @relation("DepenseCompteTresorerie")
+  bonsCharge         BonCommande[]      @relation("BonCommandeCompteCharge")
+  bonsTresorerie     BonCommande[]      @relation("BonCommandeCompteTresorerie")
+  entreesTresorerie  EntreeTresorerie[]
   // Toutes les écritures passées sur ce compte
-  ecritures            Ecriture[]
+  ecritures          Ecriture[]
+}
+
+// Après le modèle Ecriture
+
+model EntreeTresorerie {
+  id              String   @id @default(uuid())
+  date            DateTime
+  libelle         String
+  annee           Int
+  montant         Decimal  @db.Decimal(15, 2)
+  compteId        Int // 5200 Banque ou 5700 Caisse
+  etablissementId String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  compte        Compte        @relation(fields: [compteId], references: [id])
+  etablissement Etablissement @relation(fields: [etablissementId], references: [id])
 }
 
 // ============================================================
@@ -222,10 +240,10 @@ model Compte {
 
 model Ecriture {
   id      String       @id @default(uuid())
-  date    DateTime     // date comptable de l'opération
+  date    DateTime // date comptable de l'opération
   sens    SensEcriture // DEBIT ou CREDIT
   montant Decimal      @db.Decimal(15, 2)
-  libelle String?      // description libre
+  libelle String? // description libre
 
   // Compte mouvementé
   compteId Int
@@ -258,7 +276,7 @@ enum StatutDocument {
   REVISION
   VALIDE
   REJETE
-  PAYE     // futur module de paiement
+  PAYE // futur module de paiement
 }
 
 enum TypeEtablissement {
@@ -296,10 +314,10 @@ enum ActionHistorique {
   SIGNE
   VALIDE
   REJETE
-  PAYE     // traçabilité du paiement
+  PAYE // traçabilité du paiement
 }
 
 enum SensEcriture {
-  DEBIT  // charge qui augmente / argent qui entre
+  DEBIT // charge qui augmente / argent qui entre
   CREDIT // trésorerie qui diminue / argent qui sort
 }
