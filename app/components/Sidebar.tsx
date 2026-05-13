@@ -16,17 +16,33 @@ import {
   LogOut,
   ShieldCheck,
   ClipboardList,
-   BarChart3, 
+  BarChart3,
+  BookOpen,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types";
 import LogoutModal from "./LogoutModal";
 
 const PRISMA_ROLE_CONFIG: Record<string, { label: string; badge: string }> = {
-  SUPER_ADMIN: { label: "Super Admin",     badge: "bg-yellow-400/10 border-yellow-400/30 text-yellow-300" },
-  MINISTERE:   { label: "Ministère",       badge: "bg-blue-400/10 border-blue-400/30 text-blue-300" },
-  DIRECTEUR:   { label: "Directeur",       badge: "bg-purple-400/10 border-purple-400/30 text-purple-300" },
-  ADMIN:       { label: "Administrateur",  badge: "bg-cyan-400/10 border-cyan-400/30 text-cyan-300" },
-  COMPTABLE:   { label: "Comptable",       badge: "bg-emerald-400/10 border-emerald-400/30 text-emerald-300" },
+  SUPER_ADMIN: {
+    label: "Super Admin",
+    badge: "bg-yellow-400/10 border-yellow-400/30 text-yellow-300",
+  },
+  MINISTERE: {
+    label: "Ministère",
+    badge: "bg-blue-400/10 border-blue-400/30 text-blue-300",
+  },
+  DIRECTEUR: {
+    label: "Directeur",
+    badge: "bg-purple-400/10 border-purple-400/30 text-purple-300",
+  },
+  ADMIN: {
+    label: "Administrateur",
+    badge: "bg-cyan-400/10 border-cyan-400/30 text-cyan-300",
+  },
+  COMPTABLE: {
+    label: "Comptable",
+    badge: "bg-emerald-400/10 border-emerald-400/30 text-emerald-300",
+  },
 };
 
 interface MenuItem {
@@ -48,39 +64,91 @@ interface SidebarProps {
 type ScreenSize = "mobile" | "tablet" | "desktop";
 
 const superAdminMenuItems: MenuItem[] = [
-  { label: "Établissements", icon: <Building2 className="w-5 h-5" />, href: "/etablissements" },
-  { label: "Utilisateurs", icon: <Users className="w-5 h-5" />, href: "/utilisateurs" },
+  {
+    label: "Établissements",
+    icon: <Building2 className="w-5 h-5" />,
+    href: "/etablissements",
+  },
+  {
+    label: "Utilisateurs",
+    icon: <Users className="w-5 h-5" />,
+    href: "/utilisateurs",
+  },
   // { label: "Paramètres", icon: <Settings className="w-5 h-5" />, href: "/parametres" },
 ];
 
 const ministereMenuItems: MenuItem[] = [
-  { label: "Établissements", icon: <Building2 className="w-5 h-5" />, href: "/etablissements" },
+  {
+    label: "Établissements",
+    icon: <Building2 className="w-5 h-5" />,
+    href: "/etablissements",
+  },
   { label: "Budget", icon: <Wallet className="w-5 h-5" />, href: "/budget" },
-  { label: "Caisses", icon: <Receipt className="w-5 h-5" />, href: "/depenses" },
-  { label: "Bons de commande", icon: <ClipboardList className="w-5 h-5" />, href: "/bons" },
+  {
+    label: "Caisses",
+    icon: <Receipt className="w-5 h-5" />,
+    href: "/depenses",
+  },
+  {
+    label: "Bons de commande",
+    icon: <ClipboardList className="w-5 h-5" />,
+    href: "/bons",
+  },
   { label: "Bilan", icon: <FileText className="w-5 h-5" />, href: "/bilan" },
-  { label: "Utilisateurs", icon: <Users className="w-5 h-5" />, href: "/utilisateurs" },
+  {
+    label: "Utilisateurs",
+    icon: <Users className="w-5 h-5" />,
+    href: "/utilisateurs",
+  },
 ];
 
 const etablissementMenuItems: MenuItem[] = [
-  { label: "Mon Établissement", icon: <School className="w-5 h-5" />, href: "/mon-etablissement" },
-  { label: "Caisses", icon: <Receipt className="w-5 h-5" />, href: "/depensesEtablissement" },
-  { label: "État Financier",    icon: <BarChart3 className="w-5 h-5" />,     href: "/etat-financier" },
-  { label: "Profil", icon: <CircleUserRound className="w-5 h-5" />, href: "/profil" },
+  {
+    label: "Mon Établissement",
+    icon: <School className="w-5 h-5" />,
+    href: "/mon-etablissement",
+  },
+  {
+    label: "Caisses",
+    icon: <Receipt className="w-5 h-5" />,
+    href: "/depensesEtablissement",
+  },
+  {
+    label: "État Financier",
+    icon: <BarChart3 className="w-5 h-5" />,
+    href: "/etat-financier",
+  },
+  {
+    label: "Grand Livre",
+    icon: <BookOpen className="w-5 h-5" />,
+    href: "/grand-livre",
+  },
+  {
+    label: "Profil",
+    icon: <CircleUserRound className="w-5 h-5" />,
+    href: "/profil",
+  },
 ];
 
 const etablissementAdminMenuItems: MenuItem[] = [
   ...etablissementMenuItems,
-  { label: "Utilisateurs", icon: <Users className="w-5 h-5" />, href: "/utilisateurs" },
+  {
+    label: "Utilisateurs",
+    icon: <Users className="w-5 h-5" />,
+    href: "/utilisateurs",
+  },
 ];
 
-const roleConfig: Record<UserRole, {
-  menuItems: MenuItem[];
-  sectionLabel: string;
-  userLabel: string;
-  userSub: string;
-  userInitials: string;
-}> = {
+const roleConfig: Record<
+  UserRole,
+  {
+    menuItems: MenuItem[];
+    sectionLabel: string;
+    userLabel: string;
+    userSub: string;
+    userInitials: string;
+  }
+> = {
   superadmin: {
     menuItems: superAdminMenuItems,
     sectionLabel: "SUPER ADMIN",
@@ -104,7 +172,15 @@ const roleConfig: Record<UserRole, {
   },
 };
 
-const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, onNavigate, userNom, userPrenom, userPrismaRole }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  role,
+  isMobileOpen,
+  onCloseMobile,
+  onNavigate,
+  userNom,
+  userPrenom,
+  userPrismaRole,
+}) => {
   const pathname = usePathname();
   const [screenSize, setScreenSize] = useState<ScreenSize>("desktop");
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -116,11 +192,15 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, on
       : config.menuItems;
 
   // Nom réel depuis la session, fallback sur les valeurs statiques du roleConfig
-  const displayName = userPrenom && userNom ? `${userPrenom} ${userNom}` : config.userLabel;
-  const displaySub  = userPrismaRole ? (PRISMA_ROLE_CONFIG[userPrismaRole]?.label ?? config.userSub) : config.userSub;
-  const displayInitials = userPrenom && userNom
-    ? `${userPrenom[0]}${userNom[0]}`.toUpperCase()
-    : config.userInitials;
+  const displayName =
+    userPrenom && userNom ? `${userPrenom} ${userNom}` : config.userLabel;
+  const displaySub = userPrismaRole
+    ? (PRISMA_ROLE_CONFIG[userPrismaRole]?.label ?? config.userSub)
+    : config.userSub;
+  const displayInitials =
+    userPrenom && userNom
+      ? `${userPrenom[0]}${userNom[0]}`.toUpperCase()
+      : config.userInitials;
   const badgeCfg = userPrismaRole ? PRISMA_ROLE_CONFIG[userPrismaRole] : null;
 
   useEffect(() => {
@@ -144,7 +224,8 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, on
     screenSize === "desktop" || (screenSize === "mobile" && isMobileOpen);
 
   const renderMenuItem = (item: MenuItem) => {
-    const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+    const isActive =
+      pathname === item.href || pathname.startsWith(item.href + "/");
     return (
       <button
         key={item.href}
@@ -153,18 +234,23 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, on
         className={`
           w-full flex items-center gap-3 px-4 py-3 mb-1 rounded-lg transition-all duration-200 group
           border-l-4 cursor-pointer
-          ${isActive
-            ? "bg-white/10 text-white border-yellow-400"
-            : "text-blue-200 hover:text-white hover:bg-white/5 border-transparent"
+          ${
+            isActive
+              ? "bg-white/10 text-white border-yellow-400"
+              : "text-blue-200 hover:text-white hover:bg-white/5 border-transparent"
           }
           ${!showLabels ? "justify-center px-2" : ""}
         `}
       >
-        <span className={`shrink-0 transition-colors ${isActive ? "text-yellow-400" : "text-blue-300 group-hover:text-white"}`}>
+        <span
+          className={`shrink-0 transition-colors ${isActive ? "text-yellow-400" : "text-blue-300 group-hover:text-white"}`}
+        >
           {item.icon}
         </span>
         {showLabels && (
-          <span className="flex-1 text-left font-medium text-sm">{item.label}</span>
+          <span className="flex-1 text-left font-medium text-sm">
+            {item.label}
+          </span>
         )}
       </button>
     );
@@ -173,22 +259,28 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, on
   return (
     <>
       {screenSize === "mobile" && isMobileOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40" onClick={onCloseMobile} />
+        <div
+          className="fixed inset-0 bg-black/50 z-40"
+          onClick={onCloseMobile}
+        />
       )}
 
       <aside
         className={`
           bg-linear-to-b from-[#1a365d] to-[#234876]
           text-white flex flex-col shadow-xl z-50 transition-all duration-300 ease-in-out
-          ${screenSize === "mobile"
-            ? `fixed inset-y-0 left-0 w-72 ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}`
-            : `relative self-stretch shrink-0 ${screenSize === "tablet" ? "w-20" : "w-64"}`
+          ${
+            screenSize === "mobile"
+              ? `fixed inset-y-0 left-0 w-72 ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}`
+              : `relative self-stretch shrink-0 ${screenSize === "tablet" ? "w-20" : "w-64"}`
           }
         `}
       >
         {/* Logo */}
         <div className="p-4 border-b border-white/10 flex items-center justify-between min-h-16">
-          <div className={`relative transition-all duration-300 ${showLabels ? "w-40 h-12" : "w-8 h-8"}`}>
+          <div
+            className={`relative transition-all duration-300 ${showLabels ? "w-40 h-12" : "w-8 h-8"}`}
+          >
             <Image
               src={showLabels ? "/logo.svg" : "/fav.png"}
               alt="Logo"
@@ -211,9 +303,13 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, on
 
         {/* Badge rôle — affiché pour tous les rôles connectés */}
         {badgeCfg && showLabels && (
-          <div className={`mx-4 mt-3 flex items-center gap-2 px-3 py-1.5 rounded-md border ${badgeCfg.badge}`}>
+          <div
+            className={`mx-4 mt-3 flex items-center gap-2 px-3 py-1.5 rounded-md border ${badgeCfg.badge}`}
+          >
             <ShieldCheck size={13} className="shrink-0" />
-            <span className="text-xs font-semibold uppercase tracking-wider">{badgeCfg.label}</span>
+            <span className="text-xs font-semibold uppercase tracking-wider">
+              {badgeCfg.label}
+            </span>
           </div>
         )}
 
@@ -231,7 +327,9 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, on
 
         {/* Footer utilisateur */}
         <div className="p-4 border-t border-white/10 bg-black/20">
-          <div className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${!showLabels ? "justify-center" : ""}`}>
+          <div
+            className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${!showLabels ? "justify-center" : ""}`}
+          >
             <div className="relative shrink-0">
               <div className="w-9 h-9 rounded-full bg-slate-600 flex items-center justify-center text-sm font-bold border-2 border-blue-400">
                 {displayInitials}
@@ -241,7 +339,9 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, on
             {showLabels && (
               <>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">{displayName}</p>
+                  <p className="text-sm font-semibold text-white truncate">
+                    {displayName}
+                  </p>
                   <p className="text-xs text-blue-300 truncate">{displaySub}</p>
                 </div>
                 <button
@@ -264,9 +364,16 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isMobileOpen, onCloseMobile, on
       )}
 
       <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 2px;
+        }
       `}</style>
     </>
   );
