@@ -116,7 +116,7 @@ export default function GrandLivreView({
             <p
               className={`text-sm font-bold ${grandLivre.estEquilibre ? "text-emerald-600" : "text-orange-500"}`}
             >
-              {grandLivre.estEquilibre ? "Équilibré ✅" : "Déséquilibré ⚠️"}
+              {grandLivre.estEquilibre ? "Équilibré " : "Déséquilibré "}
             </p>
           </div>
           <p className="text-xs text-gray-400 mt-1">Σ Débits = Σ Crédits</p>
@@ -132,114 +132,116 @@ export default function GrandLivreView({
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-[#11355b] text-white">
-                <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider w-24">
-                  N° Compte
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider">
-                  Nom du compte
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider w-28">
-                  Date
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider">
-                  Libellé
-                </th>
-                <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider w-32">
-                  Référence
-                </th>
-                <th className="text-right px-4 py-3 text-xs font-bold uppercase tracking-wider w-32">
-                  Débit
-                </th>
-                <th className="text-right px-4 py-3 text-xs font-bold uppercase tracking-wider w-32">
-                  Crédit
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {grandLivre.sections.map((section) => (
-                <React.Fragment key={section.compteId}>
-                  {/* Ligne de groupe — nom du compte */}
-                  <tr className="bg-gray-50 border-t-2 border-gray-200">
-                    <td colSpan={7} className="px-4 py-2">
-                      <span className="font-bold text-[#11355b] text-xs uppercase tracking-wider">
-                        {section.numero} — {section.nom}
-                      </span>
-                      <span className="ml-2 text-xs text-gray-400">
-                        ({section.classeNom})
-                      </span>
-                    </td>
-                  </tr>
-
-                  {/* Lignes d'écritures */}
-                  {section.lignes.map((ligne) => (
-                    <tr
-                      key={ligne.id}
-                      className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-4 py-2.5 text-xs font-mono text-gray-400">
-                        {section.numero}
-                      </td>
-                      <td className="px-4 py-2.5 text-gray-600">
-                        {section.nom}
-                      </td>
-                      <td className="px-4 py-2.5 text-gray-500 text-xs">
-                        {formatDate(ligne.date)}
-                      </td>
-                      <td className="px-4 py-2.5 text-gray-700">
-                        {ligne.libelle ?? "—"}
-                      </td>
-                      <td className="px-4 py-2.5 text-xs font-mono text-gray-400">
-                        {ligne.reference ?? "—"}
-                      </td>
-                      <td className="px-4 py-2.5 text-right font-semibold text-blue-600">
-                        {ligne.debit > 0 ? formatMontant(ligne.debit) : "—"}
-                      </td>
-                      <td className="px-4 py-2.5 text-right font-semibold text-red-500">
-                        {ligne.credit > 0 ? formatMontant(ligne.credit) : "—"}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[700px]">
+              <thead>
+                <tr className="bg-[#11355b] text-white">
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider w-24">
+                    N° Compte
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider">
+                    Nom du compte
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider w-28">
+                    Date
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider">
+                    Libellé
+                  </th>
+                  <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider w-32">
+                    Référence
+                  </th>
+                  <th className="text-right px-4 py-3 text-xs font-bold uppercase tracking-wider w-32">
+                    Débit
+                  </th>
+                  <th className="text-right px-4 py-3 text-xs font-bold uppercase tracking-wider w-32">
+                    Crédit
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {grandLivre.sections.map((section) => (
+                  <React.Fragment key={section.compteId}>
+                    {/* Ligne de groupe — nom du compte */}
+                    <tr className="bg-gray-50 border-t-2 border-gray-200">
+                      <td colSpan={7} className="px-4 py-2">
+                        <span className="font-bold text-[#11355b] text-xs uppercase tracking-wider">
+                          {section.numero} — {section.nom}
+                        </span>
+                        <span className="ml-2 text-xs text-gray-400">
+                          ({section.classeNom})
+                        </span>
                       </td>
                     </tr>
-                  ))}
 
-                  {/* Ligne total du compte */}
-                  <tr className="bg-gray-100 border-t border-gray-200">
-                    <td colSpan={5} className="px-4 py-2 text-right">
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                        Total {section.numero}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2 text-right font-bold text-blue-600">
-                      {section.totalDebit > 0
-                        ? formatMontant(section.totalDebit)
-                        : "—"}
-                    </td>
-                    <td className="px-4 py-2 text-right font-bold text-red-500">
-                      {section.totalCredit > 0
-                        ? formatMontant(section.totalCredit)
-                        : "—"}
-                    </td>
-                  </tr>
-                </React.Fragment>
-              ))}
+                    {/* Lignes d'écritures */}
+                    {section.lignes.map((ligne) => (
+                      <tr
+                        key={ligne.id}
+                        className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="px-4 py-2.5 text-xs font-mono text-gray-400">
+                          {section.numero}
+                        </td>
+                        <td className="px-4 py-2.5 text-gray-600">
+                          {section.nom}
+                        </td>
+                        <td className="px-4 py-2.5 text-gray-500 text-xs">
+                          {formatDate(ligne.date)}
+                        </td>
+                        <td className="px-4 py-2.5 text-gray-700">
+                          {ligne.libelle ?? "—"}
+                        </td>
+                        <td className="px-4 py-2.5 text-xs font-mono text-gray-400">
+                          {ligne.reference ?? "—"}
+                        </td>
+                        <td className="px-4 py-2.5 text-right font-semibold text-blue-600">
+                          {ligne.debit > 0 ? formatMontant(ligne.debit) : "—"}
+                        </td>
+                        <td className="px-4 py-2.5 text-right font-semibold text-red-500">
+                          {ligne.credit > 0 ? formatMontant(ligne.credit) : "—"}
+                        </td>
+                      </tr>
+                    ))}
 
-              {/* Grand total général — en dehors du map */}
-              <tr className="bg-[#11355b] text-white">
-                <td colSpan={5} className="px-4 py-3 text-right">
-                  <span className="text-xs font-bold uppercase tracking-wider">
-                    Grand Total Général
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right font-bold">
-                  {formatMontant(grandLivre.grandTotalDebit)}
-                </td>
-                <td className="px-4 py-3 text-right font-bold">
-                  {formatMontant(grandLivre.grandTotalCredit)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                    {/* Ligne total du compte */}
+                    <tr className="bg-gray-100 border-t border-gray-200">
+                      <td colSpan={5} className="px-4 py-2 text-right">
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                          Total {section.numero}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 text-right font-bold text-blue-600">
+                        {section.totalDebit > 0
+                          ? formatMontant(section.totalDebit)
+                          : "—"}
+                      </td>
+                      <td className="px-4 py-2 text-right font-bold text-red-500">
+                        {section.totalCredit > 0
+                          ? formatMontant(section.totalCredit)
+                          : "—"}
+                      </td>
+                    </tr>
+                  </React.Fragment>
+                ))}
+
+                {/* Grand total général — en dehors du map */}
+                <tr className="bg-[#11355b] text-white">
+                  <td colSpan={5} className="px-4 py-3 text-right">
+                    <span className="text-xs font-bold uppercase tracking-wider">
+                      Grand Total Général
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right font-bold">
+                    {formatMontant(grandLivre.grandTotalDebit)}
+                  </td>
+                  <td className="px-4 py-3 text-right font-bold">
+                    {formatMontant(grandLivre.grandTotalCredit)}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
