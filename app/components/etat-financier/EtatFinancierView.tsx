@@ -6,6 +6,7 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  Wallet,
   ChevronDown,
   ChevronRight,
   Plus,
@@ -13,17 +14,13 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
-import {
-  type EtatFinancier,
-  type LigneEntree,
-} from "@/lib/queries/etat-financier";
+import { type EtatFinancier } from "@/lib/queries/etat-financier";
 import { formatMontant, formatDate } from "@/lib/utils/formatters";
 
 interface Props {
   etat: EtatFinancier;
   anneeSelectionnee: number;
   userPrismaRole: string;
-  // Comptes de trésorerie disponibles pour le formulaire d'ajout
   comptesTresorerie: { id: number; numero: string; nom: string }[];
 }
 
@@ -35,12 +32,9 @@ export default function EtatFinancierView({
 }: Props) {
   const router = useRouter();
 
-  // Sections dépliables
   const [chargesOuvertes, setChargesOuvertes] = useState(true);
   const [produitsOuverts, setProduitsOuverts] = useState(true);
   const [tresorerieOuverte, setTresorerieOuverte] = useState(true);
-
-  // Formulaire d'ajout d'entrée
   const [showForm, setShowForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [form, setForm] = useState({
@@ -50,12 +44,7 @@ export default function EtatFinancierView({
     compteId: comptesTresorerie[0]?.id ?? "",
   });
 
-  // Rôles pouvant ajouter/supprimer des entrées
-  const peutModifier = ["DIRECTEUR", "COMPTABLE", "ADMIN"].includes(
-    userPrismaRole,
-  );
-
-  // Années disponibles dans le sélecteur (5 dernières années)
+  const peutModifier = ["DIRECTEUR", "COMPTABLE", "ADMIN"].includes(userPrismaRole);
   const anneeActuelle = new Date().getFullYear();
   const annees = Array.from({ length: 5 }, (_, i) => anneeActuelle - i);
 
@@ -63,9 +52,6 @@ export default function EtatFinancierView({
     router.push(`/etat-financier?annee=${annee}`);
   };
 
-  // ============================================================
-  // Ajouter une entrée de trésorerie
-  // ============================================================
   const handleAjouterEntree = async () => {
     if (!form.libelle.trim()) {
       toast.error("Le libellé est requis.");
@@ -104,23 +90,17 @@ export default function EtatFinancierView({
       });
       router.refresh();
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Erreur lors de l'enregistrement.";
+      const message = err instanceof Error ? err.message : "Erreur lors de l'enregistrement.";
       toast.error(message);
     } finally {
       setFormLoading(false);
     }
   };
 
-  // ============================================================
-  // Supprimer une entrée de trésorerie
-  // ============================================================
   const handleSupprimerEntree = async (id: string) => {
     if (!confirm("Supprimer cette entrée ?")) return;
     try {
-      const res = await fetch(`/api/entrees-tresorerie/${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(`/api/entrees-tresorerie/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       toast.success("Entrée supprimée.");
       router.refresh();
@@ -134,14 +114,12 @@ export default function EtatFinancierView({
   const soldePositif = etat.soldeTresorerie > 0;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* ── En-tête ─────────────────────────────────────────── */}
+    <div className="max-w-4xl mx-auto space-y-8">
+      {/* En-tête */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-[#11355b]">État Financier</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
-            Exercice {anneeSelectionnee}
-          </p>
+          <h1 className="text-3xl font-bold text-[#11355b]">État Financier</h1>
+          <p className="text-sm text-gray-500 mt-0.5">Exercice {anneeSelectionnee}</p>
         </div>
         <select
           value={anneeSelectionnee}
@@ -149,61 +127,78 @@ export default function EtatFinancierView({
           className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#11355b]/20 cursor-pointer"
         >
           {annees.map((a) => (
-            <option key={a} value={a}>
-              {a}
-            </option>
+            <option key={a} value={a}>{a}</option>
           ))}
         </select>
       </div>
 
-      {/* ── Cartes résumé ───────────────────────────────────── */}
+      {/* Cartes résumé */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <CarteResume
-          label="Total Entrées"
-          montant={etat.totalEntrees}
-          couleur="green"
-          icone={<TrendingUp size={20} />}
-        />
-        <CarteResume
-          label="Total Charges"
-          montant={etat.totalCharges}
-          couleur="red"
-          icone={<TrendingDown size={20} />}
-        />
-        <CarteResume
-          label="Solde Trésorerie"
-          montant={etat.soldeTresorerie}
-          couleur={soldePositif ? "green" : "red"}
-          icone={
-            soldePositif ? <TrendingUp size={20} /> : <TrendingDown size={20} />
-          }
-          isResultat
-          suffixe={soldePositif ? "Disponible" : "Insuffisant ⚠️"}
-        />
-        <CarteResume
-          label="Résultat"
-          montant={etat.resultat}
-          couleur={resultatPositif ? "green" : resultatNul ? "gray" : "red"}
-          icone={
-            resultatPositif ? (
-              <TrendingUp size={20} />
-            ) : resultatNul ? (
-              <Minus size={20} />
-            ) : (
-              <TrendingDown size={20} />
-            )
-          }
-          isResultat
-          suffixe={
-            resultatPositif ? "Excédent" : resultatNul ? "Équilibre" : "Déficit"
-          }
-        />
+        <div className="bg-white px-5 py-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
+          <div>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Total Entrées</p>
+            <p className="text-lg font-bold text-[#11355b]">{formatMontant(etat.totalEntrees)}</p>
+          </div>
+          <div className="bg-emerald-50 p-2 rounded-lg text-emerald-600">
+            <TrendingUp size={18} />
+          </div>
+        </div>
+
+        <div className="bg-white px-5 py-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
+          <div>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Total Charges</p>
+            <p className="text-lg font-bold text-[#11355b]">{formatMontant(etat.totalCharges)}</p>
+          </div>
+          <div className="bg-red-50 p-2 rounded-lg text-red-500">
+            <TrendingDown size={18} />
+          </div>
+        </div>
+
+        <div className="bg-white px-5 py-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
+          <div>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Solde Trésorerie</p>
+            <p className="text-lg font-bold text-[#11355b]">{formatMontant(etat.soldeTresorerie)}</p>
+            <p className={`text-[10px] mt-0.5 ${soldePositif ? "text-emerald-600" : "text-red-500"}`}>
+              {soldePositif ? "Disponible" : "Insuffisant"}
+            </p>
+          </div>
+          <div className={`p-2 rounded-lg ${soldePositif ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}>
+            <Wallet size={18} />
+          </div>
+        </div>
+
+        {resultatPositif ? (
+          <div className="bg-[#11355b] px-5 py-4 rounded-xl shadow-sm flex justify-between items-center text-white">
+            <div>
+              <p className="text-[10px] font-bold opacity-70 uppercase tracking-wider mb-0.5">Résultat</p>
+              <p className="text-lg font-bold">+{formatMontant(etat.resultat)}</p>
+              <p className="text-[10px] opacity-60 mt-0.5">Excédent</p>
+            </div>
+            <div className="bg-white/10 p-2 rounded-lg">
+              <TrendingUp size={18} />
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white px-5 py-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Résultat</p>
+              <p className={`text-lg font-bold ${resultatNul ? "text-gray-600" : "text-red-500"}`}>
+                {formatMontant(etat.resultat)}
+              </p>
+              <p className={`text-[10px] mt-0.5 ${resultatNul ? "text-gray-400" : "text-red-400"}`}>
+                {resultatNul ? "Équilibre" : "Déficit"}
+              </p>
+            </div>
+            <div className={`p-2 rounded-lg ${resultatNul ? "bg-gray-50 text-gray-500" : "bg-red-50 text-red-500"}`}>
+              {resultatNul ? <Minus size={18} /> : <TrendingDown size={18} />}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* ── Section Trésorerie ──────────────────────────────── */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-100">
+      {/* Section Trésorerie */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <button
             type="button"
             onClick={() => setTresorerieOuverte((v) => !v)}
@@ -215,14 +210,11 @@ export default function EtatFinancierView({
               <ChevronRight size={18} className="text-gray-400" />
             )}
             <div className="text-left">
-              <p className="font-bold text-[#11355b] text-sm">Trésorerie</p>
-              <p className="text-xs text-gray-400">
-                Entrées et sorties par compte
-              </p>
+              <p className="font-bold text-[#11355b]">Trésorerie</p>
+              <p className="text-xs text-gray-400">Entrées et sorties par compte</p>
             </div>
           </button>
 
-          {/* Bouton ajouter — visible uniquement pour les rôles autorisés */}
           {peutModifier && tresorerieOuverte && (
             <button
               type="button"
@@ -237,57 +229,36 @@ export default function EtatFinancierView({
 
         {tresorerieOuverte && (
           <div>
-            {/* Formulaire d'ajout */}
             {showForm && (
-              <div className="p-4 bg-blue-50 border-b border-blue-100">
+              <div className="p-6 bg-blue-50 border-b border-blue-100">
                 <p className="text-xs font-bold text-[#11355b] uppercase tracking-wider mb-3">
                   Nouvelle entrée de trésorerie
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                  {/* Date */}
                   <div>
-                    <label className="text-xs text-gray-500 mb-1 block">
-                      Date
-                    </label>
+                    <label className="text-xs text-gray-500 mb-1 block">Date</label>
                     <input
                       type="date"
                       value={form.date}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, date: e.target.value }))
-                      }
+                      onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#11355b]/20"
                     />
                   </div>
-
-                  {/* Libellé */}
                   <div>
-                    <label className="text-xs text-gray-500 mb-1 block">
-                      Libellé
-                    </label>
+                    <label className="text-xs text-gray-500 mb-1 block">Libellé</label>
                     <input
                       type="text"
                       value={form.libelle}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, libelle: e.target.value }))
-                      }
+                      onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))}
                       placeholder="Ex: Subvention État"
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#11355b]/20"
                     />
                   </div>
-
-                  {/* Compte */}
                   <div>
-                    <label className="text-xs text-gray-500 mb-1 block">
-                      Compte
-                    </label>
+                    <label className="text-xs text-gray-500 mb-1 block">Compte</label>
                     <select
                       value={form.compteId}
-                      onChange={(e) =>
-                        setForm((f) => ({
-                          ...f,
-                          compteId: parseInt(e.target.value),
-                        }))
-                      }
+                      onChange={(e) => setForm((f) => ({ ...f, compteId: parseInt(e.target.value) }))}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#11355b]/20 bg-white cursor-pointer"
                     >
                       {comptesTresorerie.map((c) => (
@@ -297,26 +268,19 @@ export default function EtatFinancierView({
                       ))}
                     </select>
                   </div>
-
-                  {/* Montant */}
                   <div>
-                    <label className="text-xs text-gray-500 mb-1 block">
-                      Montant (FCFA)
-                    </label>
+                    <label className="text-xs text-gray-500 mb-1 block">Montant (FCFA)</label>
                     <input
                       type="number"
                       value={form.montant}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, montant: e.target.value }))
-                      }
+                      onChange={(e) => setForm((f) => ({ ...f, montant: e.target.value }))}
                       placeholder="0"
                       min={1}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#11355b]/20"
                     />
                   </div>
                 </div>
-
-                <div className="flex gap-2 mt-3">
+                <div className="flex gap-2 mt-4">
                   <button
                     type="button"
                     onClick={handleAjouterEntree}
@@ -324,10 +288,7 @@ export default function EtatFinancierView({
                     className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors cursor-pointer"
                   >
                     {formLoading ? (
-                      <>
-                        <Loader2 size={14} className="animate-spin" />{" "}
-                        Enregistrement...
-                      </>
+                      <><Loader2 size={14} className="animate-spin" /> Enregistrement...</>
                     ) : (
                       "Enregistrer"
                     )}
@@ -343,45 +304,31 @@ export default function EtatFinancierView({
               </div>
             )}
 
-            {/* Liste des entrées groupées par compte */}
             {etat.tresorerie.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-6">
+              <p className="text-sm text-gray-400 text-center py-8">
                 Aucune entrée de trésorerie pour cette période.
               </p>
             ) : (
               etat.tresorerie.map((section) => (
-                <div
-                  key={section.compteId}
-                  className="border-b border-gray-100 last:border-0"
-                >
-                  {/* Nom du compte (Banque / Caisse) */}
+                <div key={section.compteId} className="border-b border-gray-100 last:border-0">
                   <div className="flex items-center justify-between px-6 py-3 bg-gray-50">
                     <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">
-                      <span className="font-mono text-gray-400 mr-2">
-                        {section.numero}
-                      </span>
+                      <span className="font-mono text-gray-400 mr-2">{section.numero}</span>
                       {section.nom}
                     </span>
-                    <span
-                      className={`text-sm font-bold ${section.solde >= 0 ? "text-emerald-600" : "text-red-600"}`}
-                    >
+                    <span className={`text-sm font-bold ${section.solde >= 0 ? "text-emerald-600" : "text-red-600"}`}>
                       Solde : {formatMontant(section.solde)}
                     </span>
                   </div>
 
-                  {/* Entrées */}
                   {section.entrees.map((entree) => (
                     <div
                       key={entree.id}
-                      className="flex items-center justify-between px-8 py-2.5 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors group"
+                      className="flex items-center justify-between px-8 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors group"
                     >
                       <div className="flex items-center gap-4">
-                        <span className="text-xs text-gray-400 w-24 shrink-0">
-                          {formatDate(entree.date)}
-                        </span>
-                        <span className="text-sm text-gray-700">
-                          {entree.libelle}
-                        </span>
+                        <span className="text-xs text-gray-400 w-24 shrink-0">{formatDate(entree.date)}</span>
+                        <span className="text-sm text-gray-700">{entree.libelle}</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-semibold text-emerald-600">
@@ -400,34 +347,20 @@ export default function EtatFinancierView({
                     </div>
                   ))}
 
-                  {/* Résumé du compte */}
                   <div className="flex items-center justify-between px-6 py-2 text-xs text-gray-500">
-                    <span>
-                      Entrées :{" "}
-                      <span className="font-semibold text-emerald-600">
-                        {formatMontant(section.totalEntrees)}
-                      </span>
-                    </span>
-                    <span>
-                      Sorties :{" "}
-                      <span className="font-semibold text-red-500">
-                        -{formatMontant(section.totalSorties)}
-                      </span>
-                    </span>
+                    <span>Entrées : <span className="font-semibold text-emerald-600">{formatMontant(section.totalEntrees)}</span></span>
+                    <span>Sorties : <span className="font-semibold text-red-500">-{formatMontant(section.totalSorties)}</span></span>
                   </div>
                 </div>
               ))
             )}
 
-            {/* Total trésorerie */}
             {etat.tresorerie.length > 0 && (
-              <div className="flex items-center justify-between px-6 py-3 bg-[#11355b]/5 border-t border-[#11355b]/10">
+              <div className="flex items-center justify-between px-6 py-4 bg-[#11355b]/5 border-t border-[#11355b]/10">
                 <span className="text-xs font-bold text-[#11355b] uppercase tracking-wider">
                   Solde Total Trésorerie
                 </span>
-                <span
-                  className={`font-bold ${etat.soldeTresorerie >= 0 ? "text-emerald-600" : "text-red-600"}`}
-                >
+                <span className={`font-bold ${etat.soldeTresorerie >= 0 ? "text-emerald-600" : "text-red-600"}`}>
                   {formatMontant(etat.soldeTresorerie)}
                 </span>
               </div>
@@ -436,7 +369,7 @@ export default function EtatFinancierView({
         )}
       </div>
 
-      {/* ── Section Charges ─────────────────────────────────── */}
+      {/* Section Charges */}
       <Section
         titre="Charges"
         classeNom="Classe 6 — Charges engagées"
@@ -448,7 +381,7 @@ export default function EtatFinancierView({
         vide="Aucune charge enregistrée pour cette période."
       />
 
-      {/* ── Section Produits ────────────────────────────────── */}
+      {/* Section Produits */}
       <Section
         titre="Produits"
         classeNom="Classe 7 — Produits perçus"
@@ -463,58 +396,6 @@ export default function EtatFinancierView({
   );
 }
 
-// ============================================================
-// Carte résumé
-// ============================================================
-function CarteResume({
-  label,
-  montant,
-  couleur,
-  icone,
-  isResultat = false,
-  suffixe,
-}: {
-  label: string;
-  montant: number;
-  couleur: "red" | "green" | "gray";
-  icone: React.ReactNode;
-  isResultat?: boolean;
-  suffixe?: string;
-}) {
-  const styles = {
-    red: { bg: "bg-red-50", text: "text-red-600", border: "border-red-100" },
-    green: {
-      bg: "bg-green-50",
-      text: "text-green-600",
-      border: "border-green-100",
-    },
-    gray: {
-      bg: "bg-gray-50",
-      text: "text-gray-600",
-      border: "border-gray-100",
-    },
-  }[couleur];
-
-  return (
-    <div className={`${styles.bg} border ${styles.border} rounded-xl p-4`}>
-      <div className="flex items-center justify-between mb-2">
-        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-          {label}
-        </p>
-        <span className={styles.text}>{icone}</span>
-      </div>
-      <p className={`text-lg font-bold ${styles.text}`}>
-        {isResultat && montant > 0 ? "+" : ""}
-        {formatMontant(montant)}
-      </p>
-      {suffixe && <p className="text-xs text-gray-400 mt-1">{suffixe}</p>}
-    </div>
-  );
-}
-
-// ============================================================
-// Section dépliable (Charges ou Produits)
-// ============================================================
 function Section({
   titre,
   classeNom,
@@ -534,15 +415,15 @@ function Section({
   couleur: "red" | "green";
   vide: string;
 }) {
-  const textCouleur = couleur === "red" ? "text-red-600" : "text-green-600";
-  const bgCouleur = couleur === "red" ? "bg-red-50" : "bg-green-50";
+  const textCouleur = couleur === "red" ? "text-red-600" : "text-emerald-600";
+  const bgCouleur = couleur === "red" ? "bg-red-50" : "bg-emerald-50";
 
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+        className="w-full flex items-center justify-between px-6 py-5 hover:bg-gray-50 transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-3">
           {ouvert ? (
@@ -551,49 +432,41 @@ function Section({
             <ChevronRight size={18} className="text-gray-400" />
           )}
           <div className="text-left">
-            <p className="font-bold text-[#11355b] text-sm">{titre}</p>
+            <p className="font-bold text-[#11355b]">{titre}</p>
             <p className="text-xs text-gray-400">{classeNom}</p>
           </div>
         </div>
-        <span className={`font-bold text-base ${textCouleur}`}>
-          {formatMontant(total)}
-        </span>
+        <span className={`font-bold text-lg ${textCouleur}`}>{formatMontant(total)}</span>
       </button>
 
       {ouvert && (
         <div className="border-t border-gray-100">
           {sections.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-6">{vide}</p>
+            <p className="text-sm text-gray-400 text-center py-8">{vide}</p>
           ) : (
             sections.flatMap((s) =>
               s.comptes.map((compte) => (
                 <div
                   key={compte.compteId}
-                  className="flex items-center justify-between px-6 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-between px-6 py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors"
                 >
                   <div>
-                    <span className="text-xs font-mono text-gray-400 mr-2">
-                      {compte.numero}
-                    </span>
+                    <span className="text-xs font-mono text-gray-400 mr-2">{compte.numero}</span>
                     <span className="text-sm text-gray-700">{compte.nom}</span>
                   </div>
                   <span className={`text-sm font-semibold ${textCouleur}`}>
                     {formatMontant(compte.total)}
                   </span>
                 </div>
-              )),
+              ))
             )
           )}
           {sections.length > 0 && (
-            <div
-              className={`flex items-center justify-between px-6 py-3 ${bgCouleur}`}
-            >
+            <div className={`flex items-center justify-between px-6 py-4 ${bgCouleur}`}>
               <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Total {titre}
               </span>
-              <span className={`font-bold ${textCouleur}`}>
-                {formatMontant(total)}
-              </span>
+              <span className={`font-bold ${textCouleur}`}>{formatMontant(total)}</span>
             </div>
           )}
         </div>
