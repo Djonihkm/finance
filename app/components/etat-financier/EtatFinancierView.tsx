@@ -22,6 +22,7 @@ interface Props {
   anneeSelectionnee: number;
   userPrismaRole: string;
   comptesTresorerie: { id: number; numero: string; nom: string }[];
+  comptesProduits: { id: number; numero: string; nom: string }[];
 }
 
 export default function EtatFinancierView({
@@ -29,12 +30,15 @@ export default function EtatFinancierView({
   anneeSelectionnee,
   userPrismaRole,
   comptesTresorerie,
+   comptesProduits,
 }: Props) {
   const router = useRouter();
 
   const [chargesOuvertes, setChargesOuvertes] = useState(true);
   const [produitsOuverts, setProduitsOuverts] = useState(true);
   const [tresorerieOuverte, setTresorerieOuverte] = useState(true);
+  
+  // États pour le formulaire Trésorerie
   const [showForm, setShowForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [form, setForm] = useState({
@@ -44,14 +48,29 @@ export default function EtatFinancierView({
     compteId: comptesTresorerie[0]?.id ?? "",
   });
 
+  // États pour le formulaire Produits
+  const [showProduitForm, setShowProduitForm] = useState(false);
+  const [produitFormLoading, setProduitFormLoading] = useState(false);
+  const [produitForm, setProduitForm] = useState({
+    date: new Date().toISOString().split("T")[0],
+    libelle: "",
+    montant: "",
+    compteId: "", // Compte de produit (Classe 7)
+    compteTresorerieId: comptesTresorerie[0]?.id ?? "", // Compte de trésorerie (Classe 5)
+  });
+
   const peutModifier = ["DIRECTEUR", "COMPTABLE", "ADMIN"].includes(userPrismaRole);
   const anneeActuelle = new Date().getFullYear();
   const annees = Array.from({ length: 5 }, (_, i) => anneeActuelle - i);
+
+  // Liste plate de tous les comptes de produits disponibles pour le select
+  // const comptesProduits = etat.produits.flatMap((s) => s.comptes);
 
   const handleAnneeChange = (annee: number) => {
     router.push(`/etat-financier?annee=${annee}`);
   };
 
+  // --- Gestion Trésorerie ---
   const handleAjouterEntree = async () => {
     if (!form.libelle.trim()) {
       toast.error("Le libellé est requis.");
@@ -106,6 +125,58 @@ export default function EtatFinancierView({
       router.refresh();
     } catch {
       toast.error("Erreur lors de la suppression.");
+    }
+  };
+
+  // --- Gestion Produits ---
+  const handleAjouterProduit = async () => {
+    if (!produitForm.libelle.trim()) {
+      toast.error("Le libellé est requis.");
+      return;
+    }
+    if (!produitForm.montant || parseFloat(produitForm.montant) <= 0) {
+      toast.error("Le montant doit être supérieur à 0.");
+      return;
+    }
+    if (!produitForm.compteId) {
+      toast.error("Veuillez sélectionner un compte de produit.");
+      return;
+    }
+
+    setProduitFormLoading(true);
+    try {
+      const res = await fetch("/api/entrees-produits", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date: produitForm.date,
+          libelle: produitForm.libelle,
+          montant: parseFloat(produitForm.montant),
+          compteId: produitForm.compteId,
+          compteTresorerieId: produitForm.compteTresorerieId,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error ?? "Erreur inconnue");
+      }
+
+      toast.success("Produit enregistré avec succès.");
+      setShowProduitForm(false);
+      setProduitForm({
+        date: new Date().toISOString().split("T")[0],
+        libelle: "",
+        montant: "",
+        compteId: "",
+        compteTresorerieId: comptesTresorerie[0]?.id ?? "",
+      });
+      router.refresh();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erreur lors de l'enregistrement.";
+      toast.error(message);
+    } finally {
+      setProduitFormLoading(false);
     }
   };
 
@@ -381,17 +452,164 @@ export default function EtatFinancierView({
         vide="Aucune charge enregistrée pour cette période."
       />
 
-      {/* Section Produits */}
-      <Section
-        titre="Produits"
-        classeNom="Classe 7 — Produits perçus"
-        total={etat.totalProduits}
-        sections={etat.produits}
-        ouvert={produitsOuverts}
-        onToggle={() => setProduitsOuverts((v) => !v)}
-        couleur="green"
-        vide="Aucun produit enregistré pour cette période."
-      />
+      {/* Section Produits (Customisée pour inclure le bouton d'ajout) */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+          <button
+            type="button"
+            onClick={() => setProduitsOuverts((v) => !v)}
+            className="flex items-center gap-3 hover:opacity-70 transition-opacity cursor-pointer"
+          >
+            {produitsOuverts ? (
+              <ChevronDown size={18} className="text-gray-400" />
+            ) : (
+              <ChevronRight size={18} className="text-gray-400" />
+            )}
+            <div className="text-left">
+              <p className="font-bold text-[#11355b]">Produits</p>
+              <p className="text-xs text-gray-400">Classe 7 — Produits perçus</p>
+            </div>
+          </button>
+
+          <div className="flex items-center gap-4">
+            {peutModifier && produitsOuverts && (
+              <button
+                type="button"
+                onClick={() => setShowProduitForm((v) => !v)}
+                className="flex items-center gap-2 px-3 py-1.5  bg-[#11355b] hover:bg-[#1a4a7a] text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+              >
+                <Plus size={14} />
+                Ajouter un produit
+              </button>
+            )}
+          </div>
+        </div>
+
+        {produitsOuverts && (
+          <div>
+            {showProduitForm && (
+              <div className="p-6 bg-emerald-50 border-b border-emerald-100">
+                <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-3">
+                  Nouvelle entrée de produit
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Date</label>
+                    <input
+                      type="date"
+                      value={produitForm.date}
+                      onChange={(e) => setProduitForm((f) => ({ ...f, date: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Libellé</label>
+                    <input
+                      type="text"
+                      value={produitForm.libelle}
+                      onChange={(e) => setProduitForm((f) => ({ ...f, libelle: e.target.value }))}
+                      placeholder="Ex: Subvention État"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Compte Produit (Cl. 7)</label>
+                    <select
+                      value={produitForm.compteId}
+                      onChange={(e) => setProduitForm((f) => ({ ...f, compteId: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-white cursor-pointer"
+                    >
+                      <option value="">Sélectionner...</option>
+                      {comptesProduits.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.numero} — {c.nom}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Compte Trésorerie (Cl. 5)</label>
+                    <select
+                      value={produitForm.compteTresorerieId}
+                      onChange={(e) => setProduitForm((f) => ({ ...f, compteTresorerieId: parseInt(e.target.value) }))}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-white cursor-pointer"
+                    >
+                      {comptesTresorerie.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.numero} — {c.nom}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-500 mb-1 block">Montant (FCFA)</label>
+                    <input
+                      type="number"
+                      value={produitForm.montant}
+                      onChange={(e) => setProduitForm((f) => ({ ...f, montant: e.target.value }))}
+                      placeholder="0"
+                      min={1}
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-4">
+                  <button
+                    type="button"
+                    onClick={handleAjouterProduit}
+                    disabled={produitFormLoading}
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors cursor-pointer"
+                  >
+                    {produitFormLoading ? (
+                      <><Loader2 size={14} className="animate-spin" /> Enregistrement...</>
+                    ) : (
+                      "Enregistrer"
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowProduitForm(false)}
+                    className="px-4 py-2 text-gray-500 hover:text-gray-700 text-sm cursor-pointer transition-colors"
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {etat.produits.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-8">
+                Aucun produit enregistré pour cette période.
+              </p>
+            ) : (
+              etat.produits.flatMap((s) =>
+                s.comptes.map((compte) => (
+                  <div
+                    key={compte.compteId}
+                    className="flex items-center justify-between px-6 py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors"
+                  >
+                    <div>
+                      <span className="text-xs font-mono text-gray-400 mr-2">{compte.numero}</span>
+                      <span className="text-sm text-gray-700">{compte.nom}</span>
+                    </div>
+                    <span className="text-sm font-semibold text-emerald-600">
+                      {formatMontant(compte.total)}
+                    </span>
+                  </div>
+                ))
+              )
+            )}
+            {etat.produits.length > 0 && (
+              <div className="flex items-center justify-between px-6 py-4 bg-emerald-50">
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                  Total Produits
+                </span>
+                <span className="font-bold text-emerald-600">{formatMontant(etat.totalProduits)}</span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
