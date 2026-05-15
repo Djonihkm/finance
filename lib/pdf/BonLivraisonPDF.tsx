@@ -91,7 +91,7 @@ export function BonLivraisonPDF({ data, logoUrl }: { data: BonRow; logoUrl?: str
             {logoUrl && <Image src={logoUrl} style={{ width: 52, height: 52, objectFit: "contain" }} />}
           </View>
           <View style={s.titleBlock}>
-            <Text style={s.title}>BON DE LIVRAISON</Text>
+            <Text style={s.title}>BON DE RECEPTION</Text>
             <Text style={s.titleSub}>Document de procurement autorisé</Text>
           </View>
           <View style={s.addrBlock}>
@@ -110,7 +110,7 @@ export function BonLivraisonPDF({ data, logoUrl }: { data: BonRow; logoUrl?: str
               <Text style={s.infoVal}>{data.reference}</Text>
             </View>
             <View style={s.infoEntry}>
-              <Text style={s.infoLabel}>Date d'émission</Text>
+              <Text style={s.infoLabel}>Date d&apos;émission</Text>
               <Text style={s.infoValSm}>{formatDate(data.date)}</Text>
             </View>
             <View style={s.infoEntry}>

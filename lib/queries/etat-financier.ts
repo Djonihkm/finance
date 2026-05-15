@@ -79,21 +79,33 @@ export async function getEtatFinancier({
   annee,
 }: GetEtatFinancierParams): Promise<EtatFinancier> {
 
-  // Bornes de la période — du 1er janvier au 31 décembre
   const debut = new Date(`${annee}-01-01T00:00:00.000Z`);
   const fin   = new Date(`${annee}-12-31T23:59:59.999Z`);
 
   // ============================================================
   // 1. Récupérer toutes les écritures de la période
-  //    liées aux dépenses de cet établissement
+  //    Deux sources :
+  //    - Écritures liées aux dépenses     (charges + sorties trésorerie)
+  //    - Écritures liées aux EntreeProduit (produits + entrées trésorerie)
   // ============================================================
   const ecritures = await prisma.ecriture.findMany({
     where: {
       date: { gte: debut, lte: fin },
-      depense: {
-        etablissementId,
-        deletedAt: null,
-      },
+      // OR : soit liée à une dépense, soit à une entrée de produit
+      OR: [
+        {
+          depense: {
+            etablissementId,
+            deletedAt: null,
+          },
+        },
+        {
+          entreeProduit: {
+            etablissementId,
+            deletedAt: null,
+          },
+        },
+      ],
     },
     include: {
       compte: {
@@ -106,7 +118,8 @@ export async function getEtatFinancier({
   });
 
   // ============================================================
-  // 2. Récupérer toutes les entrées de trésorerie de la période
+  // 2. Récupérer toutes les entrées de trésorerie manuelles
+  //    (saisies dans la section trésorerie de l'état financier)
   // ============================================================
   const entrees = await prisma.entreeTresorerie.findMany({
     where: {
@@ -123,44 +136,50 @@ export async function getEtatFinancier({
 
   // ============================================================
   // 3. Agréger les écritures par compte et par classe
-  //
-  //  Structure intermédiaire :
-  //  {
-  //    "6": { classeNom: "Charges", comptes: { 6: { total: 500000 } } }
-  //    "5": { classeNom: "Trésorerie", comptes: { 92: { total: 500000 } } }
-  //  }
   // ============================================================
   const agregation: Record<string, {
     classeNom: string;
     comptes:   Record<number, LigneCompte>;
   }> = {};
 
-  // Structure pour les sorties de trésorerie (écritures CRÉDIT classe 5)
-  // { compteId → montant total sorti }
+  // Sorties de trésorerie (CRÉDIT classe 5) — dépenses payées
+  // Entrées de trésorerie via écritures (DÉBIT classe 5) — produits reçus
   const sortiesParCompte: Record<number, number> = {};
+  const entreesEcrituresParCompte: Record<number, number> = {};
 
   for (const ecriture of ecritures) {
     const classe  = ecriture.compte.classe;
     const compte  = ecriture.compte;
     const montant = Number(ecriture.montant);
 
-    // ── Charges (classe 6, DÉBIT) ─────────────────────────
-    const estCharge  = classe.numero === "6" && ecriture.sens === "DEBIT";
-    // ── Produits (classe 7, CRÉDIT) ───────────────────────
+    // Charges (classe 6, DÉBIT) — dépenses engagées
+    const estCharge = classe.numero === "6" && ecriture.sens === "DEBIT";
+
+    // Produits (classe 7, CRÉDIT) — recettes constatées
     const estProduit = classe.numero === "7" && ecriture.sens === "CREDIT";
-    // ── Sorties trésorerie (classe 5, CRÉDIT) ─────────────
-    // Ce sont les paiements effectués depuis la caisse ou la banque
-    const estSortie  = classe.numero === "5" && ecriture.sens === "CREDIT";
+
+    // Sorties trésorerie (classe 5, CRÉDIT) — argent qui sort (dépenses)
+    const estSortie = classe.numero === "5" && ecriture.sens === "CREDIT";
+
+    // Entrées trésorerie via écritures (classe 5, DÉBIT) — argent qui entre (produits)
+    // Générées par genererEcrituresEntreeProduit
+    const estEntreeEcriture = classe.numero === "5" && ecriture.sens === "DEBIT";
 
     if (estSortie) {
-      // Accumuler les sorties par compte de trésorerie
       sortiesParCompte[compte.id] = (sortiesParCompte[compte.id] ?? 0) + montant;
+      continue;
+    }
+
+    if (estEntreeEcriture) {
+      // On accumule les entrées via écritures séparément
+      // pour les combiner avec EntreeTresorerie dans la section trésorerie
+      entreesEcrituresParCompte[compte.id] =
+        (entreesEcrituresParCompte[compte.id] ?? 0) + montant;
       continue;
     }
 
     if (!estCharge && !estProduit) continue;
 
-    // Initialiser la classe si elle n'existe pas encore
     if (!agregation[classe.numero]) {
       agregation[classe.numero] = {
         classeNom: classe.nom,
@@ -168,7 +187,6 @@ export async function getEtatFinancier({
       };
     }
 
-    // Initialiser le compte si il n'existe pas encore
     if (!agregation[classe.numero].comptes[compte.id]) {
       agregation[classe.numero].comptes[compte.id] = {
         compteId: compte.id,
@@ -178,13 +196,11 @@ export async function getEtatFinancier({
       };
     }
 
-    // Accumuler le montant sur ce compte
     agregation[classe.numero].comptes[compte.id].total += montant;
   }
 
   // ============================================================
   // 4. Construire les sections charges et produits
-  //    triées par numéro de compte
   // ============================================================
   function construireSections(classeNumero: string): SectionClasse[] {
     const section = agregation[classeNumero];
@@ -209,8 +225,10 @@ export async function getEtatFinancier({
 
   // ============================================================
   // 5. Construire la section trésorerie
-  //    Regrouper les entrées par compte (5200 Banque, 5700 Caisse)
-  //    et calculer le solde = entrées - sorties
+  //    Combine :
+  //    - EntreeTresorerie (saisies manuelles)
+  //    - Écritures DÉBIT classe 5 (générées par EntreeProduit)
+  //    - Écritures CRÉDIT classe 5 (générées par Depense)
   // ============================================================
   const entreesParCompte: Record<number, {
     numero:  string;
@@ -221,7 +239,6 @@ export async function getEtatFinancier({
   for (const entree of entrees) {
     const compteId = entree.compte.id;
 
-    // Initialiser le compte s'il n'existe pas encore
     if (!entreesParCompte[compteId]) {
       entreesParCompte[compteId] = {
         numero:  entree.compte.numero,
@@ -239,22 +256,27 @@ export async function getEtatFinancier({
     });
   }
 
-  // Construire le tableau final de trésorerie
   const tresorerie: SectionTresorerie[] = Object.entries(entreesParCompte)
     .map(([compteIdStr, data]) => {
       const compteId     = parseInt(compteIdStr);
       const totalEntrees = data.entrees.reduce((sum, e) => sum + e.montant, 0);
+
+      // Sorties = écritures CRÉDIT classe 5 (dépenses payées)
       const totalSorties = sortiesParCompte[compteId] ?? 0;
+
+      // Entrées via écritures = DÉBIT classe 5 (produits reçus)
+      // Ces entrées viennent des EntreeProduit, pas de EntreeTresorerie
+      // On les ajoute aux entrées manuelles pour le solde
+      const entreesViaEcritures = entreesEcrituresParCompte[compteId] ?? 0;
 
       return {
         compteId,
         numero:       data.numero,
         nom:          data.nom,
         entrees:      data.entrees,
-        totalEntrees,
+        totalEntrees: totalEntrees + entreesViaEcritures,
         totalSorties,
-        // Solde = ce qui est entré - ce qui est sorti
-        solde: totalEntrees - totalSorties,
+        solde:        totalEntrees + entreesViaEcritures - totalSorties,
       };
     })
     .sort((a, b) => a.numero.localeCompare(b.numero));
@@ -262,15 +284,11 @@ export async function getEtatFinancier({
   // ============================================================
   // 6. Calculer les totaux globaux
   // ============================================================
-  const totalCharges   = charges.reduce((sum, s)  => sum + s.total, 0);
-  const totalProduits  = produits.reduce((sum, s) => sum + s.total, 0);
-  const totalEntrees   = tresorerie.reduce((sum, t) => sum + t.totalEntrees, 0);
-  const totalSorties   = tresorerie.reduce((sum, t) => sum + t.totalSorties, 0);
-
-  // Résultat comptable : produits - charges
-  const resultat = totalProduits - totalCharges;
-
-  // Solde de trésorerie : entrées - sorties
+  const totalCharges    = charges.reduce((sum, s)  => sum + s.total, 0);
+  const totalProduits   = produits.reduce((sum, s) => sum + s.total, 0);
+  const totalEntrees    = tresorerie.reduce((sum, t) => sum + t.totalEntrees, 0);
+  const totalSorties    = tresorerie.reduce((sum, t) => sum + t.totalSorties, 0);
+  const resultat        = totalProduits - totalCharges;
   const soldeTresorerie = totalEntrees - totalSorties;
 
   return {

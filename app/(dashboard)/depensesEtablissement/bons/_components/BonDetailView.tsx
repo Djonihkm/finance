@@ -382,7 +382,7 @@ export default function BonDetailView({
                         );
                       } catch {
                         toast.error(
-                          "Erreur lors de la génération du bon de livraison.",
+                          "Erreur lors de la génération du bon de réception.",
                         );
                       } finally {
                         setBlLoading(false);
@@ -395,7 +395,7 @@ export default function BonDetailView({
                     ) : (
                       <Truck size={16} />
                     )}
-                    {blLoading ? "Génération…" : "Générer bon de livraison"}
+                    {blLoading ? "Génération…" : "Générer bon de réception"}
                   </button>
                 )}
               </>

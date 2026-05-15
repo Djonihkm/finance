@@ -34,6 +34,7 @@ model User {
   etablissement         Etablissement?  @relation("EtablissementUsers", fields: [etablissementId], references: [id])
   resetToken            String?         @unique
   resetTokenExp         DateTime?
+  entreesProduitsCreees EntreeProduit[] @relation("EntreeProduitCreateur")
 }
 
 model Etablissement {
@@ -58,6 +59,7 @@ model Etablissement {
   createdBy         User               @relation("EtablissementCreateur", fields: [createdById], references: [id])
   users             User[]             @relation("EtablissementUsers")
   entreesTresorerie EntreeTresorerie[]
+  entresProduits    EntreeProduit[]
 }
 
 model Budget {
@@ -204,13 +206,15 @@ model Compte {
   enfants  Compte[] @relation("CompteHierarchy")
 
   // Relations vers les documents (nommées pour éviter l'ambiguïté)
-  depensesCharge     Depense[]          @relation("DepenseCompteCharge")
-  depensesTresorerie Depense[]          @relation("DepenseCompteTresorerie")
-  bonsCharge         BonCommande[]      @relation("BonCommandeCompteCharge")
-  bonsTresorerie     BonCommande[]      @relation("BonCommandeCompteTresorerie")
-  entreesTresorerie  EntreeTresorerie[]
+  depensesCharge            Depense[]          @relation("DepenseCompteCharge")
+  depensesTresorerie        Depense[]          @relation("DepenseCompteTresorerie")
+  bonsCharge                BonCommande[]      @relation("BonCommandeCompteCharge")
+  bonsTresorerie            BonCommande[]      @relation("BonCommandeCompteTresorerie")
+  entreesTresorerie         EntreeTresorerie[]
   // Toutes les écritures passées sur ce compte
-  ecritures          Ecriture[]
+  ecritures                 Ecriture[]
+  entreesProduitsCompte     EntreeProduit[]    @relation("EntreeProduitCompte")
+  entreesProduitsTresorerie EntreeProduit[]    @relation("EntreeProduitTresorerie")
 }
 
 // Après le modèle Ecriture
@@ -228,6 +232,47 @@ model EntreeTresorerie {
 
   compte        Compte        @relation(fields: [compteId], references: [id])
   etablissement Etablissement @relation(fields: [etablissementId], references: [id])
+}
+
+// ============================================================
+// ENTRÉES DE PRODUITS
+// Enregistre les recettes de l'établissement
+// (subventions, dons, frais de scolarité...)
+//
+// Chaque entrée génère deux écritures (partie double) :
+//   DÉBIT  classe 5 (trésorerie) ← l'argent entre en caisse/banque
+//   CRÉDIT classe 7 (produit)    ← le produit est constaté
+// ============================================================
+
+model EntreeProduit {
+  id          String   @id @default(uuid())
+  reference   String   @unique
+  date        DateTime
+  libelle     String
+  montant     Decimal  @db.Decimal(15, 2)
+  description String?
+
+  // Compte de produit (classe 7) — ce qu'on a reçu
+  // Ex: 7100 Subvention État, 7200 Don en espèces
+  compteId Int
+  compte   Compte @relation("EntreeProduitCompte", fields: [compteId], references: [id])
+
+  // Compte de trésorerie (classe 5) — où l'argent arrive
+  // Ex: 5200 Banque, 5700 Caisse
+  compteTresorerieId Int
+  compteTresorerie   Compte @relation("EntreeProduitTresorerie", fields: [compteTresorerieId], references: [id])
+
+  // Écritures comptables générées à la création
+  ecritures Ecriture[]
+
+  etablissementId String
+  etablissement   Etablissement @relation(fields: [etablissementId], references: [id])
+  createdById     String
+  createdBy       User          @relation("EntreeProduitCreateur", fields: [createdById], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 // ============================================================
@@ -255,7 +300,10 @@ model Ecriture {
   bonCommandeId String?
   bonCommande   BonCommande? @relation(fields: [bonCommandeId], references: [id])
 
-  createdAt DateTime @default(now())
+  createdAt       DateTime       @default(now())
+  // Lien vers EntreeProduit (en plus de Depense et BonCommande)
+  entreeProduit   EntreeProduit? @relation(fields: [entreeProduitId], references: [id])
+  entreeProduitId String?
 }
 
 // ============================================================
