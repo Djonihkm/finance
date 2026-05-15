@@ -35,6 +35,7 @@ yarn-error.log*
 
 seed-*.ts
 prisma/seed.ts
+prisma/seed0.ts
 
 informations.txt
 
