@@ -1,8 +1,9 @@
 "use client";
 
-import { FileSpreadsheet } from "lucide-react";
+// import { FileSpreadsheet } from "lucide-react";
 import { type GrandLivre } from "@/lib/queries/grandLivre";
-import { formatMontant, formatDate } from "@/lib/utils/formatters";
+import { formatDate } from "@/lib/utils/formatters";
+import { FaFileExcel } from "react-icons/fa";
 
 interface Props {
   grandLivre: GrandLivre;
@@ -105,10 +106,10 @@ export function GrandLivreExcelButton({ grandLivre, annee }: Props) {
   return (
     <button
       onClick={handleExport}
-      className="flex items-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg transition-colors cursor-pointer"
+      className="flex items-center justify-center w-9 h-9 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors cursor-pointer"
+      title="Exporter Excel"
     >
-      <FileSpreadsheet size={15} />
-      Exporter Excel
+      <FaFileExcel size={18} />
     </button>
   );
 }

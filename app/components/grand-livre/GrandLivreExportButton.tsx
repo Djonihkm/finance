@@ -1,9 +1,10 @@
 "use client";
 
 import { PDFDownloadLink } from "@react-pdf/renderer";
-import { FileDown } from "lucide-react";
+// import { FileDown } from "lucide-react";
 import { type GrandLivre } from "@/lib/queries/grandLivre";
 import { GrandLivrePDFDocument } from "./GrandLivrePDF";
+import { FaFilePdf } from "react-icons/fa";
 
 interface Props {
   grandLivre: GrandLivre;
@@ -19,10 +20,9 @@ export function GrandLivreExportButton({ grandLivre, annee }: Props) {
       {({ loading }) => (
         <button
           disabled={loading}
-          className="flex items-center gap-2 px-3 py-2 bg-[#11355b] hover:bg-[#1a4a7a] disabled:opacity-60 text-white text-sm font-semibold rounded-lg transition-colors cursor-pointer"
+          className="flex items-center justify-center w-9 h-9 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-lg transition-colors cursor-pointer"
         >
-          <FileDown size={15} />
-          {loading ? "Génération..." : "Exporter PDF"}
+          <FaFilePdf size={18} />
         </button>
       )}
     </PDFDownloadLink>
