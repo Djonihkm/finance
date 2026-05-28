@@ -16,6 +16,12 @@ import {
 import { toast } from "sonner";
 import { type EtatFinancier } from "@/lib/queries/etat-financier";
 import { formatMontant, formatDate } from "@/lib/utils/formatters";
+import dynamic from "next/dynamic";
+
+const EtatFinancierExportButton = dynamic(
+  () => import("./EtatFinancierExportButton").then((m) => m.EtatFinancierExportButton),
+  { ssr: false, loading: () => <div className="w-32 h-9 rounded-lg bg-gray-100 animate-pulse" /> },
+);
 
 interface Props {
   etat: EtatFinancier;
@@ -192,15 +198,19 @@ export default function EtatFinancierView({
           <h1 className="text-3xl font-bold text-[#11355b]">État Financier</h1>
           <p className="text-sm text-gray-500 mt-0.5">Exercice {anneeSelectionnee}</p>
         </div>
-        <select
-          value={anneeSelectionnee}
-          onChange={(e) => handleAnneeChange(parseInt(e.target.value))}
-          className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#11355b]/20 cursor-pointer"
-        >
-          {annees.map((a) => (
-            <option key={a} value={a}>{a}</option>
-          ))}
-        </select>
+        <div className="flex items-center gap-2">
+          <EtatFinancierExportButton etat={etat} annee={anneeSelectionnee} />
+          <select
+            title="Sélectionner l'exercice"
+            value={anneeSelectionnee}
+            onChange={(e) => handleAnneeChange(parseInt(e.target.value))}
+            className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#11355b]/20 cursor-pointer"
+          >
+            {annees.map((a) => (
+              <option key={a} value={a}>{a}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Cartes résumé */}
@@ -310,6 +320,7 @@ export default function EtatFinancierView({
                     <label className="text-xs text-gray-500 mb-1 block">Date</label>
                     <input
                       type="date"
+                      title="Date de l'entrée"
                       value={form.date}
                       onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#11355b]/20"
@@ -328,6 +339,7 @@ export default function EtatFinancierView({
                   <div>
                     <label className="text-xs text-gray-500 mb-1 block">Compte</label>
                     <select
+                      title="Compte de trésorerie"
                       value={form.compteId}
                       onChange={(e) => setForm((f) => ({ ...f, compteId: parseInt(e.target.value) }))}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#11355b]/20 bg-white cursor-pointer"
@@ -408,6 +420,7 @@ export default function EtatFinancierView({
                         {peutModifier && (
                           <button
                             type="button"
+                            aria-label="Supprimer cette entrée"
                             onClick={() => handleSupprimerEntree(entree.id)}
                             className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-all cursor-pointer"
                           >
@@ -497,6 +510,7 @@ export default function EtatFinancierView({
                     <label className="text-xs text-gray-500 mb-1 block">Date</label>
                     <input
                       type="date"
+                      title="Date du produit"
                       value={produitForm.date}
                       onChange={(e) => setProduitForm((f) => ({ ...f, date: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
@@ -515,6 +529,7 @@ export default function EtatFinancierView({
                   <div>
                     <label className="text-xs text-gray-500 mb-1 block">Compte Produit (Cl. 7)</label>
                     <select
+                      title="Compte de produit (Classe 7)"
                       value={produitForm.compteId}
                       onChange={(e) => setProduitForm((f) => ({ ...f, compteId: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-white cursor-pointer"
@@ -530,6 +545,7 @@ export default function EtatFinancierView({
                   <div>
                     <label className="text-xs text-gray-500 mb-1 block">Compte Trésorerie (Cl. 5)</label>
                     <select
+                      title="Compte de trésorerie (Classe 5)"
                       value={produitForm.compteTresorerieId}
                       onChange={(e) => setProduitForm((f) => ({ ...f, compteTresorerieId: parseInt(e.target.value) }))}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-white cursor-pointer"
