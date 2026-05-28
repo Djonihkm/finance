@@ -12,6 +12,11 @@ const GrandLivreExportButton = dynamic(
   { ssr: false, loading: () => <div className="w-32 h-9 rounded-lg bg-gray-100 animate-pulse" /> },
 );
 
+const GrandLivreExcelButton = dynamic(
+  () => import("./GrandLivreExcelButton").then((m) => m.GrandLivreExcelButton),
+  { ssr: false, loading: () => <div className="w-36 h-9 rounded-lg bg-gray-100 animate-pulse" /> },
+);
+
 interface Props {
   grandLivre: GrandLivre;
   anneeSelectionnee: number;
@@ -57,6 +62,7 @@ export default function GrandLivreView({
 
         <div className="flex items-center gap-2">
           <GrandLivreExportButton grandLivre={grandLivre} annee={anneeSelectionnee} />
+          <GrandLivreExcelButton grandLivre={grandLivre} annee={anneeSelectionnee} />
           <select
             value={compteSelectionnee ?? ""}
             onChange={(e) => handleCompteChange(e.target.value)}
