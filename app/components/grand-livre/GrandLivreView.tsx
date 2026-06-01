@@ -5,6 +5,25 @@ import { AlertTriangle, CheckCircle, TrendingUp, TrendingDown } from "lucide-rea
 import { type GrandLivre } from "@/lib/queries/grandLivre";
 import { formatMontant, formatDate } from "@/lib/utils/formatters";
 import React from "react";
+import dynamic from "next/dynamic";
+
+// Le bouton pdf
+const GrandLivreExportButton = dynamic(
+  () => import("./GrandLivreExportButton").then((m) => m.GrandLivreExportButton),
+  { ssr: false, loading: () => <div className="w-32 h-9 rounded-lg bg-gray-100 animate-pulse" /> },
+);
+
+// Le bouton excel
+const GrandLivreExcelButton = dynamic(
+  () => import("./GrandLivreExcelButton").then((m) => m.GrandLivreExcelButton),
+  { ssr: false, loading: () => <div className="w-36 h-9 rounded-lg bg-gray-100 animate-pulse" /> },
+);
+
+// Le bouton csv 
+const GrandLivreCSVButton = dynamic(
+  () => import("./GrandLivreCSVButton").then((m) => m.GrandLivreCSVButton),
+  { ssr: false, loading: () => <div className="w-28 h-9 rounded-lg bg-gray-100 animate-pulse" /> },
+);
 
 interface Props {
   grandLivre: GrandLivre;
@@ -49,7 +68,10 @@ export default function GrandLivreView({
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          <GrandLivreExportButton grandLivre={grandLivre} annee={anneeSelectionnee} />
+          <GrandLivreExcelButton grandLivre={grandLivre} annee={anneeSelectionnee} />
+          <GrandLivreCSVButton grandLivre={grandLivre} annee={anneeSelectionnee} />
           <select
             value={compteSelectionnee ?? ""}
             onChange={(e) => handleCompteChange(e.target.value)}

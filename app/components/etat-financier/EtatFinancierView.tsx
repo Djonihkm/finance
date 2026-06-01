@@ -16,6 +16,22 @@ import {
 import { toast } from "sonner";
 import { type EtatFinancier } from "@/lib/queries/etat-financier";
 import { formatMontant, formatDate } from "@/lib/utils/formatters";
+import dynamic from "next/dynamic";
+import { EtatFinancierExcelButton } from "./EtatFinancierExcelButton";
+import { EtatFinancierCSVButton } from "./EtatFinancierCSVButton";
+
+const EtatFinancierExportButton = dynamic(
+  () =>
+    import("./EtatFinancierExportButton").then(
+      (m) => m.EtatFinancierExportButton,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-32 h-9 rounded-lg bg-gray-100 animate-pulse" />
+    ),
+  },
+);
 
 interface Props {
   etat: EtatFinancier;
@@ -30,14 +46,14 @@ export default function EtatFinancierView({
   anneeSelectionnee,
   userPrismaRole,
   comptesTresorerie,
-   comptesProduits,
+  comptesProduits,
 }: Props) {
   const router = useRouter();
 
   const [chargesOuvertes, setChargesOuvertes] = useState(true);
   const [produitsOuverts, setProduitsOuverts] = useState(true);
   const [tresorerieOuverte, setTresorerieOuverte] = useState(true);
-  
+
   // États pour le formulaire Trésorerie
   const [showForm, setShowForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
@@ -59,7 +75,9 @@ export default function EtatFinancierView({
     compteTresorerieId: comptesTresorerie[0]?.id ?? "", // Compte de trésorerie (Classe 5)
   });
 
-  const peutModifier = ["DIRECTEUR", "COMPTABLE", "ADMIN"].includes(userPrismaRole);
+  const peutModifier = ["DIRECTEUR", "COMPTABLE", "ADMIN"].includes(
+    userPrismaRole,
+  );
   const anneeActuelle = new Date().getFullYear();
   const annees = Array.from({ length: 5 }, (_, i) => anneeActuelle - i);
 
@@ -109,7 +127,8 @@ export default function EtatFinancierView({
       });
       router.refresh();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Erreur lors de l'enregistrement.";
+      const message =
+        err instanceof Error ? err.message : "Erreur lors de l'enregistrement.";
       toast.error(message);
     } finally {
       setFormLoading(false);
@@ -119,7 +138,9 @@ export default function EtatFinancierView({
   const handleSupprimerEntree = async (id: string) => {
     if (!confirm("Supprimer cette entrée ?")) return;
     try {
-      const res = await fetch(`/api/entrees-tresorerie/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/entrees-tresorerie/${id}`, {
+        method: "DELETE",
+      });
       if (!res.ok) throw new Error();
       toast.success("Entrée supprimée.");
       router.refresh();
@@ -173,7 +194,8 @@ export default function EtatFinancierView({
       });
       router.refresh();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Erreur lors de l'enregistrement.";
+      const message =
+        err instanceof Error ? err.message : "Erreur lors de l'enregistrement.";
       toast.error(message);
     } finally {
       setProduitFormLoading(false);
@@ -190,25 +212,40 @@ export default function EtatFinancierView({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-[#11355b]">État Financier</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Exercice {anneeSelectionnee}</p>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Exercice {anneeSelectionnee}
+          </p>
         </div>
-        <select
-          value={anneeSelectionnee}
-          onChange={(e) => handleAnneeChange(parseInt(e.target.value))}
-          className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#11355b]/20 cursor-pointer"
-        >
-          {annees.map((a) => (
-            <option key={a} value={a}>{a}</option>
-          ))}
-        </select>
+        <div className="flex items-center gap-2">
+          <EtatFinancierExportButton etat={etat} annee={anneeSelectionnee} />
+          <EtatFinancierExcelButton etat={etat} annee={anneeSelectionnee} />
+          <EtatFinancierCSVButton etat={etat} annee={anneeSelectionnee} />
+
+          <select
+            title="Sélectionner l'exercice"
+            value={anneeSelectionnee}
+            onChange={(e) => handleAnneeChange(parseInt(e.target.value))}
+            className="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#11355b]/20 cursor-pointer"
+          >
+            {annees.map((a) => (
+              <option key={a} value={a}>
+                {a}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Cartes résumé */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white px-5 py-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
           <div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Total Entrées</p>
-            <p className="text-lg font-bold text-[#11355b]">{formatMontant(etat.totalEntrees)}</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
+              Total Entrées
+            </p>
+            <p className="text-lg font-bold text-[#11355b]">
+              {formatMontant(etat.totalEntrees)}
+            </p>
           </div>
           <div className="bg-emerald-50 p-2 rounded-lg text-emerald-600">
             <TrendingUp size={18} />
@@ -217,8 +254,12 @@ export default function EtatFinancierView({
 
         <div className="bg-white px-5 py-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
           <div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Total Charges</p>
-            <p className="text-lg font-bold text-[#11355b]">{formatMontant(etat.totalCharges)}</p>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
+              Total Charges
+            </p>
+            <p className="text-lg font-bold text-[#11355b]">
+              {formatMontant(etat.totalCharges)}
+            </p>
           </div>
           <div className="bg-red-50 p-2 rounded-lg text-red-500">
             <TrendingDown size={18} />
@@ -227,13 +268,21 @@ export default function EtatFinancierView({
 
         <div className="bg-white px-5 py-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
           <div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Solde Trésorerie</p>
-            <p className="text-lg font-bold text-[#11355b]">{formatMontant(etat.soldeTresorerie)}</p>
-            <p className={`text-[10px] mt-0.5 ${soldePositif ? "text-emerald-600" : "text-red-500"}`}>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
+              Solde Trésorerie
+            </p>
+            <p className="text-lg font-bold text-[#11355b]">
+              {formatMontant(etat.soldeTresorerie)}
+            </p>
+            <p
+              className={`text-[10px] mt-0.5 ${soldePositif ? "text-emerald-600" : "text-red-500"}`}
+            >
               {soldePositif ? "Disponible" : "Insuffisant"}
             </p>
           </div>
-          <div className={`p-2 rounded-lg ${soldePositif ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}>
+          <div
+            className={`p-2 rounded-lg ${soldePositif ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"}`}
+          >
             <Wallet size={18} />
           </div>
         </div>
@@ -241,8 +290,12 @@ export default function EtatFinancierView({
         {resultatPositif ? (
           <div className="bg-[#11355b] px-5 py-4 rounded-xl shadow-sm flex justify-between items-center text-white">
             <div>
-              <p className="text-[10px] font-bold opacity-70 uppercase tracking-wider mb-0.5">Résultat</p>
-              <p className="text-lg font-bold">+{formatMontant(etat.resultat)}</p>
+              <p className="text-[10px] font-bold opacity-70 uppercase tracking-wider mb-0.5">
+                Résultat
+              </p>
+              <p className="text-lg font-bold">
+                +{formatMontant(etat.resultat)}
+              </p>
               <p className="text-[10px] opacity-60 mt-0.5">Excédent</p>
             </div>
             <div className="bg-white/10 p-2 rounded-lg">
@@ -252,15 +305,23 @@ export default function EtatFinancierView({
         ) : (
           <div className="bg-white px-5 py-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
             <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Résultat</p>
-              <p className={`text-lg font-bold ${resultatNul ? "text-gray-600" : "text-red-500"}`}>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
+                Résultat
+              </p>
+              <p
+                className={`text-lg font-bold ${resultatNul ? "text-gray-600" : "text-red-500"}`}
+              >
                 {formatMontant(etat.resultat)}
               </p>
-              <p className={`text-[10px] mt-0.5 ${resultatNul ? "text-gray-400" : "text-red-400"}`}>
+              <p
+                className={`text-[10px] mt-0.5 ${resultatNul ? "text-gray-400" : "text-red-400"}`}
+              >
                 {resultatNul ? "Équilibre" : "Déficit"}
               </p>
             </div>
-            <div className={`p-2 rounded-lg ${resultatNul ? "bg-gray-50 text-gray-500" : "bg-red-50 text-red-500"}`}>
+            <div
+              className={`p-2 rounded-lg ${resultatNul ? "bg-gray-50 text-gray-500" : "bg-red-50 text-red-500"}`}
+            >
               {resultatNul ? <Minus size={18} /> : <TrendingDown size={18} />}
             </div>
           </div>
@@ -282,7 +343,9 @@ export default function EtatFinancierView({
             )}
             <div className="text-left">
               <p className="font-bold text-[#11355b]">Trésorerie</p>
-              <p className="text-xs text-gray-400">Entrées et sorties par compte</p>
+              <p className="text-xs text-gray-400">
+                Entrées et sorties par compte
+              </p>
             </div>
           </button>
 
@@ -307,29 +370,46 @@ export default function EtatFinancierView({
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   <div>
-                    <label className="text-xs text-gray-500 mb-1 block">Date</label>
+                    <label className="text-xs text-gray-500 mb-1 block">
+                      Date
+                    </label>
                     <input
                       type="date"
+                      title="Date de l'entrée"
                       value={form.date}
-                      onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, date: e.target.value }))
+                      }
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#11355b]/20"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500 mb-1 block">Libellé</label>
+                    <label className="text-xs text-gray-500 mb-1 block">
+                      Libellé
+                    </label>
                     <input
                       type="text"
                       value={form.libelle}
-                      onChange={(e) => setForm((f) => ({ ...f, libelle: e.target.value }))}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, libelle: e.target.value }))
+                      }
                       placeholder="Ex: Subvention État"
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#11355b]/20"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500 mb-1 block">Compte</label>
+                    <label className="text-xs text-gray-500 mb-1 block">
+                      Compte
+                    </label>
                     <select
+                      title="Compte de trésorerie"
                       value={form.compteId}
-                      onChange={(e) => setForm((f) => ({ ...f, compteId: parseInt(e.target.value) }))}
+                      onChange={(e) =>
+                        setForm((f) => ({
+                          ...f,
+                          compteId: parseInt(e.target.value),
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#11355b]/20 bg-white cursor-pointer"
                     >
                       {comptesTresorerie.map((c) => (
@@ -340,11 +420,15 @@ export default function EtatFinancierView({
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500 mb-1 block">Montant (FCFA)</label>
+                    <label className="text-xs text-gray-500 mb-1 block">
+                      Montant (FCFA)
+                    </label>
                     <input
                       type="number"
                       value={form.montant}
-                      onChange={(e) => setForm((f) => ({ ...f, montant: e.target.value }))}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, montant: e.target.value }))
+                      }
                       placeholder="0"
                       min={1}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#11355b]/20"
@@ -359,7 +443,10 @@ export default function EtatFinancierView({
                     className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors cursor-pointer"
                   >
                     {formLoading ? (
-                      <><Loader2 size={14} className="animate-spin" /> Enregistrement...</>
+                      <>
+                        <Loader2 size={14} className="animate-spin" />{" "}
+                        Enregistrement...
+                      </>
                     ) : (
                       "Enregistrer"
                     )}
@@ -381,13 +468,20 @@ export default function EtatFinancierView({
               </p>
             ) : (
               etat.tresorerie.map((section) => (
-                <div key={section.compteId} className="border-b border-gray-100 last:border-0">
+                <div
+                  key={section.compteId}
+                  className="border-b border-gray-100 last:border-0"
+                >
                   <div className="flex items-center justify-between px-6 py-3 bg-gray-50">
                     <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">
-                      <span className="font-mono text-gray-400 mr-2">{section.numero}</span>
+                      <span className="font-mono text-gray-400 mr-2">
+                        {section.numero}
+                      </span>
                       {section.nom}
                     </span>
-                    <span className={`text-sm font-bold ${section.solde >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                    <span
+                      className={`text-sm font-bold ${section.solde >= 0 ? "text-emerald-600" : "text-red-600"}`}
+                    >
                       Solde : {formatMontant(section.solde)}
                     </span>
                   </div>
@@ -398,8 +492,12 @@ export default function EtatFinancierView({
                       className="flex items-center justify-between px-8 py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors group"
                     >
                       <div className="flex items-center gap-4">
-                        <span className="text-xs text-gray-400 w-24 shrink-0">{formatDate(entree.date)}</span>
-                        <span className="text-sm text-gray-700">{entree.libelle}</span>
+                        <span className="text-xs text-gray-400 w-24 shrink-0">
+                          {formatDate(entree.date)}
+                        </span>
+                        <span className="text-sm text-gray-700">
+                          {entree.libelle}
+                        </span>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-sm font-semibold text-emerald-600">
@@ -408,6 +506,7 @@ export default function EtatFinancierView({
                         {peutModifier && (
                           <button
                             type="button"
+                            aria-label="Supprimer cette entrée"
                             onClick={() => handleSupprimerEntree(entree.id)}
                             className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-all cursor-pointer"
                           >
@@ -419,8 +518,18 @@ export default function EtatFinancierView({
                   ))}
 
                   <div className="flex items-center justify-between px-6 py-2 text-xs text-gray-500">
-                    <span>Entrées : <span className="font-semibold text-emerald-600">{formatMontant(section.totalEntrees)}</span></span>
-                    <span>Sorties : <span className="font-semibold text-red-500">-{formatMontant(section.totalSorties)}</span></span>
+                    <span>
+                      Entrées :{" "}
+                      <span className="font-semibold text-emerald-600">
+                        {formatMontant(section.totalEntrees)}
+                      </span>
+                    </span>
+                    <span>
+                      Sorties :{" "}
+                      <span className="font-semibold text-red-500">
+                        -{formatMontant(section.totalSorties)}
+                      </span>
+                    </span>
                   </div>
                 </div>
               ))
@@ -431,7 +540,9 @@ export default function EtatFinancierView({
                 <span className="text-xs font-bold text-[#11355b] uppercase tracking-wider">
                   Solde Total Trésorerie
                 </span>
-                <span className={`font-bold ${etat.soldeTresorerie >= 0 ? "text-emerald-600" : "text-red-600"}`}>
+                <span
+                  className={`font-bold ${etat.soldeTresorerie >= 0 ? "text-emerald-600" : "text-red-600"}`}
+                >
                   {formatMontant(etat.soldeTresorerie)}
                 </span>
               </div>
@@ -467,7 +578,9 @@ export default function EtatFinancierView({
             )}
             <div className="text-left">
               <p className="font-bold text-[#11355b]">Produits</p>
-              <p className="text-xs text-gray-400">Classe 7 — Produits perçus</p>
+              <p className="text-xs text-gray-400">
+                Classe 7 — Produits perçus
+              </p>
             </div>
           </button>
 
@@ -494,29 +607,49 @@ export default function EtatFinancierView({
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                   <div>
-                    <label className="text-xs text-gray-500 mb-1 block">Date</label>
+                    <label className="text-xs text-gray-500 mb-1 block">
+                      Date
+                    </label>
                     <input
                       type="date"
+                      title="Date du produit"
                       value={produitForm.date}
-                      onChange={(e) => setProduitForm((f) => ({ ...f, date: e.target.value }))}
+                      onChange={(e) =>
+                        setProduitForm((f) => ({ ...f, date: e.target.value }))
+                      }
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500 mb-1 block">Libellé</label>
+                    <label className="text-xs text-gray-500 mb-1 block">
+                      Libellé
+                    </label>
                     <input
                       type="text"
                       value={produitForm.libelle}
-                      onChange={(e) => setProduitForm((f) => ({ ...f, libelle: e.target.value }))}
+                      onChange={(e) =>
+                        setProduitForm((f) => ({
+                          ...f,
+                          libelle: e.target.value,
+                        }))
+                      }
                       placeholder="Ex: Subvention État"
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500 mb-1 block">Compte Produit (Cl. 7)</label>
+                    <label className="text-xs text-gray-500 mb-1 block">
+                      Compte Produit (Cl. 7)
+                    </label>
                     <select
+                      title="Compte de produit (Classe 7)"
                       value={produitForm.compteId}
-                      onChange={(e) => setProduitForm((f) => ({ ...f, compteId: e.target.value }))}
+                      onChange={(e) =>
+                        setProduitForm((f) => ({
+                          ...f,
+                          compteId: e.target.value,
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-white cursor-pointer"
                     >
                       <option value="">Sélectionner...</option>
@@ -528,10 +661,18 @@ export default function EtatFinancierView({
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500 mb-1 block">Compte Trésorerie (Cl. 5)</label>
+                    <label className="text-xs text-gray-500 mb-1 block">
+                      Compte Trésorerie (Cl. 5)
+                    </label>
                     <select
+                      title="Compte de trésorerie (Classe 5)"
                       value={produitForm.compteTresorerieId}
-                      onChange={(e) => setProduitForm((f) => ({ ...f, compteTresorerieId: parseInt(e.target.value) }))}
+                      onChange={(e) =>
+                        setProduitForm((f) => ({
+                          ...f,
+                          compteTresorerieId: parseInt(e.target.value),
+                        }))
+                      }
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-white cursor-pointer"
                     >
                       {comptesTresorerie.map((c) => (
@@ -542,11 +683,18 @@ export default function EtatFinancierView({
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500 mb-1 block">Montant (FCFA)</label>
+                    <label className="text-xs text-gray-500 mb-1 block">
+                      Montant (FCFA)
+                    </label>
                     <input
                       type="number"
                       value={produitForm.montant}
-                      onChange={(e) => setProduitForm((f) => ({ ...f, montant: e.target.value }))}
+                      onChange={(e) =>
+                        setProduitForm((f) => ({
+                          ...f,
+                          montant: e.target.value,
+                        }))
+                      }
                       placeholder="0"
                       min={1}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
@@ -561,7 +709,10 @@ export default function EtatFinancierView({
                     className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors cursor-pointer"
                   >
                     {produitFormLoading ? (
-                      <><Loader2 size={14} className="animate-spin" /> Enregistrement...</>
+                      <>
+                        <Loader2 size={14} className="animate-spin" />{" "}
+                        Enregistrement...
+                      </>
                     ) : (
                       "Enregistrer"
                     )}
@@ -589,14 +740,18 @@ export default function EtatFinancierView({
                     className="flex items-center justify-between px-6 py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors"
                   >
                     <div>
-                      <span className="text-xs font-mono text-gray-400 mr-2">{compte.numero}</span>
-                      <span className="text-sm text-gray-700">{compte.nom}</span>
+                      <span className="text-xs font-mono text-gray-400 mr-2">
+                        {compte.numero}
+                      </span>
+                      <span className="text-sm text-gray-700">
+                        {compte.nom}
+                      </span>
                     </div>
                     <span className="text-sm font-semibold text-emerald-600">
                       {formatMontant(compte.total)}
                     </span>
                   </div>
-                ))
+                )),
               )
             )}
             {etat.produits.length > 0 && (
@@ -604,7 +759,9 @@ export default function EtatFinancierView({
                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                   Total Produits
                 </span>
-                <span className="font-bold text-emerald-600">{formatMontant(etat.totalProduits)}</span>
+                <span className="font-bold text-emerald-600">
+                  {formatMontant(etat.totalProduits)}
+                </span>
               </div>
             )}
           </div>
@@ -654,7 +811,9 @@ function Section({
             <p className="text-xs text-gray-400">{classeNom}</p>
           </div>
         </div>
-        <span className={`font-bold text-lg ${textCouleur}`}>{formatMontant(total)}</span>
+        <span className={`font-bold text-lg ${textCouleur}`}>
+          {formatMontant(total)}
+        </span>
       </button>
 
       {ouvert && (
@@ -669,22 +828,28 @@ function Section({
                   className="flex items-center justify-between px-6 py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors"
                 >
                   <div>
-                    <span className="text-xs font-mono text-gray-400 mr-2">{compte.numero}</span>
+                    <span className="text-xs font-mono text-gray-400 mr-2">
+                      {compte.numero}
+                    </span>
                     <span className="text-sm text-gray-700">{compte.nom}</span>
                   </div>
                   <span className={`text-sm font-semibold ${textCouleur}`}>
                     {formatMontant(compte.total)}
                   </span>
                 </div>
-              ))
+              )),
             )
           )}
           {sections.length > 0 && (
-            <div className={`flex items-center justify-between px-6 py-4 ${bgCouleur}`}>
+            <div
+              className={`flex items-center justify-between px-6 py-4 ${bgCouleur}`}
+            >
               <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                 Total {titre}
               </span>
-              <span className={`font-bold ${textCouleur}`}>{formatMontant(total)}</span>
+              <span className={`font-bold ${textCouleur}`}>
+                {formatMontant(total)}
+              </span>
             </div>
           )}
         </div>

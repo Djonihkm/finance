@@ -11,7 +11,6 @@ const emerald = "#059669";
 const red = "#dc2626";
 const white = "#ffffff";
 
-
 const s = StyleSheet.create({
   page: {
     fontFamily: "Helvetica",
