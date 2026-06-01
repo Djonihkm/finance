@@ -18,6 +18,7 @@ import { type EtatFinancier } from "@/lib/queries/etat-financier";
 import { formatMontant, formatDate } from "@/lib/utils/formatters";
 import dynamic from "next/dynamic";
 import { EtatFinancierExcelButton } from "./EtatFinancierExcelButton";
+import { EtatFinancierCSVButton } from "./EtatFinancierCSVButton";
 
 const EtatFinancierExportButton = dynamic(
   () =>
@@ -218,6 +219,7 @@ export default function EtatFinancierView({
         <div className="flex items-center gap-2">
           <EtatFinancierExportButton etat={etat} annee={anneeSelectionnee} />
           <EtatFinancierExcelButton etat={etat} annee={anneeSelectionnee} />
+          <EtatFinancierCSVButton etat={etat} annee={anneeSelectionnee} />
 
           <select
             title="Sélectionner l'exercice"
