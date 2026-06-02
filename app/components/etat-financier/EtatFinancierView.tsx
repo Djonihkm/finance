@@ -79,7 +79,7 @@ export default function EtatFinancierView({
     userPrismaRole,
   );
   const anneeActuelle = new Date().getFullYear();
-  const annees = Array.from({ length: 5 }, (_, i) => anneeActuelle - i);
+  const annees = Array.from({ length: 2 }, (_, i) => anneeActuelle - i);
 
   // Liste plate de tous les comptes de produits disponibles pour le select
   // const comptesProduits = etat.produits.flatMap((s) => s.comptes);
@@ -208,6 +208,20 @@ export default function EtatFinancierView({
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
+      
+      {/* Alerte déficit */}
+{etat.totalCharges > etat.totalProduits && (
+  <div className="flex items-start gap-3 px-5 py-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+    <TrendingDown size={18} className="mt-0.5 shrink-0" />
+    <div>
+      <p className="text-sm font-semibold">Déséquilibre budgétaire détecté</p>
+      <p className="text-xs mt-0.5 text-red-500">
+        Les charges ({formatMontant(etat.totalCharges)}) dépassent les produits ({formatMontant(etat.totalProduits)}) de{" "}
+        <span className="font-bold">{formatMontant(etat.totalCharges - etat.totalProduits)}</span>.
+      </p>
+    </div>
+  </div>
+)}
       {/* En-tête */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
