@@ -66,6 +66,7 @@ type ScreenSize = "mobile" | "tablet" | "desktop";
 const superAdminMenuItems: MenuItem[] = [
   {
     label: "Établissements",
+    
     icon: <Building2 className="w-5 h-5" />,
     href: "/etablissements",
   },
