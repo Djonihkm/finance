@@ -7,7 +7,10 @@
       "Bash(rmdir \"d:/Projets/finance/app/\\(dashboard\\)/depensesEtablissement/[reference]/_components\")",
       "Bash(rmdir \"d:/Projets/finance/app/\\(dashboard\\)/depensesEtablissement/bons/[reference]/_components\")",
       "Bash(npm install *)",
-      "Bash(grep -r *)"
+      "Bash(grep -r *)",
+      "Bash(Get-ChildItem -Path \"d:\\\\Projets\\\\finance\" -Recurse -Depth 3)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Format-Table -AutoSize)"
     ]
   }
 }

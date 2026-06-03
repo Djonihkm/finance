@@ -9,7 +9,6 @@ import {
   Receipt,
   FileText,
   Users,
-  Settings,
   CircleUserRound,
   School,
   X,
@@ -18,6 +17,8 @@ import {
   ClipboardList,
   BarChart3,
   BookOpen,
+  Handshake,
+  Store,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types";
 import LogoutModal from "./LogoutModal";
@@ -66,7 +67,6 @@ type ScreenSize = "mobile" | "tablet" | "desktop";
 const superAdminMenuItems: MenuItem[] = [
   {
     label: "Établissements",
-    
     icon: <Building2 className="w-5 h-5" />,
     href: "/etablissements",
   },
@@ -75,7 +75,16 @@ const superAdminMenuItems: MenuItem[] = [
     icon: <Users className="w-5 h-5" />,
     href: "/utilisateurs",
   },
-  // { label: "Paramètres", icon: <Settings className="w-5 h-5" />, href: "/parametres" },
+  {
+    label: "Fournisseurs",
+    icon: <Store className="w-5 h-5" />,
+    href: "/fournisseurs",
+  },
+  {
+    label: "Marchés",
+    icon: <Handshake className="w-5 h-5" />,
+    href: "/marches",
+  },
 ];
 
 const ministereMenuItems: MenuItem[] = [
@@ -97,6 +106,16 @@ const ministereMenuItems: MenuItem[] = [
   },
   { label: "Bilan", icon: <FileText className="w-5 h-5" />, href: "/bilan" },
   {
+    label: "Fournisseurs",
+    icon: <Store className="w-5 h-5" />,
+    href: "/fournisseurs",
+  },
+  {
+    label: "Marchés",
+    icon: <Handshake className="w-5 h-5" />,
+    href: "/marches",
+  },
+  {
     label: "Utilisateurs",
     icon: <Users className="w-5 h-5" />,
     href: "/utilisateurs",
@@ -113,6 +132,16 @@ const etablissementMenuItems: MenuItem[] = [
     label: "Caisses",
     icon: <Receipt className="w-5 h-5" />,
     href: "/depensesEtablissement",
+  },
+  {
+    label: "Fournisseurs",
+    icon: <Store className="w-5 h-5" />,
+    href: "/fournisseurs",
+  },
+  {
+    label: "Marchés",
+    icon: <Handshake className="w-5 h-5" />,
+    href: "/marches",
   },
   {
     label: "État Financier",

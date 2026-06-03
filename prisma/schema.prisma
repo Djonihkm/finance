@@ -35,6 +35,11 @@ model User {
   resetToken            String?         @unique
   resetTokenExp         DateTime?
   entreesProduitsCreees EntreeProduit[] @relation("EntreeProduitCreateur")
+  fournisseursCrees     Fournisseur[]   @relation("FournisseurCreateur")
+  marchesCrees          Marche[]        @relation("MarcheCreateur")
+  marchesAttribues      Marche[]        @relation("MarcheAttributeur")
+  contratsCrees         Contrat[]       @relation("ContratCreateur")
+  contratsResilies      Contrat[]       @relation("ContratResiliateur")
 }
 
 model Etablissement {
@@ -60,6 +65,9 @@ model Etablissement {
   users             User[]             @relation("EtablissementUsers")
   entreesTresorerie EntreeTresorerie[]
   entresProduits    EntreeProduit[]
+  fournisseurs      Fournisseur[]
+  marches           Marche[]
+  contrats          Contrat[]
 }
 
 model Budget {
@@ -149,6 +157,10 @@ model BonCommande {
 
   // Écritures comptables générées à la validation
   ecritures Ecriture[]
+
+  // Lien optionnel vers un contrat (traçabilité marché/fournisseur)
+  contratId     String?
+  contrat       Contrat?           @relation(fields: [contratId], references: [id])
 
   createdBy     User               @relation("BonCreateur", fields: [createdById], references: [id])
   etablissement Etablissement      @relation(fields: [etablissementId], references: [id])
@@ -368,4 +380,101 @@ enum ActionHistorique {
 enum SensEcriture {
   DEBIT // charge qui augmente / argent qui entre
   CREDIT // trésorerie qui diminue / argent qui sort
+}
+
+// ============================================================
+// GESTION DES MARCHÉS & CONTRATS FOURNISSEURS
+// ============================================================
+
+enum StatutMarche {
+  EN_ATTENTE
+  ATTRIBUE
+}
+
+enum StatutContrat {
+  ACTIF
+  RESILIE
+}
+
+enum TypeMarche {
+  FOURNITURES
+  SERVICES
+  TRAVAUX
+  AUTRE
+}
+
+model Fournisseur {
+  id              String     @id @default(uuid())
+  nom             String
+  telephone       String?
+  email           String?
+  adresse         String?
+  rccm            String?
+  nif             String?
+  categorie       TypeMarche
+  etablissementId String
+  createdById     String
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  deletedAt       DateTime?
+
+  etablissement Etablissement @relation(fields: [etablissementId], references: [id])
+  createdBy     User          @relation("FournisseurCreateur", fields: [createdById], references: [id])
+  marches       Marche[]
+  contrats      Contrat[]
+}
+
+model Marche {
+  id            String       @id @default(uuid())
+  reference     String       @unique
+  objet         String
+  description   String?
+  type          TypeMarche
+  montantEstime Decimal      @db.Decimal(15, 2)
+  statut        StatutMarche @default(EN_ATTENTE)
+
+  fournisseurId String?
+  attribueParId String?
+  attribueAt    DateTime?
+
+  etablissementId String
+  createdById     String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  etablissement Etablissement @relation(fields: [etablissementId], references: [id])
+  createdBy     User          @relation("MarcheCreateur", fields: [createdById], references: [id])
+  fournisseur   Fournisseur?  @relation(fields: [fournisseurId], references: [id])
+  attribuePar   User?         @relation("MarcheAttributeur", fields: [attribueParId], references: [id])
+  contrat       Contrat?
+}
+
+model Contrat {
+  id               String        @id @default(uuid())
+  reference        String        @unique
+  objet            String
+  description      String?
+  montantTotal     Decimal       @db.Decimal(15, 2)
+  dateDebut        DateTime
+  dateFin          DateTime
+  statut           StatutContrat @default(ACTIF)
+
+  motifResiliation String?
+  resilieParId     String?
+  resilieAt        DateTime?
+
+  // 1 marché = 1 contrat max
+  marcheId        String        @unique
+  fournisseurId   String
+  etablissementId String
+  createdById     String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  marche        Marche        @relation(fields: [marcheId], references: [id])
+  fournisseur   Fournisseur   @relation(fields: [fournisseurId], references: [id])
+  etablissement Etablissement @relation(fields: [etablissementId], references: [id])
+  createdBy     User          @relation("ContratCreateur", fields: [createdById], references: [id])
+  resiliePar    User?         @relation("ContratResiliateur", fields: [resilieParId], references: [id])
+  bonsCommande  BonCommande[]
 }

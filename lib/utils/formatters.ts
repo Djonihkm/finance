@@ -102,3 +102,44 @@ export function formatDate(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
   return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
 }
+
+// ── Marchés & Contrats ────────────────────────────────────────────────────────
+
+export const TYPE_MARCHE_LABELS: Record<string, string> = {
+  FOURNITURES: "Fournitures",
+  SERVICES:    "Services",
+  TRAVAUX:     "Travaux",
+  AUTRE:       "Autre",
+};
+
+export function formatTypeMarche(type: string): string {
+  return TYPE_MARCHE_LABELS[type] ?? type;
+}
+
+export const STATUT_MARCHE_LABELS: Record<string, string> = {
+  EN_ATTENTE: "En attente",
+  ATTRIBUE:   "Attribué",
+};
+
+export const STATUT_MARCHE_COLORS: Record<string, string> = {
+  EN_ATTENTE: "bg-amber-100 text-amber-700",
+  ATTRIBUE:   "bg-emerald-100 text-emerald-700",
+};
+
+export function formatStatutMarche(statut: string): string {
+  return STATUT_MARCHE_LABELS[statut] ?? statut;
+}
+
+export const STATUT_CONTRAT_LABELS: Record<string, string> = {
+  ACTIF:    "Actif",
+  RESILIE:  "Résilié",
+};
+
+export const STATUT_CONTRAT_COLORS: Record<string, string> = {
+  ACTIF:   "bg-emerald-100 text-emerald-700",
+  RESILIE: "bg-red-100 text-red-600",
+};
+
+export function formatStatutContrat(statut: string): string {
+  return STATUT_CONTRAT_LABELS[statut] ?? statut;
+}

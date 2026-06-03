@@ -235,6 +235,107 @@ export async function getBonByReference(reference: string): Promise<BonRow | nul
   });
 }
 
+// ── Marchés & Contrats & Fournisseurs ─────────────────────────────────────────
+
+export type FournisseurRow = Prisma.FournisseurGetPayload<{
+  include: {
+    createdBy: { select: { nom: true; prenom: true } };
+    _count: { select: { marches: true; contrats: true } };
+  };
+}>;
+
+export type MarcheRow = Prisma.MarcheGetPayload<{
+  include: {
+    fournisseur: { select: { id: true; nom: true } };
+    attribuePar: { select: { nom: true; prenom: true } };
+    createdBy: { select: { nom: true; prenom: true } };
+    contrat: { select: { id: true; reference: true; statut: true } };
+  };
+}>;
+
+export type ContratRow = Prisma.ContratGetPayload<{
+  include: {
+    fournisseur: { select: { id: true; nom: true } };
+    marche: { select: { id: true; reference: true; objet: true } };
+    createdBy: { select: { nom: true; prenom: true } };
+    resiliePar: { select: { nom: true; prenom: true } };
+    bonsCommande: { select: { id: true; reference: true; montantTotal: true; statut: true } };
+  };
+}>;
+
+export async function getFournisseurs(etablissementId: string): Promise<FournisseurRow[]> {
+  return prisma.fournisseur.findMany({
+    where: { etablissementId, deletedAt: null },
+    include: {
+      createdBy: { select: { nom: true, prenom: true } },
+      _count: { select: { marches: true, contrats: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function getFournisseurById(id: string): Promise<FournisseurRow | null> {
+  return prisma.fournisseur.findUnique({
+    where: { id, deletedAt: null },
+    include: {
+      createdBy: { select: { nom: true, prenom: true } },
+      _count: { select: { marches: true, contrats: true } },
+    },
+  });
+}
+
+export async function getMarches(etablissementId: string): Promise<MarcheRow[]> {
+  return prisma.marche.findMany({
+    where: { etablissementId },
+    include: {
+      fournisseur: { select: { id: true, nom: true } },
+      attribuePar: { select: { nom: true, prenom: true } },
+      createdBy: { select: { nom: true, prenom: true } },
+      contrat: { select: { id: true, reference: true, statut: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function getMarcheById(id: string): Promise<MarcheRow | null> {
+  return prisma.marche.findUnique({
+    where: { id },
+    include: {
+      fournisseur: { select: { id: true, nom: true } },
+      attribuePar: { select: { nom: true, prenom: true } },
+      createdBy: { select: { nom: true, prenom: true } },
+      contrat: { select: { id: true, reference: true, statut: true } },
+    },
+  });
+}
+
+export async function getContrats(etablissementId: string): Promise<ContratRow[]> {
+  return prisma.contrat.findMany({
+    where: { etablissementId },
+    include: {
+      fournisseur: { select: { id: true, nom: true } },
+      marche: { select: { id: true, reference: true, objet: true } },
+      createdBy: { select: { nom: true, prenom: true } },
+      resiliePar: { select: { nom: true, prenom: true } },
+      bonsCommande: { select: { id: true, reference: true, montantTotal: true, statut: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function getContratById(id: string): Promise<ContratRow | null> {
+  return prisma.contrat.findUnique({
+    where: { id },
+    include: {
+      fournisseur: { select: { id: true, nom: true } },
+      marche: { select: { id: true, reference: true, objet: true } },
+      createdBy: { select: { nom: true, prenom: true } },
+      resiliePar: { select: { nom: true, prenom: true } },
+      bonsCommande: { select: { id: true, reference: true, montantTotal: true, statut: true } },
+    },
+  });
+}
+
 // ── Budgets ───────────────────────────────────────────────────────────────────
 
 /**
