@@ -16,7 +16,7 @@ export default async function FournisseursPage() {
         <h1 className="text-2xl font-bold text-[#11355b]">Fournisseurs</h1>
         <p className="text-sm text-gray-500 mt-1">Gérez les fournisseurs de votre établissement</p>
       </div>
-      <FournisseursView fournisseurs={fournisseurs} userPrismaRole={session.role} />
+      <FournisseursView fournisseurs={JSON.parse(JSON.stringify(fournisseurs))} userPrismaRole={session.role} />
     </div>
   );
 }

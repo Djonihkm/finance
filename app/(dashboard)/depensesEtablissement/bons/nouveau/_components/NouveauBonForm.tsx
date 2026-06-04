@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, CheckCircle2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -13,6 +13,22 @@ interface LigneCommande {
   prixUnitaire: number;
 }
 
+interface Fournisseur {
+  id: string;
+  nom: string;
+  adresse: string | null;
+  email: string | null;
+  telephone: string | null;
+}
+
+interface Contrat {
+  id: string;
+  reference: string;
+  objet: string;
+  fournisseurId: string;
+  fournisseur: Fournisseur;
+}
+
 interface Etablissement {
   adresse: string | null;
   ville: string | null;
@@ -21,19 +37,27 @@ interface Etablissement {
 
 interface Props {
   etablissement: Etablissement | null;
+  fournisseurs: Fournisseur[];
+  contrats: Contrat[];
+  preselectedContratId: string | null;
 }
 
-export default function NouveauBonForm({ etablissement }: Props) {
+const selectClass =
+  "w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#11355b]/20 focus:border-[#11355b] transition-all cursor-pointer";
+const labelClass =
+  "block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5";
+
+export default function NouveauBonForm({ etablissement, fournisseurs, contrats, preselectedContratId }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [createdRef, setCreatedRef] = useState("");
 
+  const [contratId, setContratId] = useState(preselectedContratId ?? "");
+  const [fournisseurId, setFournisseurId] = useState("");
+
   const [bonData, setBonData] = useState({
     intitule: "",
-    fournisseurNom: "",
-    fournisseurAdresse: "",
-    fournisseurEmail: "",
     dateEmission: new Date().toISOString().slice(0, 10),
     faitA: "",
   });
@@ -41,6 +65,28 @@ export default function NouveauBonForm({ etablissement }: Props) {
   const [lignes, setLignes] = useState<LigneCommande[]>([
     { designation: "", quantite: 1, prixUnitaire: 0 },
   ]);
+
+  // Fournisseur résolu — depuis le contrat ou la sélection directe
+  const selectedContrat = contrats.find((c) => c.id === contratId) ?? null;
+  const selectedFournisseur: Fournisseur | null =
+    selectedContrat?.fournisseur ??
+    fournisseurs.find((f) => f.id === fournisseurId) ??
+    null;
+
+  // Quand un contrat est sélectionné, on force le fournisseur correspondant
+  useEffect(() => {
+    if (selectedContrat) {
+      setFournisseurId(selectedContrat.fournisseurId);
+    }
+  }, [contratId, selectedContrat]);
+
+  // Si un contrat est pré-sélectionné au chargement, initialiser l'intitulé
+  useEffect(() => {
+    if (preselectedContratId && selectedContrat) {
+      setBonData((prev) => ({ ...prev, intitule: selectedContrat.objet }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleBonChange = (field: string, value: string) =>
     setBonData((prev) => ({ ...prev, [field]: value }));
@@ -58,13 +104,14 @@ export default function NouveauBonForm({ etablissement }: Props) {
 
   const qrContent = [
     bonData.intitule || "Bon de commande",
-    bonData.fournisseurNom || "Fournisseur inconnu",
+    selectedFournisseur?.nom || "Fournisseur non sélectionné",
     `Montant: ${sousTotal.toLocaleString("fr-FR")} FCFA`,
     `Date: ${bonData.dateEmission}`,
   ].join(" | ");
 
   const handleSubmit = async () => {
     if (!bonData.intitule.trim()) { toast.error("L'intitulé est requis."); return; }
+    if (!fournisseurId) { toast.error("Veuillez sélectionner un fournisseur."); return; }
     if (lignes.some((l) => !l.designation.trim())) { toast.error("Toutes les désignations sont requises."); return; }
 
     setLoading(true);
@@ -74,8 +121,9 @@ export default function NouveauBonForm({ etablissement }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           intitule: bonData.intitule,
-          fournisseur: bonData.fournisseurNom || undefined,
+          fournisseur: selectedFournisseur?.nom,
           date: bonData.dateEmission,
+          contratId: contratId || null,
           lignes: lignes.map((l) => ({
             designation: l.designation,
             quantite: l.quantite,
@@ -107,6 +155,7 @@ export default function NouveauBonForm({ etablissement }: Props) {
     <>
       <div className="max-w-7xl mx-auto">
         <button
+          type="button"
           onClick={() => router.back()}
           className="flex items-center gap-2 text-gray-500 hover:text-[#11355b] text-sm font-medium mb-4 transition-colors cursor-pointer"
         >
@@ -137,7 +186,7 @@ export default function NouveauBonForm({ etablissement }: Props) {
                 </div>
               </div>
 
-              {/* Intitulé + Infos commande */}
+              {/* Intitulé + Fournisseur affiché */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div className="space-y-4">
                   <div className="relative border-l-4 border-[#11355b] pl-4 rounded-r-lg py-2 pr-2 hover:bg-blue-50/40 hover:border-blue-400 transition-all duration-150 cursor-text group">
@@ -160,6 +209,7 @@ export default function NouveauBonForm({ etablissement }: Props) {
                     </p>
                     <input
                       type="date"
+                      aria-label="Date d'émission"
                       value={bonData.dateEmission}
                       onChange={(e) => handleBonChange("dateEmission", e.target.value)}
                       className="text-base font-semibold text-[#11355b] bg-transparent w-full focus:outline-none rounded px-1 -ml-1"
@@ -167,32 +217,29 @@ export default function NouveauBonForm({ etablissement }: Props) {
                   </div>
                 </div>
 
-                <div className="relative bg-gray-50 rounded-lg p-5 border border-gray-100 hover:border-blue-200 hover:bg-blue-50/20 transition-all duration-150 cursor-text group">
-                  <span className="absolute top-3 right-3 text-[9px] font-bold text-blue-400 uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity duration-150">✎ Modifier</span>
-                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3 group-hover:text-blue-500 transition-colors">
+                {/* Bloc fournisseur — lecture seule, alimenté par la sélection */}
+                <div className="bg-gray-50 rounded-lg p-5 border border-gray-100">
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3">
                     Coordonnées du fournisseur
                   </p>
-                  <input
-                    type="text"
-                    value={bonData.fournisseurNom}
-                    onChange={(e) => handleBonChange("fournisseurNom", e.target.value)}
-                    placeholder="Nom du fournisseur"
-                    className="text-base font-bold text-[#11355b] bg-transparent w-full focus:outline-none focus:bg-white rounded px-1 -ml-1 mb-2"
-                  />
-                  <input
-                    type="text"
-                    value={bonData.fournisseurAdresse}
-                    onChange={(e) => handleBonChange("fournisseurAdresse", e.target.value)}
-                    placeholder="Adresse"
-                    className="text-xs text-gray-600 bg-transparent w-full focus:outline-none focus:bg-white rounded px-1 -ml-1 mb-1"
-                  />
-                  <input
-                    type="email"
-                    value={bonData.fournisseurEmail}
-                    onChange={(e) => handleBonChange("fournisseurEmail", e.target.value)}
-                    placeholder="Email"
-                    className="text-xs text-gray-600 bg-transparent w-full focus:outline-none focus:bg-white rounded px-1 -ml-1"
-                  />
+                  {selectedFournisseur ? (
+                    <div className="space-y-1">
+                      <p className="text-base font-bold text-[#11355b]">{selectedFournisseur.nom}</p>
+                      {selectedFournisseur.adresse && (
+                        <p className="text-xs text-gray-600">{selectedFournisseur.adresse}</p>
+                      )}
+                      {selectedFournisseur.email && (
+                        <p className="text-xs text-gray-600">{selectedFournisseur.email}</p>
+                      )}
+                      {selectedFournisseur.telephone && (
+                        <p className="text-xs text-gray-600">{selectedFournisseur.telephone}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-400 italic">
+                      Sélectionnez un fournisseur dans le panneau de droite
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -205,7 +252,7 @@ export default function NouveauBonForm({ etablissement }: Props) {
                       <th className="px-4 py-3 text-center text-[11px] font-bold uppercase tracking-wider w-24">Quantité</th>
                       <th className="px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wider w-36">Prix unitaire</th>
                       <th className="px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wider w-36">Total</th>
-                      <th className="px-2 py-3 w-10"></th>
+                      <th className="px-2 py-3 w-10" aria-label="Actions"></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -223,6 +270,7 @@ export default function NouveauBonForm({ etablissement }: Props) {
                         <td className="px-4 py-3 text-center">
                           <input
                             type="number"
+                            aria-label="Quantité"
                             value={ligne.quantite}
                             min={1}
                             onChange={(e) => handleLigneChange(i, "quantite", e.target.value)}
@@ -232,6 +280,7 @@ export default function NouveauBonForm({ etablissement }: Props) {
                         <td className="px-4 py-3 text-right">
                           <input
                             type="number"
+                            aria-label="Prix unitaire"
                             value={ligne.prixUnitaire}
                             min={0}
                             onChange={(e) => handleLigneChange(i, "prixUnitaire", e.target.value)}
@@ -243,7 +292,7 @@ export default function NouveauBonForm({ etablissement }: Props) {
                         </td>
                         <td className="px-2 py-3 text-center">
                           {lignes.length > 1 && (
-                            <button onClick={() => supprimerLigne(i)} className="text-red-400 hover:text-red-600 cursor-pointer transition-colors">
+                            <button type="button" aria-label="Supprimer la ligne" onClick={() => supprimerLigne(i)} className="text-red-400 hover:text-red-600 cursor-pointer transition-colors">
                               <Trash2 size={16} />
                             </button>
                           )}
@@ -255,6 +304,7 @@ export default function NouveauBonForm({ etablissement }: Props) {
               </div>
 
               <button
+                type="button"
                 onClick={ajouterLigne}
                 className="flex items-center gap-2 text-sm font-semibold text-[#11355b] hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors mb-8 cursor-pointer"
               >
@@ -309,15 +359,74 @@ export default function NouveauBonForm({ etablissement }: Props) {
             </div>
           </div>
 
-          {/* Sidebar */}
+          {/* Panneau de droite */}
           <div className="md:col-span-1">
             <div className="lg:sticky lg:top-6 space-y-4">
+
+              {/* Sélecteur contrat */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-3">
+                <div>
+                  <label className={labelClass}>Contrat associé</label>
+                  <select
+                    aria-label="Contrat associé"
+                    value={contratId}
+                    onChange={(e) => {
+                      setContratId(e.target.value);
+                      if (!e.target.value) setFournisseurId("");
+                    }}
+                    className={selectClass}
+                  >
+                    <option value="">— Aucun contrat —</option>
+                    {contrats.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.reference} — {c.objet.length > 25 ? c.objet.slice(0, 25) + "…" : c.objet}
+                      </option>
+                    ))}
+                  </select>
+                  {contrats.length === 0 && (
+                    <p className="text-[11px] text-gray-400 mt-1">Aucun contrat actif disponible.</p>
+                  )}
+                </div>
+
+                {/* Sélecteur fournisseur — désactivé si contrat sélectionné */}
+                <div>
+                  <label className={labelClass}>
+                    Fournisseur <span className="text-red-400">*</span>
+                  </label>
+                  <select
+                    aria-label="Fournisseur"
+                    value={fournisseurId}
+                    onChange={(e) => setFournisseurId(e.target.value)}
+                    disabled={!!contratId}
+                    className={selectClass + (contratId ? " opacity-60 cursor-not-allowed" : "")}
+                  >
+                    <option value="">— Sélectionner —</option>
+                    {fournisseurs.map((f) => (
+                      <option key={f.id} value={f.id}>{f.nom}</option>
+                    ))}
+                  </select>
+                  {contratId && (
+                    <p className="text-[11px] text-gray-400 mt-1">
+                      Fournisseur imposé par le contrat sélectionné.
+                    </p>
+                  )}
+                  {fournisseurs.length === 0 && (
+                    <p className="text-[11px] text-amber-600 mt-1">
+                      Aucun fournisseur enregistré.{" "}
+                      <a href="/fournisseurs/nouveau" className="underline">Créer un fournisseur</a>
+                    </p>
+                  )}
+                </div>
+              </div>
+
               <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
                 <p className="text-xs italic text-blue-600 text-center">
-                  Cliquez sur un bloc pour le modifier.
+                  Cliquez sur un bloc du document pour le modifier.
                 </p>
               </div>
+
               <button
+                type="button"
                 onClick={handleSubmit}
                 disabled={loading}
                 className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-5 py-4 rounded-xl flex items-center justify-center gap-2 font-bold text-sm transition-colors shadow-md cursor-pointer"
@@ -332,8 +441,8 @@ export default function NouveauBonForm({ etablissement }: Props) {
 
       {/* Modale succès */}
       {showSuccess && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center z-50 p-4 animate-fadeIn">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center animate-scaleIn">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-[2px] flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
             <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
               <CheckCircle2 size={44} className="text-emerald-500" strokeWidth={2.5} />
             </div>
@@ -342,6 +451,7 @@ export default function NouveauBonForm({ etablissement }: Props) {
               Le bon{createdRef ? <> <span className="font-bold text-[#11355b]">{createdRef}</span></> : ""} a été soumis avec succès.
             </p>
             <button
+              type="button"
               onClick={handleCloseModal}
               className="w-full bg-[#11355b] hover:bg-[#1a4a7a] text-white py-3 rounded-lg font-semibold text-sm transition-colors cursor-pointer"
             >
@@ -350,13 +460,6 @@ export default function NouveauBonForm({ etablissement }: Props) {
           </div>
         </div>
       )}
-
-      <style jsx global>{`
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        .animate-fadeIn { animation: fadeIn 0.2s ease-out; }
-        .animate-scaleIn { animation: scaleIn 0.25s ease-out; }
-      `}</style>
     </>
   );
 }

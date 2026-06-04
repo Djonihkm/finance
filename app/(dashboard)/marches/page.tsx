@@ -19,8 +19,8 @@ export default async function MarchesPage() {
         <p className="text-sm text-gray-500 mt-1">Suivi des marchés fournisseurs et des contrats</p>
       </div>
       <MarchesView
-        marches={marches}
-        contrats={contrats}
+        marches={JSON.parse(JSON.stringify(marches))}
+        contrats={JSON.parse(JSON.stringify(contrats))}
         userPrismaRole={session.role}
       />
     </div>

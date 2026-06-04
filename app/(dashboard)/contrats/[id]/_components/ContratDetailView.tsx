@@ -57,7 +57,8 @@ export default function ContratDetailView({ contrat, userPrismaRole }: Props) {
     contrat.statut === "ACTIF" &&
     ["SUPER_ADMIN", "MINISTERE", "DIRECTEUR", "COMPTABLE"].includes(userPrismaRole);
 
-  const montantEngage = contrat.bonsCommande.reduce(
+  const bonsValides = contrat.bonsCommande.filter((b) => b.statut === "VALIDE");
+  const montantEngage = bonsValides.reduce(
     (s, b) => s + parseFloat(b.montantTotal.toString()),
     0
   );
@@ -86,7 +87,7 @@ export default function ContratDetailView({ contrat, userPrismaRole }: Props) {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <button onClick={() => navigate("/marches?tab=contrats")}
+      <button type="button" onClick={() => navigate("/marches?tab=contrats")}
         className="flex items-center gap-2 text-sm text-gray-500 hover:text-[#11355b] cursor-pointer transition-colors">
         <ArrowLeft size={16} /> Retour aux contrats
       </button>
@@ -108,6 +109,7 @@ export default function ContratDetailView({ contrat, userPrismaRole }: Props) {
           </div>
           {canResilier && !showResilier && (
             <button
+              type="button"
               onClick={() => setShowResilier(true)}
               className="flex items-center gap-2 px-4 py-2 rounded-lg border border-red-200 text-red-600 text-sm hover:bg-red-50 transition-colors cursor-pointer"
             >
@@ -162,11 +164,11 @@ export default function ContratDetailView({ contrat, userPrismaRole }: Props) {
             />
           </div>
           <div className="flex gap-3">
-            <button onClick={() => setShowResilier(false)}
+            <button type="button" onClick={() => setShowResilier(false)}
               className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 text-sm hover:bg-gray-50 cursor-pointer">
               Annuler
             </button>
-            <button onClick={handleResilier} disabled={loading}
+            <button type="button" onClick={handleResilier} disabled={loading}
               className="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold cursor-pointer disabled:opacity-60">
               {loading ? "En cours…" : "Confirmer la résiliation"}
             </button>
@@ -184,6 +186,7 @@ export default function ContratDetailView({ contrat, userPrismaRole }: Props) {
           <InfoField label="RCCM" value={contrat.fournisseur.rccm} />
         </div>
         <button
+          type="button"
           onClick={() => navigate(`/fournisseurs/${contrat.fournisseur.id}`)}
           className="mt-4 text-xs text-[#11355b] hover:underline cursor-pointer"
         >
@@ -203,6 +206,7 @@ export default function ContratDetailView({ contrat, userPrismaRole }: Props) {
           <InfoField label="Montant estimé" value={formatMontant(contrat.marche.montantEstime)} />
         </div>
         <button
+          type="button"
           onClick={() => navigate(`/marches/${contrat.marche.id}`)}
           className="mt-4 text-xs text-[#11355b] hover:underline cursor-pointer"
         >
@@ -215,7 +219,7 @@ export default function ContratDetailView({ contrat, userPrismaRole }: Props) {
         <h3 className="font-bold text-[#11355b] mb-4">Consommation du contrat</h3>
         <div className="mb-3">
           <div className="flex justify-between text-xs text-gray-500 mb-1">
-            <span>Engagé : {formatMontant(montantEngage)}</span>
+            <span>Validé : {formatMontant(montantEngage)} ({bonsValides.length} bon{bonsValides.length > 1 ? "s" : ""})</span>
             <span>{tauxConsommation.toFixed(1)}%</span>
           </div>
           <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
@@ -231,7 +235,7 @@ export default function ContratDetailView({ contrat, userPrismaRole }: Props) {
             <p className="font-bold text-[#11355b] text-sm">{formatMontant(montantTotal)}</p>
           </div>
           <div className="text-center">
-            <p className="text-[11px] font-bold text-gray-400 uppercase">Engagé</p>
+            <p className="text-[11px] font-bold text-gray-400 uppercase">Validé</p>
             <p className="font-bold text-amber-600 text-sm">{formatMontant(montantEngage)}</p>
           </div>
           <div className="text-center">
@@ -245,10 +249,19 @@ export default function ContratDetailView({ contrat, userPrismaRole }: Props) {
 
       {/* Bons de commande */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <h3 className="font-bold text-[#11355b] flex items-center gap-2">
             <ClipboardList size={18} /> Bons de commande ({contrat.bonsCommande.length})
           </h3>
+          {contrat.statut === "ACTIF" && (
+            <button
+              type="button"
+              onClick={() => navigate(`/depensesEtablissement/bons/nouveau?contratId=${contrat.id}`)}
+              className="flex items-center gap-2 px-4 py-2 bg-[#11355b] hover:bg-[#1a4a7a] text-white rounded-lg text-sm font-semibold cursor-pointer transition-colors"
+            >
+              <ClipboardList size={15} /> Nouveau bon
+            </button>
+          )}
         </div>
         {contrat.bonsCommande.length === 0 ? (
           <p className="px-6 py-8 text-sm text-gray-400 text-center">

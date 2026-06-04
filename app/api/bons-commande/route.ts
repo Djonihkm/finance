@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
 
   const body = await req.json();
-  const { intitule, fournisseur, description, date, lignes, etablissementId } = body;
+  const { intitule, fournisseur, description, date, lignes, etablissementId, contratId } = body;
 
   if (!intitule || !date || !lignes?.length) {
     return NextResponse.json({ error: "Champs requis manquants" }, { status: 400 });
@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
       description,
       date: new Date(date),
       montantTotal,
+      contratId: contratId || null,
       etablissementId: etabId,
       createdById: session.userId,
       lignes: {
