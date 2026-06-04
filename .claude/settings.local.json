@@ -10,7 +10,11 @@
       "Bash(grep -r *)",
       "Bash(Get-ChildItem -Path \"d:\\\\Projets\\\\finance\" -Recurse -Depth 3)",
       "Bash(Select-Object FullName, PSIsContainer)",
-      "Bash(Format-Table -AutoSize)"
+      "Bash(Format-Table -AutoSize)",
+      "Bash(git pull *)",
+      "Bash(git push *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
