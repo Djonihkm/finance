@@ -125,14 +125,14 @@ export function EtatFinancierCSVButton({ etat, annee }: Props) {
     }
 
     produits.push(["", "TOTAL PRODUITS", etat.totalProduits]);
-    downloadCSV(toCSV(produits), `etat-financier-${annee}-produits.csv`);  
+    downloadCSV(toCSV(produits), `etat-financier-${annee}-produits.csv`);
   };
 
   return (
     <button
       onClick={handleExport}
       className="flex items-center justify-center w-9 h-9 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors cursor-pointer"
-      title="Exporter CSVvvgo"
+      title="Exporter CSV"
     >
       <FaFileCsv size={18} />
     </button>
