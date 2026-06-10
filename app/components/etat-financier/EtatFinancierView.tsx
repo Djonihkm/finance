@@ -18,7 +18,7 @@ import { type EtatFinancier } from "@/lib/queries/etat-financier";
 import { formatMontant, formatDate } from "@/lib/utils/formatters";
 import dynamic from "next/dynamic";
 import { EtatFinancierExcelButton } from "./EtatFinancierExcelButton";
-import { EtatFinancierCSVButton } from "./EtatFinancierCsvButton";
+import { EtatFinancierCSVButton } from "./EtatFinancierCSVButton";
 
 const EtatFinancierExportButton = dynamic(
   () =>

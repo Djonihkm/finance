@@ -35,11 +35,13 @@ model User {
   resetToken            String?         @unique
   resetTokenExp         DateTime?
   entreesProduitsCreees EntreeProduit[] @relation("EntreeProduitCreateur")
-  fournisseursCrees     Fournisseur[]   @relation("FournisseurCreateur")
-  marchesCrees          Marche[]        @relation("MarcheCreateur")
-  marchesAttribues      Marche[]        @relation("MarcheAttributeur")
-  contratsCrees         Contrat[]       @relation("ContratCreateur")
-  contratsResilies      Contrat[]       @relation("ContratResiliateur")
+  fournisseursCrees          Fournisseur[]    @relation("FournisseurCreateur")
+  marchesCrees               Marche[]         @relation("MarcheCreateur")
+  marchesAttribues           Marche[]         @relation("MarcheAttributeur")
+  contratsCrees              Contrat[]        @relation("ContratCreateur")
+  contratsResilies           Contrat[]        @relation("ContratResiliateur")
+  immobilisationsCrees       Immobilisation[] @relation("ImmobilisationCreateur")
+  immobilisationsSorties     Immobilisation[] @relation("ImmobilisationSortiPar")
 }
 
 model Etablissement {
@@ -68,6 +70,7 @@ model Etablissement {
   fournisseurs      Fournisseur[]
   marches           Marche[]
   contrats          Contrat[]
+  immobilisations   Immobilisation[]
 }
 
 model Budget {
@@ -162,12 +165,13 @@ model BonCommande {
   contratId     String?
   contrat       Contrat?           @relation(fields: [contratId], references: [id])
 
-  createdBy     User               @relation("BonCreateur", fields: [createdById], references: [id])
-  etablissement Etablissement      @relation(fields: [etablissementId], references: [id])
-  signePar      User?              @relation("BonSignataire", fields: [signeParId], references: [id])
-  validePar     User?              @relation("BonValideur", fields: [valideParId], references: [id])
-  historiques   Historique[]
-  lignes        LigneBonCommande[]
+  createdBy       User               @relation("BonCreateur", fields: [createdById], references: [id])
+  etablissement   Etablissement      @relation(fields: [etablissementId], references: [id])
+  signePar        User?              @relation("BonSignataire", fields: [signeParId], references: [id])
+  validePar       User?              @relation("BonValideur", fields: [valideParId], references: [id])
+  historiques     Historique[]
+  lignes          LigneBonCommande[]
+  immobilisations Immobilisation[]
 }
 
 model LigneBonCommande {
@@ -420,8 +424,9 @@ model Fournisseur {
 
   etablissement Etablissement @relation(fields: [etablissementId], references: [id])
   createdBy     User          @relation("FournisseurCreateur", fields: [createdById], references: [id])
-  marches       Marche[]
-  contrats      Contrat[]
+  marches         Marche[]
+  contrats        Contrat[]
+  immobilisations Immobilisation[]
 }
 
 model Marche {
@@ -477,4 +482,69 @@ model Contrat {
   createdBy     User          @relation("ContratCreateur", fields: [createdById], references: [id])
   resiliePar    User?         @relation("ContratResiliateur", fields: [resilieParId], references: [id])
   bonsCommande  BonCommande[]
+}
+
+// ============================================================
+// GESTION DES IMMOBILISATIONS
+// Registre des actifs de l'établissement (équipements, mobiliers, infrastructures)
+// ============================================================
+
+enum CategorieImmobilisation {
+  INFORMATIQUE
+  MOBILIER
+  EQUIPEMENT
+  VEHICULE
+  INFRASTRUCTURE
+  AUTRE
+}
+
+enum EtatImmobilisation {
+  NEUF
+  BON
+  USAGE
+  HORS_SERVICE
+}
+
+enum StatutImmobilisation {
+  ACTIF
+  EN_ATTENTE_SORTIE
+  SORTI
+  CEDE
+}
+
+model Immobilisation {
+  id                String                 @id @default(uuid())
+  reference         String                 @unique
+  designation       String
+  description       String?
+  categorie         CategorieImmobilisation
+  etat              EtatImmobilisation     @default(NEUF)
+  statut            StatutImmobilisation   @default(ACTIF)
+  valeurAcquisition Decimal                @db.Decimal(15, 2)
+  dateAcquisition   DateTime
+  numSerie          String?
+  localisation      String?
+
+  // Workflow sortie / cession
+  motifSortie  String?
+  sortiParId   String?
+  sortiAt      DateTime?
+  demandeParId String?
+  demandeAt    DateTime?
+
+  // Liens optionnels vers documents d'achat
+  bonCommandeId String?
+  fournisseurId String?
+
+  etablissementId String
+  createdById     String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  bonCommande   BonCommande?  @relation(fields: [bonCommandeId], references: [id])
+  fournisseur   Fournisseur?  @relation(fields: [fournisseurId], references: [id])
+  etablissement Etablissement @relation(fields: [etablissementId], references: [id])
+  createdBy     User          @relation("ImmobilisationCreateur", fields: [createdById], references: [id])
+  sortiPar      User?         @relation("ImmobilisationSortiPar", fields: [sortiParId], references: [id])
 }

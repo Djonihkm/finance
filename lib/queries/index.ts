@@ -336,6 +336,51 @@ export async function getContratById(id: string): Promise<ContratRow | null> {
   });
 }
 
+// ── Immobilisations ───────────────────────────────────────────────────────────
+
+export type ImmobilisationRow = Prisma.ImmobilisationGetPayload<{
+  include: {
+    createdBy: { select: { nom: true; prenom: true } };
+    fournisseur: { select: { id: true; nom: true } };
+    bonCommande: { select: { id: true; reference: true } };
+  };
+}>;
+
+export type ImmobilisationDetail = Prisma.ImmobilisationGetPayload<{
+  include: {
+    createdBy: { select: { nom: true; prenom: true } };
+    fournisseur: { select: { id: true; nom: true; telephone: true; email: true } };
+    bonCommande: { select: { id: true; reference: true; montantTotal: true; statut: true } };
+    sortiPar: { select: { nom: true; prenom: true } };
+    etablissement: { select: { id: true; nom: true } };
+  };
+}>;
+
+export async function getImmobilisations(etablissementId: string): Promise<ImmobilisationRow[]> {
+  return prisma.immobilisation.findMany({
+    where: { etablissementId, deletedAt: null },
+    include: {
+      createdBy: { select: { nom: true, prenom: true } },
+      fournisseur: { select: { id: true, nom: true } },
+      bonCommande: { select: { id: true, reference: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function getImmobilisationById(id: string): Promise<ImmobilisationDetail | null> {
+  return prisma.immobilisation.findUnique({
+    where: { id, deletedAt: null },
+    include: {
+      createdBy: { select: { nom: true, prenom: true } },
+      fournisseur: { select: { id: true, nom: true, telephone: true, email: true } },
+      bonCommande: { select: { id: true, reference: true, montantTotal: true, statut: true } },
+      sortiPar: { select: { nom: true, prenom: true } },
+      etablissement: { select: { id: true, nom: true } },
+    },
+  });
+}
+
 // ── Budgets ───────────────────────────────────────────────────────────────────
 
 /**

@@ -19,6 +19,7 @@ import {
   BookOpen,
   Handshake,
   Store,
+  Package,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types";
 import LogoutModal from "./LogoutModal";
@@ -85,6 +86,11 @@ const superAdminMenuItems: MenuItem[] = [
     icon: <Handshake className="w-5 h-5" />,
     href: "/marches",
   },
+  {
+    label: "Immobilisations",
+    icon: <Package className="w-5 h-5" />,
+    href: "/immobilisations",
+  },
 ];
 
 const ministereMenuItems: MenuItem[] = [
@@ -116,6 +122,11 @@ const ministereMenuItems: MenuItem[] = [
     href: "/marches",
   },
   {
+    label: "Immobilisations",
+    icon: <Package className="w-5 h-5" />,
+    href: "/immobilisations",
+  },
+  {
     label: "Utilisateurs",
     icon: <Users className="w-5 h-5" />,
     href: "/utilisateurs",
@@ -142,6 +153,11 @@ const etablissementMenuItems: MenuItem[] = [
     label: "Marchés",
     icon: <Handshake className="w-5 h-5" />,
     href: "/marches",
+  },
+  {
+    label: "Immobilisations",
+    icon: <Package className="w-5 h-5" />,
+    href: "/immobilisations",
   },
   {
     label: "État Financier",

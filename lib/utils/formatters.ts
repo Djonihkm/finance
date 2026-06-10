@@ -143,3 +143,54 @@ export const STATUT_CONTRAT_COLORS: Record<string, string> = {
 export function formatStatutContrat(statut: string): string {
   return STATUT_CONTRAT_LABELS[statut] ?? statut;
 }
+
+// ── Immobilisations ───────────────────────────────────────────────────────────
+
+export const CATEGORIE_IMMO_LABELS: Record<string, string> = {
+  INFORMATIQUE:   "Informatique",
+  MOBILIER:       "Mobilier",
+  EQUIPEMENT:     "Équipement",
+  VEHICULE:       "Véhicule",
+  INFRASTRUCTURE: "Infrastructure",
+  AUTRE:          "Autre",
+};
+
+export function formatCategorieImmo(cat: string): string {
+  return CATEGORIE_IMMO_LABELS[cat] ?? cat;
+}
+
+export const ETAT_IMMO_LABELS: Record<string, string> = {
+  NEUF:         "Neuf",
+  BON:          "Bon état",
+  USAGE:        "Usagé",
+  HORS_SERVICE: "Hors service",
+};
+
+export const ETAT_IMMO_COLORS: Record<string, string> = {
+  NEUF:         "bg-emerald-100 text-emerald-700",
+  BON:          "bg-blue-100 text-blue-700",
+  USAGE:        "bg-amber-100 text-amber-700",
+  HORS_SERVICE: "bg-red-100 text-red-600",
+};
+
+export function formatEtatImmo(etat: string): string {
+  return ETAT_IMMO_LABELS[etat] ?? etat;
+}
+
+export const STATUT_IMMO_LABELS: Record<string, string> = {
+  ACTIF:             "Actif",
+  EN_ATTENTE_SORTIE: "En attente de sortie",
+  SORTI:             "Sorti",
+  CEDE:              "Cédé",
+};
+
+export const STATUT_IMMO_COLORS: Record<string, string> = {
+  ACTIF:             "bg-emerald-100 text-emerald-700",
+  EN_ATTENTE_SORTIE: "bg-amber-100 text-amber-700",
+  SORTI:             "bg-gray-100 text-gray-600",
+  CEDE:              "bg-purple-100 text-purple-700",
+};
+
+export function formatStatutImmo(statut: string): string {
+  return STATUT_IMMO_LABELS[statut] ?? statut;
+}
