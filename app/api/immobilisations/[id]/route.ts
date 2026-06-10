@@ -41,14 +41,25 @@ export async function PUT(req: NextRequest, { params }: Params) {
     if (!CAN_DEMANDE.includes(session.role)) {
       return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
     }
-    const immo = await prisma.immobilisation.update({
-      where: { id, statut: "ACTIF" },
-      data: {
-        statut:      "EN_ATTENTE_SORTIE",
-        motifSortie: body.motifSortie || null,
-        demandeParId: session.userId,
-        demandeAt:   new Date(),
-      },
+    const immo = await prisma.$transaction(async (tx) => {
+      const i = await tx.immobilisation.update({
+        where: { id, statut: "ACTIF" },
+        data: {
+          statut:       "EN_ATTENTE_SORTIE",
+          motifSortie:  body.motifSortie || null,
+          demandeParId: session.userId,
+          demandeAt:    new Date(),
+        },
+      });
+      await tx.historique.create({
+        data: {
+          action: "SOUMIS",
+          userId: session.userId,
+          immobilisationId: id,
+          commentaire: body.motifSortie || null,
+        },
+      });
+      return i;
     });
     return NextResponse.json(immo);
   }
@@ -58,13 +69,16 @@ export async function PUT(req: NextRequest, { params }: Params) {
     if (!CAN_VALIDER.includes(session.role)) {
       return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
     }
-    const immo = await prisma.immobilisation.update({
-      where: { id, statut: "EN_ATTENTE_SORTIE" },
-      data: {
-        statut:    body.typeSortie === "CEDE" ? "CEDE" : "SORTI",
-        sortiParId: session.userId,
-        sortiAt:   new Date(),
-      },
+    const immo = await prisma.$transaction(async (tx) => {
+      const finalStatut = body.typeSortie === "CEDE" ? "CEDE" : "SORTI";
+      const i = await tx.immobilisation.update({
+        where: { id, statut: "EN_ATTENTE_SORTIE" },
+        data: { statut: finalStatut, sortiParId: session.userId, sortiAt: new Date() },
+      });
+      await tx.historique.create({
+        data: { action: "SORTI", userId: session.userId, immobilisationId: id },
+      });
+      return i;
     });
     return NextResponse.json(immo);
   }
@@ -74,14 +88,15 @@ export async function PUT(req: NextRequest, { params }: Params) {
     if (!CAN_VALIDER.includes(session.role)) {
       return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
     }
-    const immo = await prisma.immobilisation.update({
-      where: { id, statut: "EN_ATTENTE_SORTIE" },
-      data: {
-        statut:      "ACTIF",
-        motifSortie:  null,
-        demandeParId: null,
-        demandeAt:    null,
-      },
+    const immo = await prisma.$transaction(async (tx) => {
+      const i = await tx.immobilisation.update({
+        where: { id, statut: "EN_ATTENTE_SORTIE" },
+        data: { statut: "ACTIF", motifSortie: null, demandeParId: null, demandeAt: null },
+      });
+      await tx.historique.create({
+        data: { action: "REJETE", userId: session.userId, immobilisationId: id },
+      });
+      return i;
     });
     return NextResponse.json(immo);
   }

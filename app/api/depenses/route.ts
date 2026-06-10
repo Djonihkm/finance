@@ -50,22 +50,28 @@ export async function POST(req: NextRequest) {
   const count = await prisma.depense.count();
   const reference = `DEP-${year}-${String(count + 1).padStart(4, "0")}`;
 
-  const depense = await prisma.depense.create({
-    data: {
-      reference,
-      intitule,
-      montant,
-      categorie,
-      paiement,
-      fournisseur,
-      compteId,
-      description,
-      pieceJustificativeUrl,
-      date: new Date(date),
-      etablissementId: etabId,
-      createdById: session.userId,
-    },
-    include: { createdBy: { select: { id: true, nom: true, prenom: true } } },
+  const depense = await prisma.$transaction(async (tx) => {
+    const d = await tx.depense.create({
+      data: {
+        reference,
+        intitule,
+        montant,
+        categorie,
+        paiement,
+        fournisseur,
+        compteId,
+        description,
+        pieceJustificativeUrl,
+        date: new Date(date),
+        etablissementId: etabId,
+        createdById: session.userId,
+      },
+      include: { createdBy: { select: { id: true, nom: true, prenom: true } } },
+    });
+    await tx.historique.create({
+      data: { action: "CREE", userId: session.userId, depenseId: d.id },
+    });
+    return d;
   });
 
   return NextResponse.json(depense, { status: 201 });

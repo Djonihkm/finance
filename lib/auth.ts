@@ -40,10 +40,20 @@ export async function login(_prevState: LoginState, formData: FormData) {
     email: user.email,
   });
 
+  await prisma.historique.create({
+    data: { action: "CONNEXION", userId: user.id },
+  });
+
   return { redirect: dashboardFor(uiRole) };
 }
 
 export async function logout() {
+  const session = await import("./session").then((m) => m.getSession());
+  if (session) {
+    await prisma.historique.create({
+      data: { action: "DECONNEXION", userId: session.userId },
+    });
+  }
   await clearSession();
   redirect("/login");
 }

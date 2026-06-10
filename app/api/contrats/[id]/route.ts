@@ -46,14 +46,25 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Ce contrat est déjà résilié" }, { status: 409 });
     }
 
-    const contrat = await prisma.contrat.update({
-      where: { id },
-      data: {
-        statut: "RESILIE",
-        resilieParId: session.userId,
-        resilieAt: new Date(),
-        motifResiliation: motifResiliation || null,
-      },
+    const contrat = await prisma.$transaction(async (tx) => {
+      const c = await tx.contrat.update({
+        where: { id },
+        data: {
+          statut: "RESILIE",
+          resilieParId: session.userId,
+          resilieAt: new Date(),
+          motifResiliation: motifResiliation || null,
+        },
+      });
+      await tx.historique.create({
+        data: {
+          action: "RESILIE",
+          userId: session.userId,
+          contratId: id,
+          commentaire: motifResiliation || null,
+        },
+      });
+      return c;
     });
 
     return NextResponse.json(contrat);

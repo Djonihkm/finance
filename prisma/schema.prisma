@@ -187,16 +187,25 @@ model LigneBonCommande {
 }
 
 model Historique {
-  id            String           @id @default(uuid())
-  action        ActionHistorique
-  commentaire   String?
-  userId        String
-  depenseId     String?
-  bonCommandeId String?
-  createdAt     DateTime         @default(now())
-  bonCommande   BonCommande?     @relation(fields: [bonCommandeId], references: [id])
-  depense       Depense?         @relation(fields: [depenseId], references: [id])
-  user          User             @relation(fields: [userId], references: [id])
+  id               String           @id @default(uuid())
+  action           ActionHistorique
+  commentaire      String?
+  userId           String
+  depenseId        String?
+  bonCommandeId    String?
+  immobilisationId String?
+  fournisseurId    String?
+  marcheId         String?
+  contratId        String?
+  createdAt        DateTime         @default(now())
+
+  bonCommande    BonCommande?    @relation(fields: [bonCommandeId], references: [id])
+  depense        Depense?        @relation(fields: [depenseId], references: [id])
+  immobilisation Immobilisation? @relation(fields: [immobilisationId], references: [id])
+  fournisseur    Fournisseur?    @relation(fields: [fournisseurId], references: [id])
+  marche         Marche?         @relation(fields: [marcheId], references: [id])
+  contrat        Contrat?        @relation(fields: [contratId], references: [id])
+  user           User            @relation(fields: [userId], references: [id])
 }
 
 // ============================================================
@@ -378,7 +387,12 @@ enum ActionHistorique {
   SIGNE
   VALIDE
   REJETE
-  PAYE // traçabilité du paiement
+  PAYE
+  ATTRIBUE
+  RESILIE
+  SORTI
+  CONNEXION
+  DECONNEXION
 }
 
 enum SensEcriture {
@@ -427,6 +441,7 @@ model Fournisseur {
   marches         Marche[]
   contrats        Contrat[]
   immobilisations Immobilisation[]
+  historiques     Historique[]
 }
 
 model Marche {
@@ -451,7 +466,8 @@ model Marche {
   createdBy     User          @relation("MarcheCreateur", fields: [createdById], references: [id])
   fournisseur   Fournisseur?  @relation(fields: [fournisseurId], references: [id])
   attribuePar   User?         @relation("MarcheAttributeur", fields: [attribueParId], references: [id])
-  contrat       Contrat?
+  contrat     Contrat?
+  historiques Historique[]
 }
 
 model Contrat {
@@ -482,6 +498,7 @@ model Contrat {
   createdBy     User          @relation("ContratCreateur", fields: [createdById], references: [id])
   resiliePar    User?         @relation("ContratResiliateur", fields: [resilieParId], references: [id])
   bonsCommande  BonCommande[]
+  historiques   Historique[]
 }
 
 // ============================================================
@@ -547,4 +564,5 @@ model Immobilisation {
   etablissement Etablissement @relation(fields: [etablissementId], references: [id])
   createdBy     User          @relation("ImmobilisationCreateur", fields: [createdById], references: [id])
   sortiPar      User?         @relation("ImmobilisationSortiPar", fields: [sortiParId], references: [id])
+  historiques   Historique[]
 }

@@ -40,14 +40,20 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Fournisseur requis" }, { status: 400 });
     }
 
-    const marche = await prisma.marche.update({
-      where: { id },
-      data: {
-        fournisseurId,
-        statut: "ATTRIBUE",
-        attribueParId: session.userId,
-        attribueAt: new Date(),
-      },
+    const marche = await prisma.$transaction(async (tx) => {
+      const m = await tx.marche.update({
+        where: { id },
+        data: {
+          fournisseurId,
+          statut: "ATTRIBUE",
+          attribueParId: session.userId,
+          attribueAt: new Date(),
+        },
+      });
+      await tx.historique.create({
+        data: { action: "ATTRIBUE", userId: session.userId, marcheId: id },
+      });
+      return m;
     });
     return NextResponse.json(marche);
   }

@@ -58,27 +58,33 @@ export async function POST(req: NextRequest) {
   const count = await prisma.immobilisation.count({ where: { etablissementId: etabId } });
   const reference = `IMM-${year}-${String(count + 1).padStart(4, "0")}`;
 
-  const immo = await prisma.immobilisation.create({
-    data: {
-      reference,
-      designation,
-      description: description || null,
-      categorie,
-      etat: etat || "NEUF",
-      valeurAcquisition,
-      dateAcquisition: new Date(dateAcquisition),
-      numSerie: numSerie || null,
-      localisation: localisation || null,
-      bonCommandeId: bonCommandeId || null,
-      fournisseurId: fournisseurId || null,
-      etablissementId: etabId,
-      createdById: session.userId,
-    },
-    include: {
-      createdBy: { select: { nom: true, prenom: true } },
-      fournisseur: { select: { id: true, nom: true } },
-      bonCommande: { select: { id: true, reference: true } },
-    },
+  const immo = await prisma.$transaction(async (tx) => {
+    const i = await tx.immobilisation.create({
+      data: {
+        reference,
+        designation,
+        description: description || null,
+        categorie,
+        etat: etat || "NEUF",
+        valeurAcquisition,
+        dateAcquisition: new Date(dateAcquisition),
+        numSerie: numSerie || null,
+        localisation: localisation || null,
+        bonCommandeId: bonCommandeId || null,
+        fournisseurId: fournisseurId || null,
+        etablissementId: etabId,
+        createdById: session.userId,
+      },
+      include: {
+        createdBy: { select: { nom: true, prenom: true } },
+        fournisseur: { select: { id: true, nom: true } },
+        bonCommande: { select: { id: true, reference: true } },
+      },
+    });
+    await tx.historique.create({
+      data: { action: "CREE", userId: session.userId, immobilisationId: i.id },
+    });
+    return i;
   });
 
   return NextResponse.json(immo, { status: 201 });

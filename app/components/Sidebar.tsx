@@ -20,6 +20,7 @@ import {
   Handshake,
   Store,
   Package,
+  ScrollText,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types";
 import LogoutModal from "./LogoutModal";
@@ -91,6 +92,11 @@ const superAdminMenuItems: MenuItem[] = [
     icon: <Package className="w-5 h-5" />,
     href: "/immobilisations",
   },
+  {
+    label: "Journal",
+    icon: <ScrollText className="w-5 h-5" />,
+    href: "/journal",
+  },
 ];
 
 const ministereMenuItems: MenuItem[] = [
@@ -127,6 +133,11 @@ const ministereMenuItems: MenuItem[] = [
     href: "/immobilisations",
   },
   {
+    label: "Journal",
+    icon: <ScrollText className="w-5 h-5" />,
+    href: "/journal",
+  },
+  {
     label: "Utilisateurs",
     icon: <Users className="w-5 h-5" />,
     href: "/utilisateurs",
@@ -158,6 +169,11 @@ const etablissementMenuItems: MenuItem[] = [
     label: "Immobilisations",
     icon: <Package className="w-5 h-5" />,
     href: "/immobilisations",
+  },
+  {
+    label: "Journal",
+    icon: <ScrollText className="w-5 h-5" />,
+    href: "/journal",
   },
   {
     label: "État Financier",
@@ -274,6 +290,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       pathname === item.href || pathname.startsWith(item.href + "/");
     return (
       <button
+        type="button"
         key={item.href}
         onClick={() => handleNav(item.href)}
         title={!showLabels ? item.label : undefined}
@@ -338,6 +355,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
           {screenSize === "mobile" && isMobileOpen && (
             <button
+              type="button"
               onClick={onCloseMobile}
               className="w-7 h-7 rounded-full flex items-center justify-center bg-white/10 hover:bg-white/20 border border-white/20 transition-all shrink-0"
               aria-label="Fermer le menu"

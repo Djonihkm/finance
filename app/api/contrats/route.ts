@@ -67,19 +67,25 @@ export async function POST(req: NextRequest) {
   const count = await prisma.contrat.count();
   const reference = `CTR-${year}-${String(count + 1).padStart(4, "0")}`;
 
-  const contrat = await prisma.contrat.create({
-    data: {
-      reference,
-      objet,
-      description: description || null,
-      montantTotal,
-      dateDebut: new Date(dateDebut),
-      dateFin: new Date(dateFin),
-      marcheId,
-      fournisseurId: marche.fournisseurId,
-      etablissementId: etabId,
-      createdById: session.userId,
-    },
+  const contrat = await prisma.$transaction(async (tx) => {
+    const c = await tx.contrat.create({
+      data: {
+        reference,
+        objet,
+        description: description || null,
+        montantTotal,
+        dateDebut: new Date(dateDebut),
+        dateFin: new Date(dateFin),
+        marcheId,
+        fournisseurId: marche.fournisseurId!,
+        etablissementId: etabId,
+        createdById: session.userId,
+      },
+    });
+    await tx.historique.create({
+      data: { action: "CREE", userId: session.userId, contratId: c.id },
+    });
+    return c;
   });
 
   return NextResponse.json(contrat, { status: 201 });

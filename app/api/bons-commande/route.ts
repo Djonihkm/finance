@@ -56,27 +56,33 @@ export async function POST(req: NextRequest) {
   const count = await prisma.bonCommande.count();
   const reference = `BON-${year}-${String(count + 1).padStart(4, "0")}`;
 
-  const bon = await prisma.bonCommande.create({
-    data: {
-      reference,
-      intitule,
-      fournisseur,
-      description,
-      date: new Date(date),
-      montantTotal,
-      contratId: contratId || null,
-      etablissementId: etabId,
-      createdById: session.userId,
-      lignes: {
-        create: lignes.map((l: { designation: string; quantite: number; prixUnitaire: number }) => ({
-          designation: l.designation,
-          quantite: l.quantite,
-          prixUnitaire: l.prixUnitaire,
-          montant: l.quantite * l.prixUnitaire,
-        })),
+  const bon = await prisma.$transaction(async (tx) => {
+    const b = await tx.bonCommande.create({
+      data: {
+        reference,
+        intitule,
+        fournisseur,
+        description,
+        date: new Date(date),
+        montantTotal,
+        contratId: contratId || null,
+        etablissementId: etabId,
+        createdById: session.userId,
+        lignes: {
+          create: lignes.map((l: { designation: string; quantite: number; prixUnitaire: number }) => ({
+            designation: l.designation,
+            quantite: l.quantite,
+            prixUnitaire: l.prixUnitaire,
+            montant: l.quantite * l.prixUnitaire,
+          })),
+        },
       },
-    },
-    include: { lignes: true, createdBy: { select: { id: true, nom: true, prenom: true } } },
+      include: { lignes: true, createdBy: { select: { id: true, nom: true, prenom: true } } },
+    });
+    await tx.historique.create({
+      data: { action: "CREE", userId: session.userId, bonCommandeId: b.id },
+    });
+    return b;
   });
 
   return NextResponse.json(bon, { status: 201 });

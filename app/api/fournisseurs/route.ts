@@ -44,18 +44,24 @@ export async function POST(req: NextRequest) {
   const etabId = etablissementId ?? session.etablissementId;
   if (!etabId) return NextResponse.json({ error: "Établissement requis" }, { status: 400 });
 
-  const fournisseur = await prisma.fournisseur.create({
-    data: {
-      nom,
-      telephone: telephone || null,
-      email: email || null,
-      adresse: adresse || null,
-      rccm: rccm || null,
-      nif: nif || null,
-      categorie,
-      etablissementId: etabId,
-      createdById: session.userId,
-    },
+  const fournisseur = await prisma.$transaction(async (tx) => {
+    const f = await tx.fournisseur.create({
+      data: {
+        nom,
+        telephone: telephone || null,
+        email: email || null,
+        adresse: adresse || null,
+        rccm: rccm || null,
+        nif: nif || null,
+        categorie,
+        etablissementId: etabId,
+        createdById: session.userId,
+      },
+    });
+    await tx.historique.create({
+      data: { action: "CREE", userId: session.userId, fournisseurId: f.id },
+    });
+    return f;
   });
 
   return NextResponse.json(fournisseur, { status: 201 });

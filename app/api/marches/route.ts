@@ -51,16 +51,22 @@ export async function POST(req: NextRequest) {
   const count = await prisma.marche.count();
   const reference = `MRC-${year}-${String(count + 1).padStart(4, "0")}`;
 
-  const marche = await prisma.marche.create({
-    data: {
-      reference,
-      objet,
-      description: description || null,
-      type,
-      montantEstime,
-      etablissementId: etabId,
-      createdById: session.userId,
-    },
+  const marche = await prisma.$transaction(async (tx) => {
+    const m = await tx.marche.create({
+      data: {
+        reference,
+        objet,
+        description: description || null,
+        type,
+        montantEstime,
+        etablissementId: etabId,
+        createdById: session.userId,
+      },
+    });
+    await tx.historique.create({
+      data: { action: "CREE", userId: session.userId, marcheId: m.id },
+    });
+    return m;
   });
 
   return NextResponse.json(marche, { status: 201 });
