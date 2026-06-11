@@ -21,6 +21,7 @@ import {
   Store,
   Package,
   ScrollText,
+  Database,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types";
 import LogoutModal from "./LogoutModal";
@@ -97,6 +98,16 @@ const superAdminMenuItems: MenuItem[] = [
     icon: <ScrollText className="w-5 h-5" />,
     href: "/journal",
   },
+  {
+    label: "Plan comptable",
+    icon: <BookOpen className="w-5 h-5" />,
+    href: "/plan-comptable",
+  },
+  {
+    label: "Référentiels",
+    icon: <Database className="w-5 h-5" />,
+    href: "/referentiels",
+  },
 ];
 
 const ministereMenuItems: MenuItem[] = [
@@ -138,6 +149,11 @@ const ministereMenuItems: MenuItem[] = [
     href: "/journal",
   },
   {
+    label: "Référentiels",
+    icon: <Database className="w-5 h-5" />,
+    href: "/referentiels",
+  },
+  {
     label: "Utilisateurs",
     icon: <Users className="w-5 h-5" />,
     href: "/utilisateurs",
@@ -174,6 +190,11 @@ const etablissementMenuItems: MenuItem[] = [
     label: "Journal",
     icon: <ScrollText className="w-5 h-5" />,
     href: "/journal",
+  },
+  {
+    label: "Référentiels",
+    icon: <Database className="w-5 h-5" />,
+    href: "/referentiels",
   },
   {
     label: "État Financier",
