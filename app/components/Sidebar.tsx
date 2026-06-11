@@ -122,11 +122,6 @@ const ministereMenuItems: MenuItem[] = [
     icon: <Receipt className="w-5 h-5" />,
     href: "/depenses",
   },
-  {
-    label: "Bons de commande",
-    icon: <ClipboardList className="w-5 h-5" />,
-    href: "/bons",
-  },
   { label: "Bilan", icon: <FileText className="w-5 h-5" />, href: "/bilan" },
   {
     label: "Fournisseurs",
@@ -213,6 +208,10 @@ const etablissementMenuItems: MenuItem[] = [
   },
 ];
 
+const comptableMenuItems: MenuItem[] = etablissementMenuItems.filter(
+  (item) => item.href !== "/journal"
+);
+
 const etablissementAdminMenuItems: MenuItem[] = [
   ...etablissementMenuItems,
   {
@@ -272,7 +271,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   const menuItems =
     role === "etablissement" && userPrismaRole === "ADMIN"
       ? etablissementAdminMenuItems
-      : config.menuItems;
+      : role === "etablissement" && userPrismaRole === "COMPTABLE"
+        ? comptableMenuItems
+        : config.menuItems;
 
   // Nom réel depuis la session, fallback sur les valeurs statiques du roleConfig
   const displayName =
